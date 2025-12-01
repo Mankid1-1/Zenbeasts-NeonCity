@@ -1,0 +1,122 @@
+{
+  "name": "ZenBeasts Neon Dynasty Generation Config",
+  "description": "12-Layer Hashlips Configuration for Cyberpunk Voxel NFT Generation",
+  "layerConfigurations": [
+    {
+      "growEditionSizeTo": 10000,
+      "layersOrder": [
+        { "name": "Background" },
+        { "name": "Aura" },
+        { "name": "Body" },
+        { "name": "Skin_Pattern" },
+        { "name": "Clothes" },
+        { "name": "Cybernetics" },
+        { "name": "Eyes" },
+        { "name": "Mouth" },
+        { "name": "Headgear" },
+        { "name": "Weapon" },
+        { "name": "Accessory" },
+        { "name": "Spirit_Projection" }
+      ]
+    }
+  ],
+  "layers": {
+    "Background": [
+      { "id": 1, "name": "Slum Alley", "weight": 50, "rarity": "Common" },
+      { "id": 2, "name": "Neon Market", "weight": 40, "rarity": "Common" },
+      { "id": 3, "name": "Dojo Interior", "weight": 30, "rarity": "Uncommon" },
+      { "id": 4, "name": "Cyber-Pagoda", "weight": 20, "rarity": "Rare" },
+      { "id": 5, "name": "High-Rise Penthouse", "weight": 10, "rarity": "Epic" },
+      { "id": 6, "name": "Digital Void", "weight": 5, "rarity": "Legendary" },
+      { "id": 7, "name": "Nirvana Plane", "weight": 1, "rarity": "Zen Master" }
+    ],
+    "Aura": [
+      { "id": 1, "name": "None", "weight": 60, "rarity": "Common" },
+      { "id": 2, "name": "Static Glitch", "weight": 30, "rarity": "Uncommon" },
+      { "id": 3, "name": "Steam Vents", "weight": 20, "rarity": "Rare" },
+      { "id": 4, "name": "Neon Outline", "weight": 10, "rarity": "Epic" },
+      { "id": 5, "name": "Matrix Code", "weight": 5, "rarity": "Legendary" },
+      { "id": 6, "name": "Golden Enlightenment", "weight": 1, "rarity": "Zen Master" }
+    ],
+    "Body": [
+      { "id": 1, "name": "Standard Organic", "weight": 50, "rarity": "Common" },
+      { "id": 2, "name": "Bulky Muscle", "weight": 30, "rarity": "Uncommon" },
+      { "id": 3, "name": "Slim Agile", "weight": 20, "rarity": "Rare" },
+      { "id": 4, "name": "Cyber-Enhanced", "weight": 10, "rarity": "Epic" },
+      { "id": 5, "name": "Translucent Holo", "weight": 5, "rarity": "Legendary" },
+      { "id": 6, "name": "Pure Energy Form", "weight": 1, "rarity": "Zen Master" }
+    ],
+    "Skin_Pattern": [
+      { "id": 1, "name": "Clean", "weight": 50, "rarity": "Common" },
+      { "id": 2, "name": "Scars", "weight": 30, "rarity": "Uncommon" },
+      { "id": 3, "name": "Neon Tattoos", "weight": 20, "rarity": "Rare" },
+      { "id": 4, "name": "Chrome Plating", "weight": 10, "rarity": "Epic" },
+      { "id": 5, "name": "Gold Circuitry", "weight": 5, "rarity": "Legendary" },
+      { "id": 6, "name": "Cosmic Starfield", "weight": 1, "rarity": "Zen Master" }
+    ],
+    "Clothes": [
+      { "id": 1, "name": "Tattered Rags", "weight": 50, "rarity": "Common" },
+      { "id": 2, "name": "Street Hoodie", "weight": 40, "rarity": "Uncommon" },
+      { "id": 3, "name": "Tactical Vest", "weight": 30, "rarity": "Rare" },
+      { "id": 4, "name": "Monk Robes (Neon Trim)", "weight": 20, "rarity": "Epic" },
+      { "id": 5, "name": "Samurai Armor", "weight": 10, "rarity": "Legendary" },
+      { "id": 6, "name": "Emperor's Digital Silk", "weight": 1, "rarity": "Zen Master" }
+    ],
+    "Cybernetics": [
+      { "id": 1, "name": "None", "weight": 40, "rarity": "Common" },
+      { "id": 2, "name": "Data Port Neck", "weight": 30, "rarity": "Uncommon" },
+      { "id": 3, "name": "Bionic Arm", "weight": 20, "rarity": "Rare" },
+      { "id": 4, "name": "Exo-Spine", "weight": 10, "rarity": "Epic" },
+      { "id": 5, "name": "Full Mech Conversion", "weight": 5, "rarity": "Legendary" },
+      { "id": 6, "name": "Nanobot Swarm", "weight": 1, "rarity": "Zen Master" }
+    ],
+    "Eyes": [
+      { "id": 1, "name": "Determined", "weight": 50, "rarity": "Common" },
+      { "id": 2, "name": "Sunglasses", "weight": 30, "rarity": "Uncommon" },
+      { "id": 3, "name": "VR Goggles", "weight": 20, "rarity": "Rare" },
+      { "id": 4, "name": "Cyber-Optic Red", "weight": 10, "rarity": "Epic" },
+      { "id": 5, "name": "Hollow Glow", "weight": 5, "rarity": "Legendary" },
+      { "id": 6, "name": "All-Seeing Third Eye", "weight": 1, "rarity": "Zen Master" }
+    ],
+    "Mouth": [
+      { "id": 1, "name": "Neutral", "weight": 50, "rarity": "Common" },
+      { "id": 2, "name": "Grin", "weight": 30, "rarity": "Uncommon" },
+      { "id": 3, "name": "Cigar", "weight": 20, "rarity": "Rare" },
+      { "id": 4, "name": "Gas Mask", "weight": 10, "rarity": "Epic" },
+      { "id": 5, "name": "Cyber-Mandible", "weight": 5, "rarity": "Legendary" },
+      { "id": 6, "name": "Void Whisper", "weight": 1, "rarity": "Zen Master" }
+    ],
+    "Headgear": [
+      { "id": 1, "name": "None", "weight": 50, "rarity": "Common" },
+      { "id": 2, "name": "Headband", "weight": 30, "rarity": "Uncommon" },
+      { "id": 3, "name": "Straw Hat", "weight": 20, "rarity": "Rare" },
+      { "id": 4, "name": "Kabuto Helmet", "weight": 10, "rarity": "Epic" },
+      { "id": 5, "name": "Neural Halo", "weight": 5, "rarity": "Legendary" },
+      { "id": 6, "name": "Crown of Light", "weight": 1, "rarity": "Zen Master" }
+    ],
+    "Weapon": [
+      { "id": 1, "name": "None", "weight": 40, "rarity": "Common" },
+      { "id": 2, "name": "Brass Knuckles", "weight": 30, "rarity": "Uncommon" },
+      { "id": 3, "name": "Nunchaku", "weight": 20, "rarity": "Rare" },
+      { "id": 4, "name": "Laser Katana", "weight": 10, "rarity": "Epic" },
+      { "id": 5, "name": "Plasma Cannon", "weight": 5, "rarity": "Legendary" },
+      { "id": 6, "name": "Reality Slicer", "weight": 1, "rarity": "Zen Master" }
+    ],
+    "Accessory": [
+      { "id": 1, "name": "None", "weight": 50, "rarity": "Common" },
+      { "id": 2, "name": "Earring", "weight": 30, "rarity": "Uncommon" },
+      { "id": 3, "name": "Gold Chain", "weight": 20, "rarity": "Rare" },
+      { "id": 4, "name": "Prayer Beads", "weight": 10, "rarity": "Epic" },
+      { "id": 5, "name": "Floating Drone", "weight": 5, "rarity": "Legendary" },
+      { "id": 6, "name": "Time Relic", "weight": 1, "rarity": "Zen Master" }
+    ],
+    "Spirit_Projection": [
+      { "id": 1, "name": "Dormant", "weight": 50, "rarity": "Common" },
+      { "id": 2, "name": "Awakened", "weight": 30, "rarity": "Uncommon" },
+      { "id": 3, "name": "Restless", "weight": 20, "rarity": "Rare" },
+      { "id": 4, "name": "Vengeful", "weight": 10, "rarity": "Epic" },
+      { "id": 5, "name": "Ascended", "weight": 5, "rarity": "Legendary" },
+      { "id": 6, "name": "God-Tier", "weight": 1, "rarity": "Zen Master" }
+    ]
+  }
+}

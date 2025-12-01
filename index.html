@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZenBeasts: Neon Dynasty</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Rajdhani', 'sans-serif'],
+              mono: ['VT323', 'monospace'],
+            },
+            colors: {
+              neon: {
+                pink: '#ff00ff',
+                blue: '#00ffff',
+                purple: '#b026ff',
+                green: '#39ff14',
+                yellow: '#fff01f',
+                red: '#ff073a'
+              },
+              void: '#050510',
+              glass: 'rgba(18, 18, 20, 0.7)'
+            },
+            animation: {
+              'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'glitch': 'glitch 1s linear infinite',
+              'scanline': 'scanline 8s linear infinite',
+              'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+              'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+              'spin-slow': 'spin 3s linear infinite',
+            },
+            keyframes: {
+              glitch: {
+                '2%, 64%': { transform: 'translate(2px,0) skew(0deg)' },
+                '4%, 60%': { transform: 'translate(-2px,0) skew(0deg)' },
+                '62%': { transform: 'translate(0,0) skew(5deg)' },
+              },
+              scanline: {
+                '0%': { transform: 'translateY(-100%)' },
+                '100%': { transform: 'translateY(100%)' }
+              },
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' }
+              },
+              shake: {
+                '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      body {
+        background-color: #050510;
+        color: #e0e0e0;
+        overflow: hidden;
+      }
+      ::selection {
+        background: #b026ff;
+        color: white;
+      }
+      .cyber-border {
+        position: relative;
+        clip-path: polygon(
+          15px 0, 100% 0, 
+          100% calc(100% - 15px), calc(100% - 15px) 100%, 
+          0 100%, 0 15px
+        );
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+          background: #0f0f1a; 
+      }
+      ::-webkit-scrollbar-thumb {
+          background: #333; 
+          border-radius: 0px;
+          border: 1px solid #000;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+          background: #00ffff; 
+      }
+
+      .crt::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+        z-index: 50;
+        background-size: 100% 2px, 3px 100%;
+        pointer-events: none;
+      }
+      .crt::after {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: rgba(18, 16, 16, 0.1);
+        opacity: 0;
+        z-index: 50;
+        pointer-events: none;
+        animation: flicker 0.15s infinite;
+      }
+      @keyframes flicker {
+        0% { opacity: 0.02795 }
+        5% { opacity: 0.03387 }
+        10% { opacity: 0.02871 }
+        15% { opacity: 0.03216 }
+        20% { opacity: 0.02823 }
+        25% { opacity: 0.03332 }
+        30% { opacity: 0.02832 }
+        35% { opacity: 0.03221 }
+        40% { opacity: 0.02815 }
+        45% { opacity: 0.03373 }
+        50% { opacity: 0.02864 }
+        55% { opacity: 0.03357 }
+        60% { opacity: 0.02964 }
+        65% { opacity: 0.03399 }
+        70% { opacity: 0.02869 }
+        75% { opacity: 0.0344 }
+        80% { opacity: 0.02874 }
+        85% { opacity: 0.03348 }
+        90% { opacity: 0.02847 }
+        95% { opacity: 0.03383 }
+        100% { opacity: 0.02888 }
+      }
+      
+      .image-pixelated {
+        image-rendering: pixelated;
+      }
+      
+      .clip-path-polygon {
+         clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^6.22.3",
+    "recharts": "https://aistudiocdn.com/recharts@^2.12.3",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^0.1.0",
+    "react/": "https://aistudiocdn.com/react@^18.2.0/",
+    "react": "https://aistudiocdn.com/react@^18.2.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.358.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^18.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

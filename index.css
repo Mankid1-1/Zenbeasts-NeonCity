@@ -1,0 +1,97 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #050510;
+  color: #e0e0e0;
+  overflow: hidden;
+}
+::selection {
+  background: #b026ff;
+  color: white;
+}
+.cyber-border {
+  position: relative;
+  clip-path: polygon(
+    15px 0, 100% 0, 
+    100% calc(100% - 15px), calc(100% - 15px) 100%, 
+    0 100%, 0 15px
+  );
+}
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #0f0f1a; 
+}
+::-webkit-scrollbar-thumb {
+    background: #333; 
+    border-radius: 0px;
+    border: 1px solid #000;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #00ffff; 
+}
+
+.crt::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 50;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+.crt::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(18, 16, 16, 0.1);
+  opacity: 0;
+  z-index: 50;
+  pointer-events: none;
+  animation: flicker 0.15s infinite;
+}
+@keyframes flicker {
+  0% { opacity: 0.02795 }
+  5% { opacity: 0.03387 }
+  10% { opacity: 0.02871 }
+  15% { opacity: 0.03216 }
+  20% { opacity: 0.02823 }
+  25% { opacity: 0.03332 }
+  30% { opacity: 0.02832 }
+  35% { opacity: 0.03221 }
+  40% { opacity: 0.02815 }
+  45% { opacity: 0.03373 }
+  50% { opacity: 0.02864 }
+  55% { opacity: 0.03357 }
+  60% { opacity: 0.02964 }
+  65% { opacity: 0.03399 }
+  70% { opacity: 0.02869 }
+  75% { opacity: 0.0344 }
+  80% { opacity: 0.02874 }
+  85% { opacity: 0.03348 }
+  90% { opacity: 0.02847 }
+  95% { opacity: 0.03383 }
+  100% { opacity: 0.02888 }
+}
+
+.image-pixelated {
+  image-rendering: pixelated;
+}
+
+.clip-path-polygon {
+   clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+}
