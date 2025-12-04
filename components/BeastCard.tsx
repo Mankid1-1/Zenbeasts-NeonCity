@@ -1,7 +1,8 @@
 import React from 'react';
-import { ZenBeast } from '../types';
+import { ZenBeast, Rarity } from '../types';
 import { RARITY_COLORS } from '../constants';
-import { CircuitBoard, ChevronUp } from 'lucide-react';
+import { CircuitBoard, ChevronUp, Lock } from 'lucide-react';
+import { ClassIcon } from './CyberComponents';
 
 interface BeastCardProps {
   beast: ZenBeast;
@@ -12,16 +13,24 @@ interface BeastCardProps {
 
 // Optimization: Memoize card to prevent re-renders in large lists
 const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onClick, small }) => {
-  const rarityBorderColor = RARITY_COLORS[beast.rarity].split(' ')[1] || 'border-gray-500';
-  const rarityTextColor = RARITY_COLORS[beast.rarity].split(' ')[0] || 'text-gray-500';
+  // CRITICAL CRASH FIX: Defensive check if beast data is missing or corrupted
+  if (!beast || !beast.stats) return null;
+
+  // Defensive check for rarity color
+  const rarityKey = beast.rarity || Rarity.COMMON;
+  const rarityColors = RARITY_COLORS[rarityKey] || RARITY_COLORS[Rarity.COMMON] || 'text-gray-500 border-gray-500';
+  const rarityBorderColor = rarityColors.split(' ')[1] || 'border-gray-500';
+  const rarityTextColor = rarityColors.split(' ')[0] || 'text-gray-500';
   const canEvolve = beast.level >= 5;
+  const isReadyToEvolve = canEvolve && !beast.isStaked;
+  const isNew = beast.obtainedAt && (Date.now() - beast.obtainedAt < 24 * 60 * 60 * 1000);
 
   if (small) {
     return (
       <div 
         onClick={onClick}
         className={`
-            relative bg-slate-900 border-2 transition-all duration-200 cursor-pointer overflow-hidden
+            relative bg-slate-900 border-2 transition-all duration-200 cursor-pointer overflow-hidden group
             ${selected ? 'border-neon-pink shadow-[0_0_15px_#ff00ff] scale-105' : `${rarityBorderColor} hover:border-gray-300 hover:shadow-lg`}
         `}
       >
@@ -29,6 +38,14 @@ const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onCli
         <div className="p-1 absolute bottom-0 w-full bg-black/80">
              <div className="text-[10px] font-bold text-white truncate font-mono">{beast.name}</div>
         </div>
+        <div className="absolute top-1 right-1 bg-black/50 p-0.5 rounded">
+            <ClassIcon beastClass={beast.class} className="w-3 h-3 text-white" />
+        </div>
+        {beast.isSoulbound && (
+            <div className="absolute top-1 left-1 bg-black/50 p-0.5 rounded text-gray-400">
+                <Lock size={10} />
+            </div>
+        )}
       </div>
     )
   }
@@ -41,12 +58,24 @@ const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onCli
         border-2 ${selected ? 'border-neon-pink shadow-[0_0_20px_#ff00ff] z-10' : `${rarityBorderColor} hover:scale-[1.02] hover:shadow-lg`}
       `}
     >
+      {/* Evolution Glow Effect */}
+      {isReadyToEvolve && !selected && (
+         <div className="absolute inset-0 z-0 shadow-[inset_0_0_20px_rgba(250,204,21,0.3)] border border-neon-yellow/40 animate-pulse pointer-events-none mix-blend-screen"></div>
+      )}
+
       {/* Badges */}
-      <div className="absolute top-2 right-2 z-10 flex gap-1">
+      <div className="absolute top-2 right-2 z-10 flex gap-1 items-center">
+        {isNew && <span className="text-[8px] bg-neon-green text-black px-1.5 py-0.5 font-bold animate-pulse shadow-[0_0_5px_#39ff14]">NEW</span>}
         <span className="text-[10px] bg-black/80 px-2 py-0.5 text-white border border-gray-600 font-mono">L{beast.level}</span>
         {beast.isStaked && <CircuitBoard size={16} className="text-neon-green animate-pulse" />}
         {canEvolve && !beast.isStaked && <ChevronUp size={16} className="text-neon-yellow animate-bounce" />}
       </div>
+
+        {beast.isSoulbound && (
+             <div className="absolute top-2 left-2 z-10 text-gray-500 bg-black/60 rounded-full p-1.5 border border-gray-700 backdrop-blur-sm" title="Soulbound">
+                 <Lock size={14} />
+             </div>
+        )}
 
       <div className="relative aspect-square overflow-hidden bg-black/50 border-b border-gray-800">
         <img 
@@ -61,7 +90,10 @@ const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onCli
            <h3 className="text-md font-bold font-mono text-white truncate">{beast.name}</h3>
            <div className="flex justify-between items-center mt-1">
              <span className={`text-[10px] font-bold uppercase ${rarityTextColor}`}>{beast.rarity}</span>
-             <span className="text-[10px] text-gray-400 font-mono bg-black/50 px-1 rounded">{beast.class}</span>
+             <span className="text-[10px] text-gray-400 font-mono bg-black/50 px-1 rounded flex items-center gap-1">
+                 <ClassIcon beastClass={beast.class} className="w-3 h-3" />
+                 {beast.class}
+             </span>
            </div>
         </div>
       </div>
