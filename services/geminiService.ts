@@ -8,7 +8,19 @@ import { generateStableDiffusionImage } from './stableDiffusionService';
 // Import the Hashlips Config
 import hashlipsConfig from '../hashlips_config.json';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// --- API KEY MANAGEMENT & MOCK MODE ---
+const getGeminiApiKey = (): string => {
+  // Check if running in a browser environment before accessing localStorage
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('GEMINI_API_KEY') || process.env.API_KEY || '';
+  }
+  return process.env.API_KEY || '';
+};
+
+const GEMINI_API_KEY = getGeminiApiKey();
+const MOCK_MODE = !GEMINI_API_KEY;
+
+const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 const modelName = 'gemini-2.5-flash';
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
@@ -79,6 +91,28 @@ const generateHashlipsTraits = (): { traits: Trait[], overallRarity: Rarity } =>
 // --- END HASHLIPS LOGIC ---
 
 export const generateZenBeast = async (generation: number): Promise<ZenBeast> => {
+  // --- MOCK MODE ---
+  if (MOCK_MODE) {
+    console.warn("MOCK MODE: Simulating beast generation.");
+    const { traits, overallRarity } = generateHashlipsTraits();
+    const selectedClass = Object.values(BeastClass)[Math.floor(Math.random() * Object.values(BeastClass).length)];
+    const imageUrl = await generateStableDiffusionImage(selectedClass, traits);
+
+    return {
+        id: generateId(),
+        name: `Simulacrum-${selectedClass}`,
+        description: "A digital ghost, a product of a world without true AI.",
+        class: selectedClass,
+        rarity: overallRarity,
+        level: 1, exp: 0, generation: 0, obtainedAt: Date.now(),
+        isStaked: false, isSoulbound: false, isOnChain: false,
+        ownerId: 'player',
+        stats: { attack: 20, defense: 20, speed: 20, zen: 20 },
+        traits: traits,
+        imageUrl: imageUrl,
+    };
+  }
+
   try {
     // 1. Generate Traits Deterministically via Hashlips Config
     const { traits, overallRarity } = generateHashlipsTraits();
@@ -150,6 +184,28 @@ export const generateZenBeast = async (generation: number): Promise<ZenBeast> =>
 };
 
 export const breedZenBeasts = async (parentA: ZenBeast, parentB: ZenBeast): Promise<ZenBeast> => {
+    // --- MOCK MODE ---
+  if (MOCK_MODE) {
+    console.warn("MOCK MODE: Simulating breeding.");
+    const childClass = parentA.class;
+    const childTraits = parentA.traits.slice(0, 6).concat(parentB.traits.slice(6, 12));
+    const imageUrl = await generateStableDiffusionImage(childClass, childTraits);
+
+    return {
+        id: generateId(),
+        name: "Mock Hybrid",
+        description: "A simulated fusion.",
+        class: childClass,
+        rarity: Rarity.COMMON,
+        level: 1, exp: 0, generation: 1, obtainedAt: Date.now(),
+        isStaked: false, isSoulbound: false, isOnChain: false,
+        ownerId: 'player',
+        stats: { attack: 15, defense: 15, speed: 15, zen: 15 },
+        traits: childTraits,
+        imageUrl: imageUrl
+    };
+  }
+
   try {
      const response = await ai.models.generateContent({
       model: modelName,
@@ -200,6 +256,26 @@ export const breedZenBeasts = async (parentA: ZenBeast, parentB: ZenBeast): Prom
 };
 
 export const evolveZenBeast = async (original: ZenBeast): Promise<ZenBeast> => {
+  // --- MOCK MODE ---
+  if (MOCK_MODE) {
+    console.warn("MOCK MODE: Simulating evolution.");
+    const evolvedTraits = original.traits.map(t => ({...t, value: `Alpha ${t.value}`}));
+    const imageUrl = await generateStableDiffusionImage(original.class, evolvedTraits);
+    return {
+        ...original,
+        name: `Alpha ${original.name}`,
+        rarity: Rarity.EPIC,
+        stats: {
+            attack: original.stats.attack + 20,
+            defense: original.stats.defense + 20,
+            speed: original.stats.speed + 20,
+            zen: original.stats.zen + 20,
+        },
+        traits: evolvedTraits,
+        imageUrl: imageUrl
+    };
+  }
+
   try {
     const response = await ai.models.generateContent({
       model: modelName,
@@ -228,6 +304,25 @@ export const evolveZenBeast = async (original: ZenBeast): Promise<ZenBeast> => {
 }
 
 export const simulateBattle = async (playerBeast: ZenBeast, opponent: ZenBeast | GymLeader): Promise<BattleResult> => {
+  // --- MOCK MODE ---
+  if (MOCK_MODE) {
+    console.warn("MOCK MODE: Simulating battle.");
+    const playerWon = Math.random() > 0.5; // 50/50 chance
+    return {
+        winnerId: playerWon ? playerBeast.id : 'enemy',
+        logs: [
+            { turn: 1, actor: playerBeast.name, action: "Mock Attack", description: "A simulated strike!", damage: 10 },
+            { turn: 1, actor: opponent.name, action: "Mock Defense", description: "A digital shield parries.", damage: 0 },
+            { turn: 2, actor: opponent.name, action: "Mock Counter", description: "An algorithmic counter-attack!", damage: 8 },
+            { turn: 2, actor: playerBeast.name, action: "Mock Evade", description: "The beast dodges.", damage: 0 },
+            { turn: 3, actor: playerBeast.name, action: "Finishing Blow", description: "The simulation concludes.", damage: 20 },
+        ],
+        rewards: playerWon
+            ? { exp: 20, zenCoins: 15, points: 5, trainerExp: 10 }
+            : { exp: 5, zenCoins: 0, points: 0, trainerExp: 5 }
+    };
+  }
+
     let context = '';
     
     if ('team' in opponent) {

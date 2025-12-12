@@ -1,14 +1,22 @@
 
 import { BeastClass, Trait } from '../types';
 
+// --- API KEY MANAGEMENT ---
+const getStabilityApiKey = (): string => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('STABILITY_API_KEY') || process.env.STABILITY_API_KEY || '';
+  }
+  return process.env.STABILITY_API_KEY || '';
+};
+
 // Placeholder for the Stability AI endpoint
 const STABILITY_API_URL = 'https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image';
 
 export const generateStableDiffusionImage = async (
   beastClass: BeastClass,
-  traits: Trait[],
-  apiKey: string = process.env.STABILITY_API_KEY || ''
+  traits: Trait[]
 ): Promise<string> => {
+  const apiKey = getStabilityApiKey();
   
   // Construct a detailed prompt based on the 12-trait Hashlips selection
   const traitDescription = traits.map(t => `${t.type}: ${t.value}`).join(', ');
@@ -21,10 +29,13 @@ export const generateStableDiffusionImage = async (
     Style: Magicavoxel, Cryptovoxels, SandboxGame.
   `;
 
-  // If no API key is present in this demo environment, return a placeholder
-  if (!apiKey || apiKey === 'undefined') {
-    console.warn("No Stability AI API Key found. Using simulation.");
-    return `https://picsum.photos/seed/${Math.random()}/400/400`;
+  // If no API key is present in this demo environment, return a deterministic placeholder
+  if (!apiKey || apiKey === 'undefined' || apiKey === 'YOUR_STABILITY_API_KEY') {
+    console.warn("No Stability AI API Key found. Using deterministic simulation.");
+
+    // Create a deterministic seed from the beast's visual traits
+    const seed = beastClass + traits.map(t => t.value).join('');
+    return `https://picsum.photos/seed/${seed}/400/400`;
   }
 
   try {
