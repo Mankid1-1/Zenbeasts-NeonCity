@@ -22,14 +22,19 @@ Output JSON only:
 }
 `;
 
-export const getBreedingPrompt = (parentA: ZenBeast, parentB: ZenBeast) => `
+export const getBreedingPrompt = (parentA: ZenBeast, parentB: ZenBeast, childClass: string, childTraits: any[]) => `
 Breeding Event:
 Father: ${parentA.name} (${parentA.class}, ${parentA.rarity})
 Mother: ${parentB.name} (${parentB.class}, ${parentB.rarity})
 
-Goal: Create an offspring that inherits traits from both but with potential genetic mutations.
-If parents are same class, child is that class. If different, 50/50 chance.
-Stats should be average of parents + small random bonus (0-10%).
+I have already determined the offspring's genetic traits:
+Class: ${childClass}
+Traits: ${JSON.stringify(childTraits.map(t => `${t.type}: ${t.value}`))}
+
+Your task is to:
+1. Generate a creative Name that fits these traits and heritage.
+2. Write a 2-sentence Description acknowledging its mixed heritage.
+3. Calculate stats: Average of parents + small random bonus (0-10%).
 
 Output JSON only. Follow the same schema as generation.
 `;
