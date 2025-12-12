@@ -22,6 +22,7 @@ const BeastDetailModal: React.FC<BeastDetailModalProps> = ({ beast, onClose, chi
         <button 
             onClick={onClose} 
             className="absolute top-4 right-4 text-gray-500 hover:text-white z-20 bg-black/50 p-2 rounded-full hover:bg-red-500/20 transition-colors"
+            aria-label="Close details"
         >
             <X size={24} />
         </button>
