@@ -183,6 +183,94 @@ export const generateZenBeast = async (generation: number): Promise<ZenBeast> =>
   }
 };
 
+const mixTraits = (parentA: ZenBeast, parentB: ZenBeast): { traits: Trait[], overallRarity: Rarity } => {
+  const childTraits: Trait[] = [];
+  let rarityScore = 0;
+  const layersOrder = hashlipsConfig.layerConfigurations[0].layersOrder;
+
+  // Map traits by type for easier access
+  const traitsA = new Map(parentA.traits.map(t => [t.type, t]));
+  const traitsB = new Map(parentB.traits.map(t => [t.type, t]));
+
+  layersOrder.forEach(layer => {
+    const layerName = layer.name;
+    const traitA = traitsA.get(layerName as any);
+    const traitB = traitsB.get(layerName as any);
+
+    let selectedTrait: Trait | null = null;
+    const mutationChance = 0.1; // 10% chance to mutate
+
+    if (Math.random() < mutationChance) {
+      // Mutation: Pick a random new trait
+      const picked = pickTraitFromConfig(layerName);
+      if (picked) {
+        selectedTrait = {
+          name: picked.name,
+          value: picked.name,
+          type: layerName as any,
+          rarity: 100 - picked.weight
+        };
+      }
+    } else {
+      // Inheritance
+      if (traitA && traitB) {
+        // Both parents have it: 50/50
+        selectedTrait = Math.random() < 0.5 ? traitA : traitB;
+      } else if (traitA) {
+        selectedTrait = traitA;
+      } else if (traitB) {
+        selectedTrait = traitB;
+      } else {
+        // Neither has it, try to pick one (mutation fallback) or skip
+        const picked = pickTraitFromConfig(layerName);
+        if (picked) {
+            selectedTrait = {
+              name: picked.name,
+              value: picked.name,
+              type: layerName as any,
+              rarity: 100 - picked.weight
+            };
+        }
+      }
+    }
+
+    if (selectedTrait) {
+      childTraits.push(selectedTrait);
+      // Rarity Calculation Logic from generateHashlipsTraits
+      // We need to reverse-engineer the weight or just use the visual rarity score we stored
+      // But generateHashlipsTraits uses string checking on the 'rarity' field of the config object,
+      // which we don't strictly have here unless we look it up or store it.
+      // However, trait.rarity is a number (1-100).
+      // Let's approximate score based on the numeric rarity we have.
+      // Or, we can re-find the config object to be precise.
+
+      const layerOptions = (hashlipsConfig.layers as any)[layerName] as HashlipsLayer[];
+      const configObj = layerOptions?.find(opt => opt.name === selectedTrait!.name);
+
+      if (configObj) {
+         if (configObj.rarity === 'Zen Master') rarityScore += 50;
+         else if (configObj.rarity === 'Legendary') rarityScore += 20;
+         else if (configObj.rarity === 'Epic') rarityScore += 10;
+         else if (configObj.rarity === 'Rare') rarityScore += 5;
+         else if (configObj.rarity === 'Uncommon') rarityScore += 2;
+         else rarityScore += 1;
+      } else {
+          rarityScore += 1;
+      }
+    }
+  });
+
+  // Determine overall rarity based on the sum of trait scores
+  let overallRarity = Rarity.COMMON;
+  if (rarityScore > 100) overallRarity = Rarity.ZEN_MASTER;
+  else if (rarityScore > 60) overallRarity = Rarity.LEGENDARY;
+  else if (rarityScore > 40) overallRarity = Rarity.EPIC;
+  else if (rarityScore > 25) overallRarity = Rarity.RARE;
+  else if (rarityScore > 15) overallRarity = Rarity.UNCOMMON;
+
+  return { traits: childTraits, overallRarity };
+};
+
 export const breedZenBeasts = async (parentA: ZenBeast, parentB: ZenBeast): Promise<ZenBeast> => {
     // --- MOCK MODE ---
   if (MOCK_MODE) {
@@ -207,37 +295,48 @@ export const breedZenBeasts = async (parentA: ZenBeast, parentB: ZenBeast): Prom
   }
 
   try {
+    const newGen = Math.max(parentA.generation, parentB.generation) + 1;
+
+    // 1. Determine Child Class
+    let childClass: BeastClass;
+    if (parentA.class === parentB.class) {
+      childClass = parentA.class;
+    } else {
+      childClass = Math.random() < 0.5 ? parentA.class : parentB.class;
+    }
+
+    // 2. Mix Traits
+    const { traits: childTraits, overallRarity: childRarity } = mixTraits(parentA, parentB);
+
+    // 3. Generate Image
+    const imageUrl = await generateStableDiffusionImage(childClass, childTraits);
+
+    // 4. Generate Description/Stats via Gemini
      const response = await ai.models.generateContent({
       model: modelName,
-      contents: getBreedingPrompt(parentA, parentB),
+      contents: getBreedingPrompt(parentA, parentB, childClass, childTraits),
       config: { responseMimeType: "application/json" }
     });
 
     const fallback: Partial<ZenBeast> = { 
         name: "Hybrid Error", 
         description: "A genetic anomaly.", 
-        class: BeastClass.MANTIS, 
-        rarity: Rarity.COMMON, 
-        stats: parentA.stats, 
-        traits: [] 
+        stats: {
+            attack: Math.floor((parentA.stats.attack + parentB.stats.attack)/2),
+            defense: Math.floor((parentA.stats.defense + parentB.stats.defense)/2),
+            speed: Math.floor((parentA.stats.speed + parentB.stats.speed)/2),
+            zen: Math.floor((parentA.stats.zen + parentB.stats.zen)/2)
+        }
     };
 
     const data = safeParseJSON(response.text || '{}', fallback);
-    const newGen = Math.max(parentA.generation, parentB.generation) + 1;
-    
-    // For breeding, we should ideally mix parent traits, but for now we generate a new image
-    // based on the AI's interpretation of the hybrid
-    const childClass = (data.class as BeastClass) || BeastClass.TIGER;
-    const childTraits = data.traits || [];
-    
-    const imageUrl = await generateStableDiffusionImage(childClass, childTraits);
 
     return {
       id: generateId(),
       name: data.name || "Hybrid",
       description: data.description || "A new life.",
       class: childClass,
-      rarity: (data.rarity as Rarity) || Rarity.COMMON,
+      rarity: childRarity,
       level: 1,
       exp: 0,
       generation: newGen,
@@ -246,11 +345,12 @@ export const breedZenBeasts = async (parentA: ZenBeast, parentB: ZenBeast): Prom
       isSoulbound: false,
       isOnChain: false,
       ownerId: 'player',
-      stats: data.stats || { attack: 10, defense: 10, speed: 10, zen: 10 },
+      stats: data.stats || fallback.stats!,
       traits: childTraits,
       imageUrl: imageUrl
     };
   } catch (e) {
+    console.error("Breeding failed:", e);
     throw new Error("Breeding failed.");
   }
 };
