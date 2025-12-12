@@ -13,9 +13,9 @@ import hashlipsConfig from '../hashlips_config.json';
 const getGeminiApiKey = (): string => {
   // Check if running in a browser environment before accessing localStorage
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('GEMINI_API_KEY') || process.env.API_KEY || '';
+    return localStorage.getItem('GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY || '';
   }
-  return process.env.API_KEY || '';
+  return import.meta.env.VITE_GEMINI_API_KEY || '';
 };
 
 const GEMINI_API_KEY = getGeminiApiKey();
