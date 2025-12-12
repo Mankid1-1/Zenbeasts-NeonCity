@@ -93,7 +93,7 @@ const generateHashlipsTraits = (): { traits: Trait[], overallRarity: Rarity } =>
 export const generateZenBeast = async (generation: number): Promise<ZenBeast> => {
   // --- MOCK MODE ---
   if (MOCK_MODE) {
-    console.warn("MOCK MODE: Simulating beast generation.");
+    console.warn("⚠️ MOCK MODE ACTIVE: API Key missing. Simulating beast generation with local data.");
     const { traits, overallRarity } = generateHashlipsTraits();
     const selectedClass = Object.values(BeastClass)[Math.floor(Math.random() * Object.values(BeastClass).length)];
     const imageUrl = await generateStableDiffusionImage(selectedClass, traits);

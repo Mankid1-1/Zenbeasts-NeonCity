@@ -18,3 +18,7 @@ View your app in AI Studio: https://ai.studio/apps/drive/1v3hM57tbGwS3oY61sodx8s
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## Troubleshooting
+
+- **Mock Mode:** If you do not provide valid API keys, the application will automatically run in "Mock Mode". This allows you to explore the UI and functionality using simulated data without consuming API credits.
