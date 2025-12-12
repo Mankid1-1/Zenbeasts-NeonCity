@@ -82,7 +82,7 @@ const ToastItem: React.FC<{ notification: Notification; onDismiss: () => void }>
                 <h4 className="text-white font-mono font-bold text-sm">{notification.title}</h4>
                 <p className="text-gray-400 text-xs">{notification.message}</p>
             </div>
-            <button onClick={onDismiss} className="absolute top-2 right-2 text-gray-600 hover:text-white"><X size={12}/></button>
+            <button onClick={onDismiss} className="absolute top-2 right-2 text-gray-600 hover:text-white" aria-label="Close notification"><X size={12}/></button>
         </div>
     );
 };

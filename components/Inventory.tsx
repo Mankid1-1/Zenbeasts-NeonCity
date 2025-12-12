@@ -126,7 +126,7 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
             {Object.values(BeastClass).map(c => <option key={c} value={c}>{c}</option>)}
         </select>
         {(filterRarity || filterClass || searchQuery) && (
-             <button onClick={() => {setFilterRarity(''); setFilterClass(''); setSearchQuery('')}} className="p-2 text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/50 rounded">
+             <button onClick={() => {setFilterRarity(''); setFilterClass(''); setSearchQuery('')}} className="p-2 text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/50 rounded" aria-label="Clear filters">
                  <X size={18} />
              </button>
         )}
