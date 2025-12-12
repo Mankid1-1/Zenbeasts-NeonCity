@@ -81,12 +81,14 @@ const App = () => {
             } />
           </Routes>
           
-          <DebugConsole 
-            onAddCoins={gameState.debugMethods.addCoins}
-            onAddBeast={gameState.debugMethods.addBeast}
-            onLevelUp={gameState.debugMethods.levelUp}
-            onReset={gameState.debugMethods.reset}
-          />
+          {import.meta.env.DEV && (
+            <DebugConsole
+              onAddCoins={gameState.debugMethods.addCoins}
+              onAddBeast={gameState.debugMethods.addBeast}
+              onLevelUp={gameState.debugMethods.levelUp}
+              onReset={gameState.debugMethods.reset}
+            />
+          )}
       </Layout>
     </HashRouter>
   );
