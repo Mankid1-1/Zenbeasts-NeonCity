@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
 import BeastCard from './BeastCard';
+import InventoryItem from './InventoryItem';
 import { Filter, Search, X, ArrowUpCircle } from 'lucide-react';
 import { BASE_MINT_PRICE } from '../constants';
 
@@ -21,6 +22,29 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
   const [sellPrice, setSellPrice] = useState('100');
   const [evolvingId, setEvolvingId] = useState<string | null>(null);
   
+  // Optimization: Memoize handlers to prevent InventoryItem re-renders
+  const handleOpenSellModal = React.useCallback((id: string) => {
+    setSellingId(id);
+  }, []);
+
+  const handleToggleStake = React.useCallback((id: string, isStaked: boolean) => {
+    if (isStaked) {
+      onUnstake(id);
+    } else {
+      onStake(id);
+    }
+  }, [onStake, onUnstake]);
+
+  const handleEvolveAction = React.useCallback(async (beast: ZenBeast) => {
+    if (coins < 200) {
+      alert("Insufficient ZenCoins to evolve (Cost: 200 ZC)");
+      return;
+    }
+    setEvolvingId(beast.id);
+    await onEvolve(beast);
+    setEvolvingId(null);
+  }, [coins, onEvolve]);
+
   // Filters
   const [filterRarity, setFilterRarity] = useState<string>('');
   const [filterClass, setFilterClass] = useState<string>('');
@@ -47,17 +71,6 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
           setSellingId(null);
       }
   }
-
-  const handleEvolveClick = async (e: React.MouseEvent, beast: ZenBeast) => {
-    e.stopPropagation();
-    if (coins < 200) {
-      alert("Insufficient ZenCoins to evolve (Cost: 200 ZC)");
-      return;
-    }
-    setEvolvingId(beast.id);
-    await onEvolve(beast);
-    setEvolvingId(null);
-  };
 
   return (
     <div className="h-full flex flex-col animate-fade-in-up">
@@ -122,48 +135,14 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 pb-10">
         {filteredBeasts.map(b => (
-          <div key={b.id} className="relative group perspective-1000">
-              <BeastCard beast={b} />
-              
-              {/* Overlay Actions */}
-              <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center space-y-3 z-20">
-                  <div className="flex space-x-2">
-                    {!b.isStaked && (
-                        <button 
-                            onClick={(e) => { e.stopPropagation(); setSellingId(b.id); }}
-                            className="bg-transparent border border-white text-white hover:bg-white hover:text-black px-4 py-2 text-xs font-mono tracking-widest transition-colors"
-                        >
-                            SELL
-                        </button>
-                    )}
-                    <button 
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            b.isStaked ? onUnstake(b.id) : onStake(b.id);
-                        }}
-                        className={`
-                            px-4 py-2 text-xs font-mono tracking-widest border transition-colors
-                            ${b.isStaked 
-                                ? 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white' 
-                                : 'border-neon-purple text-neon-purple hover:bg-neon-purple hover:text-white'}
-                        `}
-                    >
-                        {b.isStaked ? 'UNSTAKE' : 'STAKE'}
-                    </button>
-                  </div>
-                  
-                  {/* Evolve Button */}
-                  {!b.isStaked && b.level >= 5 && (
-                    <button
-                      onClick={(e) => handleEvolveClick(e, b)}
-                      disabled={evolvingId === b.id}
-                      className="flex items-center space-x-2 bg-neon-yellow/10 border border-neon-yellow text-neon-yellow px-4 py-2 text-xs font-mono tracking-widest hover:bg-neon-yellow hover:text-black transition-colors"
-                    >
-                      {evolvingId === b.id ? <span className="animate-spin text-lg">↻</span> : <><ArrowUpCircle size={14} /> <span>EVOLVE</span></>}
-                    </button>
-                  )}
-              </div>
-          </div>
+          <InventoryItem
+            key={b.id}
+            beast={b}
+            onOpenSellModal={handleOpenSellModal}
+            onToggleStake={handleToggleStake}
+            onEvolve={handleEvolveAction}
+            isEvolving={evolvingId === b.id}
+          />
         ))}
         {filteredBeasts.length === 0 && (
             <div className="col-span-full py-20 text-center text-gray-600 font-mono">
