@@ -4,6 +4,7 @@ import { ZenBeast, Rarity, BeastClass, BattleResult, GymLeader, Trait } from '..
 import { safeParseJSON } from '../utils';
 import { getBreedingPrompt, getEvolutionPrompt, getBattlePrompt } from './prompts';
 import { generateStableDiffusionImage } from './stableDiffusionService';
+import { getRandomName, getRandomDescription, generateMockBattleLogs } from './mockData';
 
 // Import the Hashlips Config
 import hashlipsConfig from '../hashlips_config.json';
@@ -98,16 +99,20 @@ export const generateZenBeast = async (generation: number): Promise<ZenBeast> =>
     const selectedClass = Object.values(BeastClass)[Math.floor(Math.random() * Object.values(BeastClass).length)];
     const imageUrl = await generateStableDiffusionImage(selectedClass, traits);
 
+    // Better Stats Randomization based on rarity
+    const baseStat = overallRarity === Rarity.LEGENDARY ? 40 : overallRarity === Rarity.EPIC ? 30 : 20;
+    const randomStat = () => baseStat + Math.floor(Math.random() * 15);
+
     return {
         id: generateId(),
-        name: `Simulacrum-${selectedClass}`,
-        description: "A digital ghost, a product of a world without true AI.",
+        name: getRandomName(selectedClass),
+        description: getRandomDescription(),
         class: selectedClass,
         rarity: overallRarity,
         level: 1, exp: 0, generation: 0, obtainedAt: Date.now(),
         isStaked: false, isSoulbound: false, isOnChain: false,
         ownerId: 'player',
-        stats: { attack: 20, defense: 20, speed: 20, zen: 20 },
+        stats: { attack: randomStat(), defense: randomStat(), speed: randomStat(), zen: randomStat() },
         traits: traits,
         imageUrl: imageUrl,
     };
@@ -276,19 +281,27 @@ export const breedZenBeasts = async (parentA: ZenBeast, parentB: ZenBeast): Prom
   if (MOCK_MODE) {
     console.warn("MOCK MODE: Simulating breeding.");
     const childClass = parentA.class;
+    // Simple trait mixing for mock mode
     const childTraits = parentA.traits.slice(0, 6).concat(parentB.traits.slice(6, 12));
     const imageUrl = await generateStableDiffusionImage(childClass, childTraits);
 
+    const stats = {
+        attack: Math.floor((parentA.stats.attack + parentB.stats.attack) / 2) + Math.floor(Math.random() * 5),
+        defense: Math.floor((parentA.stats.defense + parentB.stats.defense) / 2) + Math.floor(Math.random() * 5),
+        speed: Math.floor((parentA.stats.speed + parentB.stats.speed) / 2) + Math.floor(Math.random() * 5),
+        zen: Math.floor((parentA.stats.zen + parentB.stats.zen) / 2) + Math.floor(Math.random() * 5)
+    };
+
     return {
         id: generateId(),
-        name: "Mock Hybrid",
-        description: "A simulated fusion.",
+        name: `${getRandomName(childClass)} (Gen ${Math.max(parentA.generation, parentB.generation) + 1})`,
+        description: "A hybrid born from simulated fusion.",
         class: childClass,
-        rarity: Rarity.COMMON,
-        level: 1, exp: 0, generation: 1, obtainedAt: Date.now(),
+        rarity: Rarity.RARE, // Hybrids are at least Rare in mock
+        level: 1, exp: 0, generation: Math.max(parentA.generation, parentB.generation) + 1, obtainedAt: Date.now(),
         isStaked: false, isSoulbound: false, isOnChain: false,
         ownerId: 'player',
-        stats: { attack: 15, defense: 15, speed: 15, zen: 15 },
+        stats: stats,
         traits: childTraits,
         imageUrl: imageUrl
     };
@@ -363,13 +376,13 @@ export const evolveZenBeast = async (original: ZenBeast): Promise<ZenBeast> => {
     const imageUrl = await generateStableDiffusionImage(original.class, evolvedTraits);
     return {
         ...original,
-        name: `Alpha ${original.name}`,
+        name: `Ascended ${original.name}`,
         rarity: Rarity.EPIC,
         stats: {
-            attack: original.stats.attack + 20,
-            defense: original.stats.defense + 20,
-            speed: original.stats.speed + 20,
-            zen: original.stats.zen + 20,
+            attack: original.stats.attack + 25,
+            defense: original.stats.defense + 25,
+            speed: original.stats.speed + 25,
+            zen: original.stats.zen + 25,
         },
         traits: evolvedTraits,
         imageUrl: imageUrl
@@ -407,19 +420,27 @@ export const simulateBattle = async (playerBeast: ZenBeast, opponent: ZenBeast |
   // --- MOCK MODE ---
   if (MOCK_MODE) {
     console.warn("MOCK MODE: Simulating battle.");
-    const playerWon = Math.random() > 0.5; // 50/50 chance
+
+    // Simple logic: higher stats win + random factor
+    const playerPower = playerBeast.stats.attack + playerBeast.stats.speed;
+    const oppPower = opponent.stats.attack + opponent.stats.speed;
+
+    // Add randomness (-20% to +20%)
+    const playerRoll = playerPower * (0.8 + Math.random() * 0.4);
+    const oppRoll = oppPower * (0.8 + Math.random() * 0.4);
+
+    const playerWon = playerRoll >= oppRoll;
+    const winnerName = playerWon ? playerBeast.name : opponent.name;
+    const loserName = playerWon ? opponent.name : playerBeast.name;
+
+    const logs = generateMockBattleLogs(winnerName, loserName);
+
     return {
         winnerId: playerWon ? playerBeast.id : 'enemy',
-        logs: [
-            { turn: 1, actor: playerBeast.name, action: "Mock Attack", description: "A simulated strike!", damage: 10 },
-            { turn: 1, actor: opponent.name, action: "Mock Defense", description: "A digital shield parries.", damage: 0 },
-            { turn: 2, actor: opponent.name, action: "Mock Counter", description: "An algorithmic counter-attack!", damage: 8 },
-            { turn: 2, actor: playerBeast.name, action: "Mock Evade", description: "The beast dodges.", damage: 0 },
-            { turn: 3, actor: playerBeast.name, action: "Finishing Blow", description: "The simulation concludes.", damage: 20 },
-        ],
+        logs: logs,
         rewards: playerWon
-            ? { exp: 20, zenCoins: 15, points: 5, trainerExp: 10 }
-            : { exp: 5, zenCoins: 0, points: 0, trainerExp: 5 }
+            ? { exp: 50, zenCoins: 25, points: 10, trainerExp: 20 }
+            : { exp: 10, zenCoins: 5, points: 0, trainerExp: 5 }
     };
   }
 
