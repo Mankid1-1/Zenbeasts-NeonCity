@@ -4,9 +4,9 @@ import { BeastClass, Trait } from '../types';
 // --- API KEY MANAGEMENT ---
 const getStabilityApiKey = (): string => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('STABILITY_API_KEY') || process.env.STABILITY_API_KEY || '';
+    return localStorage.getItem('STABILITY_API_KEY') || import.meta.env.VITE_STABILITY_API_KEY || '';
   }
-  return process.env.STABILITY_API_KEY || '';
+  return import.meta.env.VITE_STABILITY_API_KEY || '';
 };
 
 // Placeholder for the Stability AI endpoint
