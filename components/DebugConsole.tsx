@@ -44,10 +44,19 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
     };
 
     const execute = () => {
-        const cmd = command.trim().toLowerCase();
-        setLogs(prev => [...prev, `> ${cmd}`]);
+        const cmd = command.trim();
+        const cmdLower = cmd.toLowerCase();
 
-        const parts = cmd.split(' ');
+        // Security: Redact API keys in logs if setting them
+        if (cmdLower.startsWith('set ')) {
+             const parts = cmd.split(' ');
+             const safeParts = parts.map((p, i) => i >= 2 ? '****************' : p);
+             setLogs(prev => [...prev, `> ${safeParts.join(' ')}`]);
+        } else {
+             setLogs(prev => [...prev, `> ${cmd}`]);
+        }
+
+        const parts = cmdLower.split(' ');
         const baseCmd = parts[0];
         const arg = parts.slice(1).join(' ');
 
