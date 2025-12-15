@@ -45,9 +45,15 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
 
     const execute = () => {
         const cmd = command.trim().toLowerCase();
-        setLogs(prev => [...prev, `> ${cmd}`]);
 
+        // Redact sensitive info in logs
+        let displayCmd = cmd;
         const parts = cmd.split(' ');
+        if (parts[0] === 'set' && (parts[1] === 'gemini' || parts[1] === 'stability') && parts.length > 2) {
+            displayCmd = `set ${parts[1]} [REDACTED]`;
+        }
+
+        setLogs(prev => [...prev, `> ${displayCmd}`]);
         const baseCmd = parts[0];
         const arg = parts.slice(1).join(' ');
 
