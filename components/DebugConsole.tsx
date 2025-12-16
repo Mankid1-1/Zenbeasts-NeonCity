@@ -96,7 +96,7 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
         <div className="fixed top-0 left-0 w-full md:w-1/2 h-auto bg-black/90 text-green-500 font-mono border-b-2 border-r-2 border-green-500 z-[9999] shadow-2xl flex flex-col p-4 animate-fade-in-up">
             <div className="flex justify-between items-center border-b border-green-900 pb-2 mb-2">
                 <div className="flex items-center gap-2"><Terminal size={14}/> NETRUNNER CONSOLE</div>
-                <button onClick={() => setIsOpen(false)}><X size={14}/></button>
+                <button aria-label="Close debug console" title="Close" onClick={() => setIsOpen(false)}><X size={14}/></button>
             </div>
 
             {/* API Key Management */}
@@ -104,6 +104,7 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
                  <div className="flex items-center gap-1">
                     <KeyRound size={12}/>
                     <input
+                        aria-label="Gemini API Key"
                         type="password"
                         value={geminiApiKey}
                         onChange={(e) => setGeminiApiKey(e.target.value)}
@@ -114,6 +115,7 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
                  <div className="flex items-center gap-1">
                      <KeyRound size={12}/>
                     <input
+                        aria-label="Stability API Key"
                         type="password"
                         value={stabilityApiKey}
                         onChange={(e) => setStabilityApiKey(e.target.value)}
@@ -132,6 +134,7 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
             <div className="flex items-center gap-2 border-t border-green-900 pt-2">
                 <ChevronRight size={14}/>
                 <input 
+                    aria-label="Debug command input"
                     type="text" 
                     value={command} 
                     onChange={(e) => setCommand(e.target.value)}
