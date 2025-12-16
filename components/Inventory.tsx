@@ -21,6 +21,12 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
   const [sellingId, setSellingId] = useState<string | null>(null);
   const [sellPrice, setSellPrice] = useState('100');
   const [evolvingId, setEvolvingId] = useState<string | null>(null);
+
+  // Performance: Use ref for coins to avoid recreating handlers on every coin update (every 5s)
+  const coinsRef = React.useRef(coins);
+  React.useEffect(() => {
+    coinsRef.current = coins;
+  }, [coins]);
   
   // Optimization: Memoize handlers to prevent InventoryItem re-renders
   const handleOpenSellModal = React.useCallback((id: string) => {
@@ -36,14 +42,14 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
   }, [onStake, onUnstake]);
 
   const handleEvolveAction = React.useCallback(async (beast: ZenBeast) => {
-    if (coins < 200) {
+    if (coinsRef.current < 200) {
       alert("Insufficient ZenCoins to evolve (Cost: 200 ZC)");
       return;
     }
     setEvolvingId(beast.id);
     await onEvolve(beast);
     setEvolvingId(null);
-  }, [coins, onEvolve]);
+  }, [onEvolve]);
 
   // Filters
   const [filterRarity, setFilterRarity] = useState<string>('');
