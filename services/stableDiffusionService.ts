@@ -4,9 +4,10 @@ import { BeastClass, Trait } from '../types';
 // --- API KEY MANAGEMENT ---
 const getStabilityApiKey = (): string => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('STABILITY_API_KEY') || process.env.STABILITY_API_KEY || '';
+    // SECURITY: Use import.meta.env for Vite instead of process.env which might expose secrets if defined in vite config
+    return localStorage.getItem('STABILITY_API_KEY') || import.meta.env.VITE_STABILITY_API_KEY || '';
   }
-  return process.env.STABILITY_API_KEY || '';
+  return import.meta.env.VITE_STABILITY_API_KEY || '';
 };
 
 // Placeholder for the Stability AI endpoint
@@ -30,6 +31,7 @@ export const generateStableDiffusionImage = async (
   `;
 
   // If no API key is present in this demo environment, return a deterministic placeholder
+  // SECURITY: Check for default placeholder to avoid sending it to the API
   if (!apiKey || apiKey === 'undefined' || apiKey === 'YOUR_STABILITY_API_KEY') {
     console.warn("No Stability AI API Key found. Using deterministic simulation.");
 
@@ -66,7 +68,10 @@ export const generateStableDiffusionImage = async (
     });
 
     if (!response.ok) {
-      throw new Error(`Non-200 response: ${await response.text()}`);
+      // SECURITY: Do not leak the raw response text in the error message as it may contain sensitive info
+      const errorText = await response.text();
+      console.error('Stability AI API Error:', errorText);
+      throw new Error('Failed to generate image from Stability AI');
     }
 
     const responseJSON = await response.json();
