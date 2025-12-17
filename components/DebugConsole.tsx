@@ -44,12 +44,19 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
     };
 
     const execute = () => {
-        const cmd = command.trim().toLowerCase();
-        setLogs(prev => [...prev, `> ${cmd}`]);
+        const rawCmd = command.trim();
+        const parts = rawCmd.split(' ');
+        const baseCmd = parts[0].toLowerCase();
+        const subCmd = parts.length > 1 ? parts[1].toLowerCase() : '';
 
-        const parts = cmd.split(' ');
-        const baseCmd = parts[0];
-        const arg = parts.slice(1).join(' ');
+        // Security: Redact sensitive keys in logs
+        if (baseCmd === 'set' && (subCmd === 'gemini' || subCmd === 'stability') && parts.length > 2) {
+             setLogs(prev => [...prev, `> ${baseCmd} ${parts[1]} ************`]);
+        } else {
+             setLogs(prev => [...prev, `> ${rawCmd}`]);
+        }
+
+        const arg = parts.slice(1).join(' ').toLowerCase();
 
         switch(baseCmd) {
             case 'add':
@@ -71,11 +78,11 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
                 setLogs(prev => [...prev, '>> Game State Reset [Reload Required]']);
                 break;
             case 'set':
-                if (parts[1] === 'gemini') {
-                    setGeminiApiKey(parts[2]);
+                if (subCmd === 'gemini') {
+                    setGeminiApiKey(parts[2]); // Preserve case of the key
                     setLogs(prev => [...prev, '>> Gemini Key set in console. Press Save.']);
-                } else if (parts[1] === 'stability') {
-                    setStabilityApiKey(parts[2]);
+                } else if (subCmd === 'stability') {
+                    setStabilityApiKey(parts[2]); // Preserve case of the key
                     setLogs(prev => [...prev, '>> Stability Key set in console. Press Save.']);
                 } else {
                     setLogs(prev => [...prev, '>> Usage: set [gemini|stability] [key]']);
