@@ -1,17 +1,20 @@
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { useGameState } from './hooks/useGameState';
 
 import Layout from './components/Layout';
-import Dashboard from './components/Dashboard';
-import Inventory from './components/Inventory';
-import Breeding from './components/Breeding';
-import BattleArena from './components/BattleArena';
-import Marketplace from './components/Marketplace';
-import WorldMap from './components/WorldMap';
 import DebugConsole from './components/DebugConsole';
-import Bank from './components/Bank';
+import PageLoader from './components/PageLoader';
+
+// Lazy load route components
+const Dashboard = React.lazy(() => import('./components/Dashboard'));
+const Inventory = React.lazy(() => import('./components/Inventory'));
+const Breeding = React.lazy(() => import('./components/Breeding'));
+const BattleArena = React.lazy(() => import('./components/BattleArena'));
+const Marketplace = React.lazy(() => import('./components/Marketplace'));
+const WorldMap = React.lazy(() => import('./components/WorldMap'));
+const Bank = React.lazy(() => import('./components/Bank'));
 
 const App = () => {
   const gameState = useGameState();
@@ -30,6 +33,7 @@ const App = () => {
         onSwitchChain={gameState.switchChain}
         onClaimQuest={gameState.claimQuestReward}
       >
+        <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<WorldMap trainerLevel={gameState.trainerLevel} />} />
             <Route path="/dashboard" element={
@@ -80,6 +84,7 @@ const App = () => {
                 />
             } />
           </Routes>
+        </Suspense>
           
           {import.meta.env.DEV && (
             <DebugConsole
