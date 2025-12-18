@@ -29,6 +29,15 @@ const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onCli
     return (
       <div 
         onClick={onClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick?.();
+          }
+        }}
+        aria-label={`Select ${beast.name}`}
         className={`
             relative bg-slate-900 border-2 transition-all duration-200 cursor-pointer overflow-hidden group
             ${selected ? 'border-neon-pink shadow-[0_0_15px_#ff00ff] scale-105' : `${rarityBorderColor} hover:border-gray-300 hover:shadow-lg`}
@@ -53,6 +62,15 @@ const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onCli
   return (
     <div 
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+      aria-label={`View details for ${beast.name}`}
       className={`
         relative group bg-slate-900/80 transition-all duration-300 cursor-pointer cyber-border overflow-hidden
         border-2 ${selected ? 'border-neon-pink shadow-[0_0_20px_#ff00ff] z-10' : `${rarityBorderColor} hover:scale-[1.02] hover:shadow-lg`}
