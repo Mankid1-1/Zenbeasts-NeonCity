@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
 import BeastCard from './BeastCard';
 import InventoryItem from './InventoryItem';
@@ -22,28 +22,41 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
   const [sellPrice, setSellPrice] = useState('100');
   const [evolvingId, setEvolvingId] = useState<string | null>(null);
   
-  // Optimization: Memoize handlers to prevent InventoryItem re-renders
+  // Optimization: Use Ref pattern to keep handlers stable even when props (coins, callbacks) change.
+  // This ensures InventoryItem (which is React.memo'd) doesn't re-render unnecessarily.
+  const onStakeRef = useRef(onStake);
+  const onUnstakeRef = useRef(onUnstake);
+  const onEvolveRef = useRef(onEvolve);
+  const coinsRef = useRef(coins);
+
+  useEffect(() => {
+    onStakeRef.current = onStake;
+    onUnstakeRef.current = onUnstake;
+    onEvolveRef.current = onEvolve;
+    coinsRef.current = coins;
+  }, [onStake, onUnstake, onEvolve, coins]);
+
   const handleOpenSellModal = React.useCallback((id: string) => {
     setSellingId(id);
   }, []);
 
   const handleToggleStake = React.useCallback((id: string, isStaked: boolean) => {
     if (isStaked) {
-      onUnstake(id);
+      onUnstakeRef.current(id);
     } else {
-      onStake(id);
+      onStakeRef.current(id);
     }
-  }, [onStake, onUnstake]);
+  }, []);
 
   const handleEvolveAction = React.useCallback(async (beast: ZenBeast) => {
-    if (coins < 200) {
+    if (coinsRef.current < 200) {
       alert("Insufficient ZenCoins to evolve (Cost: 200 ZC)");
       return;
     }
     setEvolvingId(beast.id);
-    await onEvolve(beast);
+    await onEvolveRef.current(beast);
     setEvolvingId(null);
-  }, [coins, onEvolve]);
+  }, []);
 
   // Filters
   const [filterRarity, setFilterRarity] = useState<string>('');
