@@ -45,6 +45,7 @@ const InventoryItem: React.FC<InventoryItemProps> = React.memo(({
                 {!beast.isStaked && (
                     <button
                         onClick={handleSellClick}
+                        aria-label={`Sell ${beast.name}`}
                         className="bg-transparent border border-white text-white hover:bg-white hover:text-black px-4 py-2 text-xs font-mono tracking-widest transition-colors"
                     >
                         SELL
@@ -52,6 +53,7 @@ const InventoryItem: React.FC<InventoryItemProps> = React.memo(({
                 )}
                 <button
                     onClick={handleStakeClick}
+                    aria-label={`${beast.isStaked ? 'Unstake' : 'Stake'} ${beast.name}`}
                     className={`
                         px-4 py-2 text-xs font-mono tracking-widest border transition-colors
                         ${beast.isStaked
@@ -68,6 +70,7 @@ const InventoryItem: React.FC<InventoryItemProps> = React.memo(({
                 <button
                   onClick={handleEvolveClick}
                   disabled={isEvolving}
+                  aria-label={`Evolve ${beast.name}`}
                   className="flex items-center space-x-2 bg-neon-yellow/10 border border-neon-yellow text-neon-yellow px-4 py-2 text-xs font-mono tracking-widest hover:bg-neon-yellow hover:text-black transition-colors"
                 >
                   {isEvolving ? <span className="animate-spin text-lg">↻</span> : <><ArrowUpCircle size={14} /> <span>EVOLVE</span></>}
