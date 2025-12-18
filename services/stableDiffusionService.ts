@@ -66,7 +66,19 @@ export const generateStableDiffusionImage = async (
     });
 
     if (!response.ok) {
-      throw new Error(`Non-200 response: ${await response.text()}`);
+      let errorMessage = `Status: ${response.status} ${response.statusText}`;
+      try {
+        const errorBody = await response.json();
+        // Stability AI standard error format often includes { name, message }
+        if (errorBody.message) {
+          errorMessage += ` - ${errorBody.message}`;
+        } else if (errorBody.name) {
+          errorMessage += ` - ${errorBody.name}`;
+        }
+      } catch {
+        // Ignore JSON parse errors, keep only status
+      }
+      throw new Error(errorMessage);
     }
 
     const responseJSON = await response.json();
@@ -75,7 +87,8 @@ export const generateStableDiffusionImage = async (
     return `data:image/png;base64,${base64Image}`;
 
   } catch (error) {
-    console.error("Stable Diffusion Generation Error:", error);
+    // SECURITY: Log only the error message to avoid leaking sensitive data (like headers in raw error objects)
+    console.error("Stable Diffusion Generation Error:", error instanceof Error ? error.message : "Unknown error");
     // Fallback to placeholder on error
     return `https://picsum.photos/seed/${Math.random()}/400/400`;
   }

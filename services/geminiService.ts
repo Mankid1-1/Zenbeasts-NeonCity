@@ -183,7 +183,8 @@ export const generateZenBeast = async (generation: number): Promise<ZenBeast> =>
       imageUrl: imageUrl
     };
   } catch (error) {
-    console.error("Generation failed", error);
+    // SECURITY: Log only the message to prevent potential leakage of config/keys in full error objects
+    console.error("Generation failed", error instanceof Error ? error.message : "Unknown error");
     throw error;
   }
 };
