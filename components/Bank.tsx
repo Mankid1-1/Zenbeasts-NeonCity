@@ -201,8 +201,8 @@ const Bank: React.FC<BankProps> = ({ beasts, wallet, onStake, onUnstake, onClaim
                                             <div className="text-[10px] text-gray-500">PENDING</div>
                                             <div className="text-xs text-neon-yellow font-mono">+{pending.toFixed(4)}</div>
                                         </div>
-                                        <button onClick={() => onClaimRewards(b.id)} className="p-1 hover:text-neon-green transition-colors" title="Claim Rewards"><DollarSign size={14}/></button>
-                                        <button onClick={() => onUnstake(b.id)} className="p-1 hover:text-red-500 transition-colors" title="Unstake & Claim"><Unlock size={14}/></button>
+                                        <button onClick={() => onClaimRewards(b.id)} className="p-1 hover:text-neon-green transition-colors" title="Claim Rewards" aria-label={`Claim rewards for ${b.name}`}><DollarSign size={14}/></button>
+                                        <button onClick={() => onUnstake(b.id)} className="p-1 hover:text-red-500 transition-colors" title="Unstake & Claim" aria-label={`Unstake ${b.name} and claim rewards`}><Unlock size={14}/></button>
                                     </div>
                                 </div>
                              )
