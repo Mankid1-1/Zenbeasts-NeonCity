@@ -44,10 +44,23 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
     };
 
     const execute = () => {
-        const cmd = command.trim().toLowerCase();
-        setLogs(prev => [...prev, `> ${cmd}`]);
+        const cmd = command.trim();
+        // Redact sensitive commands from logs
+        let logCmd = cmd;
 
-        const parts = cmd.split(' ');
+        // Regex to match "set" followed by whitespace, then "gemini" or "stability", then anything
+        const sensitiveRegex = /^set\s+(gemini|stability)\s+(.+)$/i;
+        const match = cmd.match(sensitiveRegex);
+
+        if (match) {
+            // match[1] is the provider (gemini/stability), match[2] is the key
+            logCmd = `set ${match[1]} ********`;
+        }
+
+        setLogs(prev => [...prev, `> ${logCmd}`]);
+
+        // Normalize for execution: collapse multiple spaces and lowercase
+        const parts = cmd.toLowerCase().split(/\s+/);
         const baseCmd = parts[0];
         const arg = parts.slice(1).join(' ');
 
