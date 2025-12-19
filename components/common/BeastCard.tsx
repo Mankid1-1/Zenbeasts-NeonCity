@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { ZenBeast, Rarity } from '../types';
-import { RARITY_COLORS } from '../constants';
+import { ZenBeast, Rarity } from '../../types';
+import { RARITY_COLORS } from '../../constants';
 import { CircuitBoard, ChevronUp, Lock } from 'lucide-react';
-import { ClassIcon } from './common/CyberComponents';
+import { ClassIcon } from './CyberComponents';
 
 interface BeastCardProps {
   beast: ZenBeast;
