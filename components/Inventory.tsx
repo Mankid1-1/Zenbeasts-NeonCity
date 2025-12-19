@@ -6,7 +6,6 @@ import InventoryItem from './InventoryItem';
 import { useDebounce } from '../hooks/useDebounce';
 import { Filter, Search, X, ArrowUpCircle } from 'lucide-react';
 import { BASE_MINT_PRICE } from '../constants';
-import { useDebounce } from '../hooks/useDebounce';
 
 interface InventoryProps {
   beasts: ZenBeast[];
@@ -64,7 +63,6 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
   const [filterRarity, setFilterRarity] = useState<string>('');
   const [filterClass, setFilterClass] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Optimization: Debounce search query to prevent filtering on every keystroke
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -187,12 +185,19 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
           <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
               <div className="bg-slate-900 border-2 border-neon-blue p-8 max-w-md w-full cyber-border shadow-[0_0_30px_rgba(0,255,255,0.2)]">
                   <h3 className="text-2xl text-white font-mono mb-2">LIST ON BLACK MARKET</h3>
-                  <p className="text-gray-400 mb-6 text-sm font-mono">Enter listing price in ZenCoins.</p>
+                  <label htmlFor="sell-price-input" className="text-gray-400 mb-6 text-sm font-mono block">Enter listing price in ZenCoins.</label>
                   <div className="relative mb-6">
                       <input 
+                        id="sell-price-input"
                         type="number" 
                         value={sellPrice} 
                         onChange={(e) => setSellPrice(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') confirmSell();
+                            if (e.key === 'Escape') setSellingId(null);
+                        }}
+                        autoFocus
+                        aria-label="Listing Price (ZenCoins)"
                         className="w-full bg-black border border-slate-700 p-4 text-2xl text-neon-blue font-mono text-center focus:border-neon-blue outline-none"
                       />
                       <span className="absolute right-4 top-4 text-gray-500 font-mono">ZC</span>
