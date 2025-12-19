@@ -442,6 +442,12 @@ export const useGameState = () => {
   }, [addNotification, updateQuestProgress, addTrainerExp]);
 
   const handleListForSale = useCallback(async (id: string, price: number) => {
+    // SECURITY: Input validation to prevent negative price listings (Economy Exploit)
+    if (price <= 0) {
+        addNotification("Invalid Price", "Price must be greater than 0.", 'error');
+        return;
+    }
+
     if (!walletRef.current.isConnected) {
         addNotification("Wallet Locked", "Connect wallet to access Black Market.", 'warning');
         return;
