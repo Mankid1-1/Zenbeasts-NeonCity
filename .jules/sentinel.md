@@ -7,3 +7,8 @@
 **Vulnerability:** The `DebugConsole` component was logging full command strings, including API keys provided via the `set gemini <KEY>` command, to the on-screen display.
 **Learning:** "Input echoing" is a common source of information leakage. Even in development tools, logs should be treated as potentially visible (e.g., screen sharing, screenshots).
 **Prevention:** Implement redaction for known sensitive commands before appending them to UI logs or console output. Use regex to reliably identify and mask sensitive parameters regardless of case or whitespace.
+
+## 2025-05-18 - [Negative Price Economy Exploit]
+**Vulnerability:** The marketplace listing logic in `useGameState.ts` did not validate that the listing price was positive. This allowed a user to list an item for a negative price (e.g., -1000). If another user (or the same user) bought it, the transaction logic `buyerBalance - price` would result in `buyerBalance - (-1000) = buyerBalance + 1000`, effectively printing infinite currency.
+**Learning:** Always validate numerical inputs, especially those related to financial transactions or game economy. Do not assume UI constraints (if any) prevent malicious API calls or internal logic execution.
+**Prevention:** Added explicit `if (price <= 0)` validation in the `handleListForSale` function in the core game state hook.
