@@ -6,6 +6,7 @@ import InventoryItem from './InventoryItem';
 import { useDebounce } from '../hooks/useDebounce';
 import { Filter, Search, X, ArrowUpCircle } from 'lucide-react';
 import { BASE_MINT_PRICE } from '../constants';
+import { useDebounce } from '../hooks/useDebounce';
 
 interface InventoryProps {
   beasts: ZenBeast[];
@@ -63,6 +64,7 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
   const [filterRarity, setFilterRarity] = useState<string>('');
   const [filterClass, setFilterClass] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Optimization: Debounce search query to prevent filtering on every keystroke
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -117,33 +119,45 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
       {/* Filter Bar */}
       <div className="bg-slate-900/50 p-4 border border-slate-700 mb-6 flex flex-col md:flex-row gap-4 items-center rounded-sm">
         <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-3 text-gray-500" size={16} />
+            <Search className="absolute left-3 top-3 text-gray-500 pointer-events-none" size={16} />
             <input 
                 type="text" 
+                aria-label="Search beasts by name"
                 placeholder="Search database..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-black/50 border border-slate-700 text-white pl-10 pr-4 py-2 text-sm focus:border-neon-blue focus:outline-none transition-colors"
+                className="w-full bg-black/50 border border-slate-700 text-white pl-10 pr-10 py-2 text-sm focus:border-neon-blue focus:outline-none transition-colors"
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-2 text-gray-500 hover:text-white transition-colors"
+                aria-label="Clear search"
+              >
+                <X size={16} />
+              </button>
+            )}
         </div>
         <select 
+            aria-label="Filter by rarity"
             value={filterRarity} 
             onChange={(e) => setFilterRarity(e.target.value)}
-            className="w-full md:w-auto bg-black/50 border border-slate-700 text-gray-300 px-4 py-2 text-sm focus:border-neon-blue outline-none"
+            className="w-full md:w-auto bg-black/50 border border-slate-700 text-gray-300 px-4 py-2 text-sm focus:border-neon-blue outline-none cursor-pointer"
         >
             <option value="">All Rarities</option>
             {Object.values(Rarity).map(r => <option key={r} value={r}>{r}</option>)}
         </select>
         <select 
+            aria-label="Filter by class"
             value={filterClass} 
             onChange={(e) => setFilterClass(e.target.value)}
-            className="w-full md:w-auto bg-black/50 border border-slate-700 text-gray-300 px-4 py-2 text-sm focus:border-neon-blue outline-none"
+            className="w-full md:w-auto bg-black/50 border border-slate-700 text-gray-300 px-4 py-2 text-sm focus:border-neon-blue outline-none cursor-pointer"
         >
             <option value="">All Classes</option>
             {Object.values(BeastClass).map(c => <option key={c} value={c}>{c}</option>)}
         </select>
         {(filterRarity || filterClass || searchQuery) && (
-             <button onClick={() => {setFilterRarity(''); setFilterClass(''); setSearchQuery('')}} className="p-2 text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/50 rounded" aria-label="Clear filters">
+             <button onClick={() => {setFilterRarity(''); setFilterClass(''); setSearchQuery('')}} className="p-2 text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/50 rounded" aria-label="Clear all filters">
                  <X size={18} />
              </button>
         )}
