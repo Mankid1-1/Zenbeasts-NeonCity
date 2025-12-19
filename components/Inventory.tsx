@@ -3,6 +3,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
 import BeastCard from './BeastCard';
 import InventoryItem from './InventoryItem';
+import { useDebounce } from '../hooks/useDebounce';
 import { Filter, Search, X, ArrowUpCircle } from 'lucide-react';
 import { BASE_MINT_PRICE } from '../constants';
 
@@ -63,14 +64,17 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
   const [filterClass, setFilterClass] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Optimization: Debounce search query to prevent filtering on every keystroke
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
   const filteredBeasts = useMemo(() => {
     return beasts.filter(b => {
         const matchesRarity = filterRarity ? b.rarity === filterRarity : true;
         const matchesClass = filterClass ? b.class === filterClass : true;
-        const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = b.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
         return matchesRarity && matchesClass && matchesSearch;
     });
-  }, [beasts, filterRarity, filterClass, searchQuery]);
+  }, [beasts, filterRarity, filterClass, debouncedSearchQuery]);
 
   const handleMint = async () => {
     setIsMinting(true);
