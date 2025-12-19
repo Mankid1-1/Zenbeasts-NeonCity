@@ -2,9 +2,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ZenBeast, LeaderboardEntry, GymLeader, BattleResult, TrainerPerk, Achievement, Notification, BeastClass, Rarity, Wallet, Chain, Quest } from '../types';
 import { INITIAL_ZEN_COINS, INITIAL_LEADERBOARD, INITIAL_MARKET_LISTINGS, TRAINER_PERKS, LEVEL_THRESHOLDS, BASE_MINT_PRICE, ACHIEVEMENTS_LIST, TOKENOMICS, DAILY_CONTRACTS, STAKING_RATES, GENESIS_MULTIPLIER, BREEDING_COST, EVOLUTION_COST } from '../constants';
-import { generateZenBeast, breedZenBeasts, simulateBattle, evolveZenBeast } from '../services/geminiService';
+import { generateZenBeast, breedZenBeasts, evolveZenBeast } from '../services/gameEngine';
+import { simulateBattle } from '../services/battleEngine';
 import { loadState, saveState } from '../utils';
-import { connectWalletService, simulateTransaction, bridgeOffChainToOnChain, estimateGas } from '../services/web3';
+import { connectWalletService, simulateTransaction, bridgeOffChainToOnChain, estimateGas, spendZen } from '../services/web3';
 
 export const useGameState = () => {
   // Persistence Keys
@@ -502,13 +503,16 @@ export const useGameState = () => {
 
     try {
         await simulateTransaction(walletRef.current.chain, 'transfer');
+        // Actually spend from ledger
+        await spendZen(totalCost);
+
         setWallet(prev => ({ ...prev, zenBalance: prev.zenBalance - totalCost }));
         setMarketListings(prev => prev.filter(b => b.id !== beast.id));
         setBeasts(prev => [...prev, { ...beast, price: undefined, ownerId: 'player', isStaked: false, isOnChain: true }]);
         addNotification("Asset Acquired", `Purchased ${beast.name}`, 'success');
         setMarketHistory(prev => [`${beast.name} sold for ${beast.price} ZEN`, ...prev].slice(0, 5));
-    } catch (e) {
-        addNotification("Transaction Failed", "Blockchain rejected transfer.", 'error');
+    } catch (e: any) {
+        addNotification("Transaction Failed", e.message || "Blockchain rejected transfer.", 'error');
     }
   }, [addNotification]);
 
