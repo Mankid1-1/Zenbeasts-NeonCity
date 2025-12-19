@@ -60,13 +60,16 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
         setLogs(prev => [...prev, `> ${logCmd}`]);
 
         // Normalize for execution: collapse multiple spaces and lowercase
-        const parts = cmd.toLowerCase().split(/\s+/);
-        const baseCmd = parts[0];
-        const arg = parts.slice(1).join(' ');
+        // SECURITY FIX: Split original string to preserve case for sensitive arguments (API Keys)
+        const partsLower = cmd.toLowerCase().split(/\s+/);
+        const partsOriginal = cmd.split(/\s+/);
+
+        const baseCmd = partsLower[0];
+        const argLower = partsLower.slice(1).join(' ');
 
         switch(baseCmd) {
             case 'add':
-                if (arg === 'coins') {
+                if (argLower === 'coins') {
                     onAddCoins(1000);
                     setLogs(prev => [...prev, '>> Added 1000 ZenCoins']);
                 }
@@ -84,11 +87,13 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
                 setLogs(prev => [...prev, '>> Game State Reset [Reload Required]']);
                 break;
             case 'set':
-                if (parts[1] === 'gemini') {
-                    setGeminiApiKey(parts[2]);
+                if (partsLower[1] === 'gemini') {
+                    // Use original case for the API Key
+                    setGeminiApiKey(partsOriginal[2]);
                     setLogs(prev => [...prev, '>> Gemini Key set in console. Press Save.']);
-                } else if (parts[1] === 'stability') {
-                    setStabilityApiKey(parts[2]);
+                } else if (partsLower[1] === 'stability') {
+                    // Use original case for the API Key
+                    setStabilityApiKey(partsOriginal[2]);
                     setLogs(prev => [...prev, '>> Stability Key set in console. Press Save.']);
                 } else {
                     setLogs(prev => [...prev, '>> Usage: set [gemini|stability] [key]']);

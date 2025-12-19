@@ -64,7 +64,6 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
   const [filterRarity, setFilterRarity] = useState<string>('');
   const [filterClass, setFilterClass] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Optimization: Debounce search query to prevent filtering on every keystroke
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
