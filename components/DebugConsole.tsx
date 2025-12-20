@@ -59,10 +59,15 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
 
         setLogs(prev => [...prev, `> ${logCmd}`]);
 
-        // Normalize for execution: collapse multiple spaces and lowercase
-        const parts = cmd.toLowerCase().split(/\s+/);
-        const baseCmd = parts[0];
-        const arg = parts.slice(1).join(' ');
+        // Normalize for execution: collapse multiple spaces
+        // SECURITY FIX: We must NOT lowercase the arguments as API keys are case-sensitive!
+        const partsRaw = cmd.split(/\s+/);
+        const baseCmd = partsRaw[0].toLowerCase();
+
+        // Arguments might be multi-word for some commands (not currently used but good practice)
+        // For 'set', partsRaw[1] is provider (case-insensitive usually ok, but we match lower),
+        // partsRaw[2] is the KEY (must be case-preserved).
+        const arg = partsRaw.slice(1).join(' ').toLowerCase(); // For non-sensitive commands like 'add coins'
 
         switch(baseCmd) {
             case 'add':
@@ -84,12 +89,24 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
                 setLogs(prev => [...prev, '>> Game State Reset [Reload Required]']);
                 break;
             case 'set':
-                if (parts[1] === 'gemini') {
-                    setGeminiApiKey(parts[2]);
-                    setLogs(prev => [...prev, '>> Gemini Key set in console. Press Save.']);
-                } else if (parts[1] === 'stability') {
-                    setStabilityApiKey(parts[2]);
-                    setLogs(prev => [...prev, '>> Stability Key set in console. Press Save.']);
+                // Check provider case-insensitively
+                const provider = partsRaw[1]?.toLowerCase();
+                const key = partsRaw[2]; // PRESERVE CASE
+
+                if (provider === 'gemini') {
+                    if (!key) {
+                        setLogs(prev => [...prev, '>> Error: Missing API Key']);
+                    } else {
+                        setGeminiApiKey(key);
+                        setLogs(prev => [...prev, '>> Gemini Key set in console. Press Save.']);
+                    }
+                } else if (provider === 'stability') {
+                    if (!key) {
+                         setLogs(prev => [...prev, '>> Error: Missing API Key']);
+                    } else {
+                        setStabilityApiKey(key);
+                        setLogs(prev => [...prev, '>> Stability Key set in console. Press Save.']);
+                    }
                 } else {
                     setLogs(prev => [...prev, '>> Usage: set [gemini|stability] [key]']);
                 }
