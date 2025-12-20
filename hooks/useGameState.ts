@@ -37,8 +37,13 @@ export const useGameState = () => {
   });
 
   const [marketListings, setMarketListings] = useState<ZenBeast[]>(() => {
-      const loaded = loadState(KEYS.MARKET, INITIAL_MARKET_LISTINGS);
-      return Array.isArray(loaded) ? loaded : INITIAL_MARKET_LISTINGS;
+      let loaded = loadState<ZenBeast[]>(KEYS.MARKET, INITIAL_MARKET_LISTINGS);
+      if (!Array.isArray(loaded)) loaded = INITIAL_MARKET_LISTINGS;
+
+      return loaded.map(b => ({
+        ...b,
+        stats: b.stats || { attack: 10, defense: 10, speed: 10, zen: 10 },
+      }));
   });
   
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>(() => loadState(KEYS.LEADERBOARD, INITIAL_LEADERBOARD));
