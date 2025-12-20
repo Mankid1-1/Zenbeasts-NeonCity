@@ -40,7 +40,7 @@ const InventoryItem: React.FC<InventoryItemProps> = React.memo(({
           <BeastCard beast={beast} />
 
           {/* Overlay Actions */}
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center space-y-3 z-20">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center space-y-3 z-20">
               <div className="flex space-x-2">
                 {!beast.isStaked && (
                     <button
