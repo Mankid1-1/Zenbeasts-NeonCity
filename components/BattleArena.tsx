@@ -11,7 +11,9 @@ interface BattleArenaProps {
   leaderboard: LeaderboardEntry[];
 }
 
-const BattleArena: React.FC<BattleArenaProps> = ({ beasts, onBattle, leaderboard }) => {
+// Optimization: Memoize BattleArena to prevent re-renders when unrelated global state (like coins/wallet) changes.
+// The internal state (battle logs, selection) is preserved, and it only re-renders if beasts or leaderboard updates.
+const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboard }) => {
     const [selectedBeast, setSelectedBeast] = useState<ZenBeast | null>(null);
     const [selectedGymLeader, setSelectedGymLeader] = useState<GymLeader | null>(null);
     const [mode, setMode] = useState<'sparring' | 'gym'>('gym');
@@ -252,6 +254,6 @@ const BattleArena: React.FC<BattleArenaProps> = ({ beasts, onBattle, leaderboard
             )}
         </div>
     );
-};
+});
 
 export default BattleArena;
