@@ -55,7 +55,9 @@ const MapNode = ({ x, y, icon, label, path, color, delay, levelRequired, current
     );
 };
 
-const WorldMap = ({ trainerLevel }: { trainerLevel: number }) => {
+// Optimization: Memoize WorldMap to prevent re-renders when unrelated global state (like coins) changes.
+// It only depends on trainerLevel for unlocking nodes.
+const WorldMap = React.memo(({ trainerLevel }: { trainerLevel: number }) => {
     return (
         <div className="relative w-full h-full bg-[#050510] overflow-hidden animate-fade-in-up">
             {/* Background Grid */}
@@ -92,6 +94,6 @@ const WorldMap = ({ trainerLevel }: { trainerLevel: number }) => {
             </div>
         </div>
     );
-};
+});
 
 export default WorldMap;
