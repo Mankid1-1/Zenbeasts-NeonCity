@@ -81,4 +81,13 @@ describe('sanitizeZenBeast', () => {
     expect(result.class).toBe(BeastClass.TIGER);
     expect(result.rarity).toBe(Rarity.COMMON);
   });
+
+  it('should remove negative prices (Security Fix)', () => {
+    const input = {
+      price: -100,
+      name: 'Exploit Beast'
+    };
+    const result = sanitizeZenBeast(input);
+    expect(result.price).toBeUndefined();
+  });
 });

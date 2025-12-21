@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { ZenBeast, LeaderboardEntry, GymLeader, BattleResult, TrainerPerk, Achievement, Notification, BeastClass, Rarity, Wallet, Chain, Quest } from '../types';
 import { INITIAL_ZEN_COINS, INITIAL_LEADERBOARD, INITIAL_MARKET_LISTINGS, TRAINER_PERKS, LEVEL_THRESHOLDS, BASE_MINT_PRICE, ACHIEVEMENTS_LIST, TOKENOMICS, DAILY_CONTRACTS, STAKING_RATES, GENESIS_MULTIPLIER, BREEDING_COST, EVOLUTION_COST } from '../constants';
 import { generateZenBeast, breedZenBeasts, simulateBattle, evolveZenBeast } from '../services/geminiService';
-import { loadState, saveState } from '../utils';
+import { loadState, saveState, sanitizeZenBeast } from '../utils';
 import { connectWalletService, simulateTransaction, bridgeOffChainToOnChain, estimateGas } from '../services/web3';
 
 export const useGameState = () => {
@@ -37,8 +37,9 @@ export const useGameState = () => {
   });
 
   const [marketListings, setMarketListings] = useState<ZenBeast[]>(() => {
-      const loaded = loadState(KEYS.MARKET, INITIAL_MARKET_LISTINGS);
-      return Array.isArray(loaded) ? loaded : INITIAL_MARKET_LISTINGS;
+      const loaded = loadState<ZenBeast[]>(KEYS.MARKET, INITIAL_MARKET_LISTINGS);
+      // SECURITY: Sanitize loaded listings to prevent negative price exploits via localStorage
+      return Array.isArray(loaded) ? loaded.map(sanitizeZenBeast) : INITIAL_MARKET_LISTINGS;
   });
   
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>(() => loadState(KEYS.LEADERBOARD, INITIAL_LEADERBOARD));
@@ -399,14 +400,21 @@ export const useGameState = () => {
   }, [addNotification, addTrainerExp]);
 
   const handleRename = useCallback((id: string, newName: string) => {
+      // SECURITY: Input validation to prevent abuse (XSS/spam)
+      const trimmed = newName.trim();
+      if (!trimmed || trimmed.length > 20) {
+          addNotification("Invalid Name", "Name must be 1-20 characters.", 'warning');
+          return;
+      }
+
       const COST = 10;
       if (coinsRef.current < COST) {
           addNotification("Insufficient Funds", `Rename costs ${COST} ZC`, 'error');
           return;
       }
       setCoins(c => c - COST);
-      setBeasts(prev => prev.map(b => b.id === id ? { ...b, name: newName } : b));
-      addNotification("Identity Updated", `Beast renamed to ${newName}`, 'success');
+      setBeasts(prev => prev.map(b => b.id === id ? { ...b, name: trimmed } : b));
+      addNotification("Identity Updated", `Beast renamed to ${trimmed}`, 'success');
   }, [addNotification]);
 
   const handleBattle = useCallback(async (beast: ZenBeast, gymLeader?: GymLeader): Promise<BattleResult | null> => {

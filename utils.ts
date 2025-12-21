@@ -73,7 +73,7 @@ export const sanitizeZenBeast = (data: any): ZenBeast => {
     isSoulbound: !!data.isSoulbound,
     isOnChain: !!data.isOnChain,
     ownerId: typeof data.ownerId === 'string' ? data.ownerId : 'player',
-    price: typeof data.price === 'number' ? data.price : undefined,
+    price: (typeof data.price === 'number' && data.price > 0) ? data.price : undefined,
     originalOwner: typeof data.originalOwner === 'string' ? data.originalOwner : undefined,
   };
 };
