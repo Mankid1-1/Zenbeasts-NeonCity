@@ -404,14 +404,25 @@ export const useGameState = () => {
   }, [addNotification, addTrainerExp]);
 
   const handleRename = useCallback((id: string, newName: string) => {
+      // SECURITY: Input validation to prevent excessively long or malicious names
+      const trimmedName = newName.trim();
+      if (trimmedName.length === 0 || trimmedName.length > 25) {
+          addNotification("Invalid Name", "Name must be 1-25 characters.", 'error');
+          return;
+      }
+      if (!/^[a-zA-Z0-9 -]+$/.test(trimmedName)) {
+          addNotification("Invalid Name", "Only alphanumeric, spaces, and hyphens allowed.", 'error');
+          return;
+      }
+
       const COST = 10;
       if (coinsRef.current < COST) {
           addNotification("Insufficient Funds", `Rename costs ${COST} ZC`, 'error');
           return;
       }
       setCoins(c => c - COST);
-      setBeasts(prev => prev.map(b => b.id === id ? { ...b, name: newName } : b));
-      addNotification("Identity Updated", `Beast renamed to ${newName}`, 'success');
+      setBeasts(prev => prev.map(b => b.id === id ? { ...b, name: trimmedName } : b));
+      addNotification("Identity Updated", `Beast renamed to ${trimmedName}`, 'success');
   }, [addNotification]);
 
   const handleBattle = useCallback(async (beast: ZenBeast, gymLeader?: GymLeader): Promise<BattleResult | null> => {
