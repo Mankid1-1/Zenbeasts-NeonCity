@@ -5,6 +5,7 @@ import { INITIAL_ZEN_COINS, INITIAL_LEADERBOARD, INITIAL_MARKET_LISTINGS, TRAINE
 import { generateZenBeast, breedZenBeasts, simulateBattle, evolveZenBeast } from '../services/geminiService';
 import { loadState, saveState } from '../utils';
 import { connectWalletService, simulateTransaction, bridgeOffChainToOnChain, estimateGas } from '../services/web3';
+import { useDebounce } from './useDebounce';
 
 export const useGameState = () => {
   // Persistence Keys
@@ -145,12 +146,18 @@ export const useGameState = () => {
     checkDailyReset();
   }, []); 
 
-  // Persistence
-  useEffect(() => saveState(KEYS.COINS, coins), [coins]);
-  useEffect(() => saveState(KEYS.BEASTS, beasts), [beasts]);
-  useEffect(() => saveState(KEYS.MARKET, marketListings), [marketListings]);
-  useEffect(() => saveState(KEYS.WALLET, wallet), [wallet]);
-  useEffect(() => saveState(KEYS.QUESTS, quests), [quests]);
+  // Persistence - Optimization: Debounce storage writes to prevent blocking main thread on rapid updates
+  const debouncedCoins = useDebounce(coins, 500);
+  const debouncedBeasts = useDebounce(beasts, 500);
+  const debouncedMarket = useDebounce(marketListings, 500);
+  const debouncedWallet = useDebounce(wallet, 500);
+  const debouncedQuests = useDebounce(quests, 500);
+
+  useEffect(() => saveState(KEYS.COINS, debouncedCoins), [debouncedCoins]);
+  useEffect(() => saveState(KEYS.BEASTS, debouncedBeasts), [debouncedBeasts]);
+  useEffect(() => saveState(KEYS.MARKET, debouncedMarket), [debouncedMarket]);
+  useEffect(() => saveState(KEYS.WALLET, debouncedWallet), [debouncedWallet]);
+  useEffect(() => saveState(KEYS.QUESTS, debouncedQuests), [debouncedQuests]);
 
   const activePerks = TRAINER_PERKS.filter(p => p.unlockLevel <= trainerLevel);
 
