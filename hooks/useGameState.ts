@@ -447,9 +447,9 @@ export const useGameState = () => {
   }, [addNotification, updateQuestProgress, addTrainerExp]);
 
   const handleListForSale = useCallback(async (id: string, price: number) => {
-    // SECURITY: Input validation to prevent negative price listings (Economy Exploit)
-    if (price <= 0) {
-        addNotification("Invalid Price", "Price must be greater than 0.", 'error');
+    // SECURITY: Input validation to prevent negative price or NaN listings (Economy Exploit)
+    if (!Number.isFinite(price) || price <= 0) {
+        addNotification("Invalid Price", "Price must be a valid positive number.", 'error');
         return;
     }
 
