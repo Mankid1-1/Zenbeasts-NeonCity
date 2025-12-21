@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
 import BeastCard from './BeastCard';
 import BeastDetailModal from './BeastDetailModal';
@@ -21,12 +21,15 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
   const [selectedBeast, setSelectedBeast] = useState<ZenBeast | null>(null);
   const [viewMode, setViewMode] = useState<'all' | 'mine'>('all');
 
-  const filteredListings = listings.filter(beast => {
-    const matchesSearch = beast.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRarity = selectedRarity ? beast.rarity === selectedRarity : true;
-    const matchesMode = viewMode === 'mine' ? beast.originalOwner === 'player' : true;
-    return matchesSearch && matchesRarity && matchesMode;
-  });
+  // Optimization: Memoize filtered listings to prevent re-calculation on every render (e.g. when userCoins changes)
+  const filteredListings = useMemo(() => {
+    return listings.filter(beast => {
+      const matchesSearch = beast.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesRarity = selectedRarity ? beast.rarity === selectedRarity : true;
+      const matchesMode = viewMode === 'mine' ? beast.originalOwner === 'player' : true;
+      return matchesSearch && matchesRarity && matchesMode;
+    });
+  }, [listings, searchTerm, selectedRarity, viewMode]);
 
   return (
     <div className="h-full flex flex-col animate-fade-in-up">
