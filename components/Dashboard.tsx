@@ -75,6 +75,7 @@ const Dashboard: React.FC<DashboardProps> = ({ beasts, coins, leaderboard, train
                             type="number" 
                             value={claimAmount}
                             onChange={(e) => setClaimAmount(e.target.value)}
+                            aria-label="Amount to claim in ZenCoins"
                             className="bg-black/50 border border-gray-700 text-white w-full px-3 py-2 text-sm font-mono outline-none focus:border-neon-yellow"
                          />
                          <CyberButton variant="secondary" onClick={() => onClaim(parseInt(claimAmount))} className="text-xs">
