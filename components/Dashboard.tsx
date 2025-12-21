@@ -73,6 +73,7 @@ const Dashboard: React.FC<DashboardProps> = ({ beasts, coins, leaderboard, train
                      <div className="flex gap-2">
                          <input 
                             type="number" 
+                            aria-label="Claim Amount"
                             value={claimAmount}
                             onChange={(e) => setClaimAmount(e.target.value)}
                             className="bg-black/50 border border-gray-700 text-white w-full px-3 py-2 text-sm font-mono outline-none focus:border-neon-yellow"

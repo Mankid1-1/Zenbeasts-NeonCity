@@ -52,10 +52,10 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
         <div className="flex gap-4 items-center flex-1">
             <div className="relative flex-1">
                 <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
-                <input type="text" placeholder="Search Listings..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                <input type="text" placeholder="Search Listings..." aria-label="Search Listings" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full bg-black/50 border border-slate-700 text-white pl-10 pr-4 py-2 text-sm focus:border-neon-yellow outline-none" />
             </div>
-            <select value={selectedRarity} onChange={(e) => setSelectedRarity(e.target.value)}
+            <select value={selectedRarity} aria-label="Filter by Rarity" onChange={(e) => setSelectedRarity(e.target.value)}
                 className="bg-black/50 border border-slate-700 text-gray-300 px-4 py-2 text-sm focus:border-neon-yellow outline-none">
                 <option value="">All Rarities</option>
                 {Object.values(Rarity).map(r => <option key={r} value={r}>{r}</option>)}
