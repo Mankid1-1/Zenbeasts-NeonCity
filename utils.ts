@@ -35,6 +35,22 @@ export const formatNumber = (num: number): string => {
   return new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(num);
 };
 
+/**
+ * SECURITY: Use crypto.randomUUID for secure ID generation instead of Math.random
+ * Fallback for environments where crypto is not available (though widely supported now)
+ */
+export const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback (less secure, but better than nothing for legacy/test envs)
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 export const sanitizeZenBeast = (data: any): ZenBeast => {
   if (!data || typeof data !== 'object') {
     data = {};
@@ -55,7 +71,7 @@ export const sanitizeZenBeast = (data: any): ZenBeast => {
   const rarity = validRarities.includes(data.rarity) ? data.rarity : Rarity.COMMON;
 
   return {
-    id: typeof data.id === 'string' ? data.id : `beast-${Math.random().toString(36).substr(2, 9)}`,
+    id: typeof data.id === 'string' ? data.id : `beast-${generateUUID()}`,
     name: typeof data.name === 'string' ? data.name : 'Unknown Beast',
     description: typeof data.description === 'string' ? data.description : 'A mysterious creature.',
     class: beastClass,
