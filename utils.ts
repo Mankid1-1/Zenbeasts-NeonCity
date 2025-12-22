@@ -1,6 +1,18 @@
 
 import { ZenBeast, BeastClass, Rarity } from './types';
 
+// SECURITY: Use crypto.randomUUID for secure ID generation
+export const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments where crypto.randomUUID is not available
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 export const safeParseJSON = <T>(text: string, fallback: T): T => {
   try {
     // Strip markdown code blocks if present (e.g. ```json ... ```)
@@ -55,7 +67,8 @@ export const sanitizeZenBeast = (data: any): ZenBeast => {
   const rarity = validRarities.includes(data.rarity) ? data.rarity : Rarity.COMMON;
 
   return {
-    id: typeof data.id === 'string' ? data.id : `beast-${Math.random().toString(36).substr(2, 9)}`,
+    // SECURITY: Use strong UUIDs instead of predictable Math.random()
+    id: typeof data.id === 'string' ? data.id : `beast-${generateUUID()}`,
     name: typeof data.name === 'string' ? data.name : 'Unknown Beast',
     description: typeof data.description === 'string' ? data.description : 'A mysterious creature.',
     class: beastClass,

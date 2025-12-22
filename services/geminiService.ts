@@ -1,7 +1,7 @@
 
 import { GoogleGenAI } from "@google/genai";
 import { ZenBeast, Rarity, BeastClass, BattleResult, GymLeader, Trait } from '../types';
-import { safeParseJSON } from '../utils';
+import { safeParseJSON, generateUUID } from '../utils';
 import { getBreedingPrompt, getEvolutionPrompt, getBattlePrompt } from './prompts';
 import { generateStableDiffusionImage } from './stableDiffusionService';
 import { getRandomName, getRandomDescription, generateMockBattleLogs } from './mockData';
@@ -24,7 +24,7 @@ const MOCK_MODE = !GEMINI_API_KEY;
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 const modelName = 'gemini-2.5-flash';
 
-const generateId = () => Math.random().toString(36).substring(2, 9);
+const generateId = () => generateUUID();
 
 // --- HASHLIPS GENERATION LOGIC ---
 
