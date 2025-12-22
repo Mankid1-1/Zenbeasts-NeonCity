@@ -1,9 +1,9 @@
 
 import React, { useState, useMemo } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
-import BeastCard from './BeastCard';
 import BeastDetailModal from './BeastDetailModal';
-import { ShoppingBag, Search, Filter, X, Tag, Activity, Fuel, User } from 'lucide-react';
+import MarketplaceItem from './MarketplaceItem';
+import { ShoppingBag, Search, Activity, Fuel, User } from 'lucide-react';
 import { SectionHeader, CyberButton } from './common/CyberComponents';
 import { TOKENOMICS } from '../constants';
 
@@ -93,17 +93,11 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pb-10">
         {filteredListings.map((beast) => (
-            <div key={beast.id} className="relative group cursor-pointer" onClick={() => setSelectedBeast(beast)}>
-                <BeastCard beast={beast} />
-                <div className="absolute top-2 left-2 bg-black border border-neon-yellow px-2 py-1 z-20 shadow-lg">
-                    <span className="text-neon-yellow font-bold font-mono text-xs flex items-center"><Tag size={12} className="mr-1"/> {beast.price} ZEN</span>
-                </div>
-                {beast.originalOwner === 'player' && (
-                    <div className="absolute top-2 right-2 bg-neon-blue px-2 py-1 z-20">
-                        <span className="text-black font-bold font-mono text-[10px]">YOURS</span>
-                    </div>
-                )}
-            </div>
+            <MarketplaceItem
+                key={beast.id}
+                beast={beast}
+                onSelect={setSelectedBeast}
+            />
         ))}
         {filteredListings.length === 0 && <div className="col-span-full text-center text-gray-600 py-20 font-mono">NO LISTINGS FOUND</div>}
       </div>
