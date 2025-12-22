@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { ZenBeast, LeaderboardEntry, GymLeader, BattleResult, TrainerPerk, Achievement, Notification, BeastClass, Rarity, Wallet, Chain, Quest } from '../types';
 import { INITIAL_ZEN_COINS, INITIAL_LEADERBOARD, INITIAL_MARKET_LISTINGS, TRAINER_PERKS, LEVEL_THRESHOLDS, BASE_MINT_PRICE, ACHIEVEMENTS_LIST, TOKENOMICS, DAILY_CONTRACTS, STAKING_RATES, GENESIS_MULTIPLIER, BREEDING_COST, EVOLUTION_COST } from '../constants';
 import { generateZenBeast, breedZenBeasts, simulateBattle, evolveZenBeast } from '../services/geminiService';
-import { loadState, saveState } from '../utils';
+import { loadState, saveState, generateUUID } from '../utils';
 import { connectWalletService, simulateTransaction, bridgeOffChainToOnChain, estimateGas } from '../services/web3';
 import { useDebounce } from './useDebounce';
 
@@ -88,7 +88,7 @@ export const useGameState = () => {
   useEffect(() => { marketListingsRef.current = marketListings; }, [marketListings]);
 
   const addNotification = useCallback((title: string, message: string, type: 'success' | 'warning' | 'info' | 'error' = 'info') => {
-      const id = Math.random().toString(36).substr(2, 9);
+      const id = generateUUID();
       setNotifications(prev => [...prev, { id, title, message, type }]);
   }, []);
 
@@ -125,7 +125,7 @@ export const useGameState = () => {
     if (beasts.length === 0) {
         const initBeast = async () => {
             const starter: ZenBeast = {
-                id: 'starter-' + Math.random().toString(36).substr(2,9),
+                id: 'starter-' + generateUUID(),
                 name: 'Neon Initiate',
                 description: 'Your spirit companion. Bound to your soul, it cannot be traded.',
                 class: BeastClass.TIGER,
