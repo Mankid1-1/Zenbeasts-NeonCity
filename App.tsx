@@ -69,7 +69,6 @@ const App = () => {
                   listings={gameState.marketListings} 
                   onBuy={gameState.handleBuy} 
                   onCancelListing={gameState.handleCancelListing}
-                  userCoins={gameState.coins} 
                   marketHistory={gameState.marketHistory} 
               />
             } />

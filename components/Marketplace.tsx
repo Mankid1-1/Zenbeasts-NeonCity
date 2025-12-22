@@ -11,17 +11,16 @@ interface MarketplaceProps {
   listings: ZenBeast[];
   onBuy: (beast: ZenBeast) => void;
   onCancelListing: (id: string) => void;
-  userCoins: number; 
   marketHistory: string[];
 }
 
-const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelListing, userCoins, marketHistory }) => {
+const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelListing, marketHistory }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRarity, setSelectedRarity] = useState<string>('');
   const [selectedBeast, setSelectedBeast] = useState<ZenBeast | null>(null);
   const [viewMode, setViewMode] = useState<'all' | 'mine'>('all');
 
-  // Optimization: Memoize filtered listings to prevent re-calculation on every render (e.g. when userCoins changes)
+  // Optimization: Memoize filtered listings to prevent re-calculation on every render
   const filteredListings = useMemo(() => {
     return listings.filter(beast => {
       const matchesSearch = beast.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -138,4 +137,5 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
   );
 };
 
-export default Marketplace;
+// Optimization: Prevent re-renders when global state (like coins) changes but Marketplace props remain stable
+export default React.memo(Marketplace);
