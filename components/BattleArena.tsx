@@ -11,7 +11,9 @@ interface BattleArenaProps {
   leaderboard: LeaderboardEntry[];
 }
 
-const BattleArena: React.FC<BattleArenaProps> = ({ beasts, onBattle, leaderboard }) => {
+// Optimization: Memoize BattleArena to prevent re-renders when unrelated global state (like coins/wallet) changes.
+// The internal state (battle logs, selection) is preserved, and it only re-renders if beasts or leaderboard updates.
+const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboard }) => {
     const [selectedBeast, setSelectedBeast] = useState<ZenBeast | null>(null);
     const [selectedGymLeader, setSelectedGymLeader] = useState<GymLeader | null>(null);
     const [mode, setMode] = useState<'sparring' | 'gym'>('gym');
@@ -185,7 +187,11 @@ const BattleArena: React.FC<BattleArenaProps> = ({ beasts, onBattle, leaderboard
             ) : null}
 
             {isBattling && (
-                <div className="flex-1 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm z-50 absolute inset-0">
+                <div
+                    role="status"
+                    aria-live="polite"
+                    className="flex-1 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm z-50 absolute inset-0"
+                >
                     <Sword size={64} className="text-neon-pink animate-spin mb-8" />
                     <div className="text-2xl font-mono text-neon-blue animate-pulse">COMPUTING COMBAT LOGIC...</div>
                 </div>
@@ -216,7 +222,11 @@ const BattleArena: React.FC<BattleArenaProps> = ({ beasts, onBattle, leaderboard
                             </div>
                         </div>
 
-                        <div className="bg-black border border-gray-700 p-4 font-mono text-sm h-64 overflow-y-auto custom-scrollbar shadow-inner mb-6">
+                        <div
+                            role="log"
+                            aria-label="Battle Log"
+                            className="bg-black border border-gray-700 p-4 font-mono text-sm h-64 overflow-y-auto custom-scrollbar shadow-inner mb-6"
+                        >
                             {visibleLogs.map((log, i) => (
                                 <div key={i} className="mb-2 border-l-2 border-gray-700 pl-3 animate-fade-in-up">
                                     <span className="text-gray-500 text-xs">TURN_{log.turn} </span>
@@ -252,6 +262,6 @@ const BattleArena: React.FC<BattleArenaProps> = ({ beasts, onBattle, leaderboard
             )}
         </div>
     );
-};
+});
 
 export default BattleArena;

@@ -75,6 +75,7 @@ const Dashboard: React.FC<DashboardProps> = ({ beasts, coins, leaderboard, train
                             type="number" 
                             value={claimAmount}
                             onChange={(e) => setClaimAmount(e.target.value)}
+                            aria-label="Amount to claim in ZenCoins"
                             className="bg-black/50 border border-gray-700 text-white w-full px-3 py-2 text-sm font-mono outline-none focus:border-neon-yellow"
                          />
                          <CyberButton variant="secondary" onClick={() => onClaim(parseInt(claimAmount))} className="text-xs">
@@ -88,9 +89,14 @@ const Dashboard: React.FC<DashboardProps> = ({ beasts, coins, leaderboard, train
                 <h3 className="text-neon-purple font-mono mb-4 flex items-center tracking-wider"><Star className="mr-2" size={18}/> ACHIEVEMENTS</h3>
                 <div className="grid grid-cols-4 gap-2">
                     {achievements.map(ach => (
-                        <div key={ach.id} className={`aspect-square flex items-center justify-center rounded border ${ach.unlocked ? 'border-neon-yellow bg-neon-yellow/10 text-neon-yellow' : 'border-gray-800 bg-black/40 text-gray-700'}`} title={ach.title + ": " + ach.description}>
+                        <button
+                          key={ach.id}
+                          className={`aspect-square flex items-center justify-center rounded border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-neon-blue ${ach.unlocked ? 'border-neon-yellow bg-neon-yellow/10 text-neon-yellow' : 'border-gray-800 bg-black/40 text-gray-700'}`}
+                          title={ach.title + ": " + ach.description}
+                          aria-label={`${ach.title}: ${ach.description} (${ach.unlocked ? 'Unlocked' : 'Locked'})`}
+                        >
                             <Trophy size={20} />
-                        </div>
+                        </button>
                     ))}
                 </div>
             </div>
@@ -142,7 +148,12 @@ const Dashboard: React.FC<DashboardProps> = ({ beasts, coins, leaderboard, train
         <div className="lg:col-span-2">
             <div className="flex justify-between items-end mb-4 border-b border-gray-800 pb-2">
                 <h2 className="text-xl text-white font-mono tracking-wider">RECENT ACQUISITIONS</h2>
-                <span className="text-xs text-neon-blue cursor-pointer hover:underline">VIEW ALL</span>
+                <button
+                  className="text-xs text-neon-blue cursor-pointer hover:underline bg-transparent border-none p-0 focus:outline-none focus:ring-2 focus:ring-neon-blue rounded px-1"
+                  aria-label="View all recent acquisitions"
+                >
+                  VIEW ALL
+                </button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {beasts.slice(-4).reverse().map(b => <BeastCard key={b.id} beast={b} small />)}
