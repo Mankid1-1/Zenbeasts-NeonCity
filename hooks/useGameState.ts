@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { ZenBeast, LeaderboardEntry, GymLeader, BattleResult, TrainerPerk, Achievement, Notification, BeastClass, Rarity, Wallet, Chain, Quest } from '../types';
 import { INITIAL_ZEN_COINS, INITIAL_LEADERBOARD, INITIAL_MARKET_LISTINGS, TRAINER_PERKS, LEVEL_THRESHOLDS, BASE_MINT_PRICE, ACHIEVEMENTS_LIST, TOKENOMICS, DAILY_CONTRACTS, STAKING_RATES, GENESIS_MULTIPLIER, BREEDING_COST, EVOLUTION_COST } from '../constants';
 import { generateZenBeast, breedZenBeasts, simulateBattle, evolveZenBeast } from '../services/geminiService';
-import { loadState, saveState, generateUUID } from '../utils';
+import { loadState, saveState, generateUUID, sanitizeZenBeast } from '../utils';
 import { connectWalletService, simulateTransaction, bridgeOffChainToOnChain, estimateGas } from '../services/web3';
 import { useDebounce } from './useDebounce';
 
@@ -31,20 +31,14 @@ export const useGameState = () => {
     let loaded = loadState<ZenBeast[]>(KEYS.BEASTS, []);
     if (!Array.isArray(loaded)) loaded = []; // Ensure it's an array
     
-    return loaded.map(b => ({
-      ...b,
-      stats: b.stats || { attack: 10, defense: 10, speed: 10, zen: 10 },
-    }));
+    return loaded.map(sanitizeZenBeast);
   });
 
   const [marketListings, setMarketListings] = useState<ZenBeast[]>(() => {
       let loaded = loadState<ZenBeast[]>(KEYS.MARKET, INITIAL_MARKET_LISTINGS);
       if (!Array.isArray(loaded)) loaded = INITIAL_MARKET_LISTINGS;
 
-      return loaded.map(b => ({
-        ...b,
-        stats: b.stats || { attack: 10, defense: 10, speed: 10, zen: 10 },
-      }));
+      return loaded.map(sanitizeZenBeast);
   });
   
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>(() => loadState(KEYS.LEADERBOARD, INITIAL_LEADERBOARD));

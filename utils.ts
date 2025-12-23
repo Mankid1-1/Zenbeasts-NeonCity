@@ -58,10 +58,10 @@ export const sanitizeZenBeast = (data: any): ZenBeast => {
 
   const defaultStats = { attack: 10, defense: 10, speed: 10, zen: 10 };
   const stats = data.stats && typeof data.stats === 'object' ? {
-    attack: typeof data.stats.attack === 'number' ? data.stats.attack : defaultStats.attack,
-    defense: typeof data.stats.defense === 'number' ? data.stats.defense : defaultStats.defense,
-    speed: typeof data.stats.speed === 'number' ? data.stats.speed : defaultStats.speed,
-    zen: typeof data.stats.zen === 'number' ? data.stats.zen : defaultStats.zen,
+    attack: typeof data.stats.attack === 'number' && data.stats.attack >= 0 ? data.stats.attack : defaultStats.attack,
+    defense: typeof data.stats.defense === 'number' && data.stats.defense >= 0 ? data.stats.defense : defaultStats.defense,
+    speed: typeof data.stats.speed === 'number' && data.stats.speed >= 0 ? data.stats.speed : defaultStats.speed,
+    zen: typeof data.stats.zen === 'number' && data.stats.zen >= 0 ? data.stats.zen : defaultStats.zen,
   } : defaultStats;
 
   const validClasses = Object.values(BeastClass);
@@ -76,20 +76,20 @@ export const sanitizeZenBeast = (data: any): ZenBeast => {
     description: typeof data.description === 'string' ? data.description : 'A mysterious creature.',
     class: beastClass,
     rarity: rarity,
-    level: typeof data.level === 'number' ? data.level : 1,
-    exp: typeof data.exp === 'number' ? data.exp : 0,
+    level: typeof data.level === 'number' && data.level >= 1 ? data.level : 1,
+    exp: typeof data.exp === 'number' && data.exp >= 0 ? data.exp : 0,
     stats: stats,
     traits: Array.isArray(data.traits) ? data.traits : [],
     imageUrl: typeof data.imageUrl === 'string' ? data.imageUrl : 'https://via.placeholder.com/400',
-    generation: typeof data.generation === 'number' ? data.generation : 0,
+    generation: typeof data.generation === 'number' && data.generation >= 0 ? data.generation : 0,
     obtainedAt: typeof data.obtainedAt === 'number' ? data.obtainedAt : Date.now(),
     isStaked: !!data.isStaked,
     stakingStart: typeof data.stakingStart === 'number' ? data.stakingStart : undefined,
-    accumulatedRewards: typeof data.accumulatedRewards === 'number' ? data.accumulatedRewards : undefined,
+    accumulatedRewards: typeof data.accumulatedRewards === 'number' && data.accumulatedRewards >= 0 ? data.accumulatedRewards : undefined,
     isSoulbound: !!data.isSoulbound,
     isOnChain: !!data.isOnChain,
     ownerId: typeof data.ownerId === 'string' ? data.ownerId : 'player',
-    price: typeof data.price === 'number' ? data.price : undefined,
+    price: (typeof data.price === 'number' && data.price > 0) ? data.price : undefined,
     originalOwner: typeof data.originalOwner === 'string' ? data.originalOwner : undefined,
   };
 };
