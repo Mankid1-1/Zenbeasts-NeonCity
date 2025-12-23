@@ -44,7 +44,22 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
     };
 
     const execute = () => {
-        const cmd = command.trim();
+        const cmd = command.tri sentinel-fix-log-redaction-3169484012800439969
+        const cmdLower = cmd.toLowerCase();
+
+        // Security: Redact API keys in logs if setting them
+        if (cmdLower.startsWith('set ')) {
+             const parts = cmd.split(' ');
+             const safeParts = parts.map((p, i) => i >= 2 ? '****************' : p);
+             setLogs(prev => [...prev, `> ${safeParts.join(' ')}`]);
+        } else {
+             setLogs(prev => [...prev, `> ${cmd}`]);
+        }
+
+        const parts = cmdLower.split(' ');
+        const baseCmd = parts[0];
+        const arg = parts.slice(1).join(' ');
+
         // Redact sensitive commands from logs
         let logCmd = cmd;
 
@@ -67,7 +82,7 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
         // Arguments might be multi-word for some commands (not currently used but good practice)
         // For 'set', partsRaw[1] is provider (case-insensitive usually ok, but we match lower),
         // partsRaw[2] is the KEY (must be case-preserved).
-        const arg = partsRaw.slice(1).join(' ').toLowerCase(); // For non-sensitive commands like 'add coins'
+        const arg = partsRaw.slice(1).join(' ').toLowerCase(); // For non-sensitive commands like 'add coin
 
         switch(baseCmd) {
             case 'add':
@@ -79,7 +94,7 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
             case 'spawn':
                 onAddBeast();
                 setLogs(prev => [...prev, '>> Spawned Random Beast']);
-                break;
+                brea
             case 'levelup':
                 onLevelUp();
                 setLogs(prev => [...prev, '>> Trainer Level Increased']);
