@@ -44,28 +44,11 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
     };
 
     const execute = () => {
-        const cmd = command.tri sentinel-fix-log-redaction-3169484012800439969
-        const cmdLower = cmd.toLowerCase();
-
-        // Security: Redact API keys in logs if setting them
-        if (cmdLower.startsWith('set ')) {
-             const parts = cmd.split(' ');
-             const safeParts = parts.map((p, i) => i >= 2 ? '****************' : p);
-             setLogs(prev => [...prev, `> ${safeParts.join(' ')}`]);
-        } else {
-             setLogs(prev => [...prev, `> ${cmd}`]);
-        }
-
-        const parts = cmdLower.split(' ');
-        const baseCmd = parts[0];
-        const arg = parts.slice(1).join(' ');
-
-        // Redact sensitive commands from logs
-        let logCmd = cmd;
+        let logCmd = command;
 
         // Regex to match "set" followed by whitespace, then "gemini" or "stability", then anything
         const sensitiveRegex = /^set\s+(gemini|stability)\s+(.+)$/i;
-        const match = cmd.match(sensitiveRegex);
+        const match = command.match(sensitiveRegex);
 
         if (match) {
             // match[1] is the provider (gemini/stability), match[2] is the key
@@ -76,7 +59,7 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
 
         // Normalize for execution: collapse multiple spaces
         // SECURITY FIX: We must NOT lowercase the arguments as API keys are case-sensitive!
-        const partsRaw = cmd.split(/\s+/);
+        const partsRaw = command.split(/\s+/);
         const baseCmd = partsRaw[0].toLowerCase();
 
         // Arguments might be multi-word for some commands (not currently used but good practice)
@@ -94,7 +77,7 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
             case 'spawn':
                 onAddBeast();
                 setLogs(prev => [...prev, '>> Spawned Random Beast']);
-                brea
+                break;
             case 'levelup':
                 onLevelUp();
                 setLogs(prev => [...prev, '>> Trainer Level Increased']);
