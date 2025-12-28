@@ -51,6 +51,22 @@ export const generateUUID = (): string => {
   });
 };
 
+/**
+ * SECURITY: Generate cryptographically secure hex strings
+ * Uses crypto.getRandomValues instead of Math.random
+ */
+export const generateSecureHex = (length: number): string => {
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    return Array.from(array)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+  // Fallback for environments without crypto
+  return Array.from({ length }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('');
+};
+
 export const sanitizeZenBeast = (data: any): ZenBeast => {
   if (!data || typeof data !== 'object') {
     data = {};

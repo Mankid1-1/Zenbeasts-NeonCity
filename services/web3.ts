@@ -1,15 +1,23 @@
 
 import { Chain, Wallet } from '../types';
 import { TOKENOMICS } from '../constants';
+import { generateSecureHex } from '../utils';
 
 // Simulated latency to mimic blockchain finality
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const connectWalletService = async (chain: Chain): Promise<Wallet> => {
     await delay(1000); // Simulate connection handshake
-    const address = chain === 'solana' 
-        ? 'Sol' + Math.random().toString(36).substring(2, 10) 
-        : '0x' + Math.random().toString(36).substring(2, 40);
+
+    let address = '';
+    if (chain === 'solana') {
+        // Mock Solana address: 'Sol' + 8 hex chars (4 bytes) to match original length approx
+        // Original was Math.random().toString(36).substring(2, 10) -> 8 chars
+        address = 'Sol' + generateSecureHex(4);
+    } else {
+        // Mock EVM address: '0x' + 40 hex chars (20 bytes)
+        address = '0x' + generateSecureHex(20);
+    }
     
     return {
         address,
