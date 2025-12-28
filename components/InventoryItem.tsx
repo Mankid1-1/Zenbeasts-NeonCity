@@ -37,7 +37,7 @@ const InventoryItem: React.FC<InventoryItemProps> = React.memo(({
 
   return (
       <div className="relative group perspective-1000">
-          <BeastCard beast={beast} />
+          <BeastCard beast={beast} interactive={false} />
 
           {/* Overlay Actions */}
           <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center space-y-3 z-20">
