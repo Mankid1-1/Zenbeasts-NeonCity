@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Terminal, Home, Box, Dna, Sword, Coins, User, Wallet as WalletIcon, Map, Gift, LandPlot } from 'lucide-react';
+import { Terminal, Home, Box, Dna, Sword, Coins, User, Wallet as WalletIcon, Map, Gift, LandPlot, Menu, X } from 'lucide-react';
 import { LEVEL_THRESHOLDS } from '../constants';
 import { CyberToast } from './common/CyberComponents';
 import { Notification, Wallet, Chain, Quest } from '../types';
@@ -21,12 +21,13 @@ interface LayoutProps {
   onClaimQuest: (id: string) => void;
 }
 
-const NavItem = ({ to, icon, label }: { to: string, icon: React.ReactNode, label: string }) => {
+const NavItem = ({ to, icon, label, onClick }: { to: string, icon: React.ReactNode, label: string, onClick?: () => void }) => {
     const location = useLocation();
     const isActive = location.pathname === to;
     return (
         <Link 
             to={to} 
+            onClick={onClick}
             className={`
                 flex items-center p-3 rounded-md transition-all duration-300 group border-l-2
                 ${isActive 
@@ -36,7 +37,7 @@ const NavItem = ({ to, icon, label }: { to: string, icon: React.ReactNode, label
             aria-label={label}
         >
             <span className={`${isActive ? 'text-neon-pink' : 'text-gray-500 group-hover:text-white transition-colors'}`}>{icon}</span>
-            <span className="hidden md:block ml-3 font-mono text-sm tracking-widest">{label}</span>
+            <span className="ml-3 font-mono text-sm tracking-widest">{label}</span>
         </Link>
     )
 }
@@ -48,40 +49,63 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
 
   const [isWalletMenuOpen, setIsWalletMenuOpen] = useState(false);
   const [showQuestLog, setShowQuestLog] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const pendingClaims = quests.filter(q => q.completed && !q.claimed).length;
 
   return (
-    <div className="flex h-screen bg-[#050510] text-gray-200 font-sans overflow-hidden crt relative selection:bg-neon-pink selection:text-white">
+    <div className="flex flex-col md:flex-row h-screen bg-[#050510] text-gray-200 font-sans overflow-hidden crt relative selection:bg-neon-pink selection:text-white">
         {/* Scanline Overlay */}
         <div className="pointer-events-none fixed inset-0 z-50 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[size:100%_3px,3px_100%]"></div>
 
-        {/* Sidebar */}
-        <div className="w-16 md:w-64 bg-slate-900/90 border-r border-slate-800 flex flex-col justify-between z-40 backdrop-blur-md transition-all duration-300">
-          <div>
-            <div className="p-4 md:p-6 flex items-center justify-center md:justify-start border-b border-slate-800 bg-black/20">
-                <Terminal className="text-neon-pink w-6 h-6 md:w-8 md:h-8 md:mr-3 animate-pulse flex-shrink-0" />
-                <h1 className="hidden md:block text-2xl font-mono font-bold text-white tracking-widest leading-none">
+        {/* Mobile Header */}
+        <div className="md:hidden flex items-center justify-between p-4 bg-slate-900 border-b border-slate-800 z-50">
+            <div className="flex items-center">
+                <Terminal className="text-neon-pink w-6 h-6 mr-2 animate-pulse" />
+                <h1 className="text-xl font-mono font-bold text-white tracking-widest leading-none">
+                    ZEN<span className="text-neon-pink">BEASTS</span>
+                </h1>
+            </div>
+            <div className="flex items-center gap-4">
+                 <div className="flex items-center text-neon-yellow font-bold font-mono text-xs">
+                    <Coins size={14} className="mr-1"/>
+                    {userCoins.toLocaleString()}
+                 </div>
+                 <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white">
+                     {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                 </button>
+            </div>
+        </div>
+
+        {/* Sidebar / Mobile Menu */}
+        <div className={`
+            fixed inset-0 top-[60px] md:top-0 bg-slate-900/95 md:bg-slate-900/90 md:relative md:w-64 border-r border-slate-800 z-40 backdrop-blur-md transition-transform duration-300 flex flex-col justify-between
+            ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}>
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <div className="hidden md:flex p-6 items-center justify-start border-b border-slate-800 bg-black/20">
+                <Terminal className="text-neon-pink w-8 h-8 mr-3 animate-pulse flex-shrink-0" />
+                <h1 className="text-2xl font-mono font-bold text-white tracking-widest leading-none">
                     ZEN<span className="text-neon-pink text-3xl">BEASTS</span>
                 </h1>
             </div>
             
-            <nav className="mt-8 space-y-2 px-2 overflow-y-auto max-h-[50vh] custom-scrollbar">
-                <NavItem to="/" icon={<Map size={20} />} label="NEON CITY" />
-                <NavItem to="/dashboard" icon={<Home size={20} />} label="COMMAND HQ" />
-                <NavItem to="/inventory" icon={<Box size={20} />} label="ARMORY" />
-                <NavItem to="/breeding" icon={<Dna size={20} />} label="LAB" />
-                <NavItem to="/battle" icon={<Sword size={20} />} label="ARENA" />
-                <NavItem to="/market" icon={<Coins size={20} />} label="MARKET" />
-                <NavItem to="/bank" icon={<LandPlot size={20} />} label="NEURAL BANK" />
+            <nav className="mt-4 md:mt-8 space-y-2 px-2">
+                <NavItem to="/" icon={<Map size={20} />} label="NEON CITY" onClick={() => setIsMobileMenuOpen(false)} />
+                <NavItem to="/dashboard" icon={<Home size={20} />} label="COMMAND HQ" onClick={() => setIsMobileMenuOpen(false)} />
+                <NavItem to="/inventory" icon={<Box size={20} />} label="ARMORY" onClick={() => setIsMobileMenuOpen(false)} />
+                <NavItem to="/breeding" icon={<Dna size={20} />} label="LAB" onClick={() => setIsMobileMenuOpen(false)} />
+                <NavItem to="/battle" icon={<Sword size={20} />} label="ARENA" onClick={() => setIsMobileMenuOpen(false)} />
+                <NavItem to="/market" icon={<Coins size={20} />} label="MARKET" onClick={() => setIsMobileMenuOpen(false)} />
+                <NavItem to="/bank" icon={<LandPlot size={20} />} label="NEURAL BANK" onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
           </div>
 
-          <div className="p-2 md:p-4 border-t border-slate-800 bg-black/40">
+          <div className="p-4 border-t border-slate-800 bg-black/40">
              <div className="flex flex-col space-y-3">
-                 <button onClick={() => setShowQuestLog(true)} className="flex items-center justify-between w-full bg-slate-800 hover:bg-slate-700 p-2 rounded border border-gray-600 transition-colors group" aria-label="Quest Log">
+                 <button onClick={() => { setShowQuestLog(true); setIsMobileMenuOpen(false); }} className="flex items-center justify-between w-full bg-slate-800 hover:bg-slate-700 p-2 rounded border border-gray-600 transition-colors group" aria-label="Quest Log">
                     <div className="flex items-center text-neon-yellow">
-                        <Gift size={16} className="mr-2 group-hover:animate-bounce"/> <span className="hidden md:inline font-mono text-xs">QUESTS</span>
+                        <Gift size={16} className="mr-2 group-hover:animate-bounce"/> <span className="font-mono text-xs">QUESTS</span>
                     </div>
                     {pendingClaims > 0 && <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full animate-pulse">{pendingClaims}</span>}
                  </button>
@@ -90,8 +114,8 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
                  <div className="relative">
                      {!wallet.isConnected ? (
                          <button onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)} className="w-full flex items-center justify-center md:justify-start bg-blue-600/20 text-blue-400 border border-blue-500/50 p-2 rounded hover:bg-blue-600/30 transition-colors" aria-label="Connect Wallet">
-                            <WalletIcon size={16} className="md:mr-2" />
-                            <span className="hidden md:inline font-mono text-xs">CONNECT WALLET</span>
+                            <WalletIcon size={16} className="mr-2" />
+                            <span className="font-mono text-xs">CONNECT WALLET</span>
                          </button>
                      ) : (
                          <button className="w-full text-left bg-slate-800/80 p-2 rounded border border-slate-600 cursor-pointer hover:border-neon-green transition-colors" onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)} aria-label="Wallet Menu">
@@ -105,7 +129,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
                      )}
 
                      {isWalletMenuOpen && (
-                         <div className="absolute bottom-full mb-2 left-0 w-60 bg-slate-900 border border-slate-700 p-2 rounded shadow-lg z-50">
+                         <div className="absolute bottom-full mb-2 left-0 w-full bg-slate-900 border border-slate-700 p-2 rounded shadow-lg z-50">
                              {!wallet.isConnected ? (
                                 <>
                                     <div className="text-xs text-gray-400 mb-2 font-mono text-center">SELECT NETWORK</div>
@@ -124,22 +148,22 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
                  </div>
 
                  {/* Trainer Level */}
-                 <div className="bg-slate-800/50 p-1 md:p-2 rounded border border-slate-700">
-                     <div className="flex flex-col md:flex-row justify-between items-center text-xs font-mono mb-1">
+                 <div className="bg-slate-800/50 p-2 rounded border border-slate-700">
+                     <div className="flex justify-between items-center text-xs font-mono mb-1">
                          <div className="flex items-center text-neon-blue">
-                             <User size={12} className="mr-1" /> <span className="hidden md:inline">LVL</span> {trainerLevel}
+                             <User size={12} className="mr-1" /> <span>LVL {trainerLevel}</span>
                          </div>
-                         <span className="text-gray-500 hidden md:inline">{trainerExp}/{nextLevelExp}</span>
+                         <span className="text-gray-500">{trainerExp}/{nextLevelExp}</span>
                      </div>
                      <div className="w-full bg-black h-1 rounded-full overflow-hidden">
                          <div className="h-full bg-neon-blue transition-all duration-1000 shadow-[0_0_5px_#00ffff]" style={{ width: `${Math.min(100, expProgress)}%` }}></div>
                      </div>
                  </div>
 
-                 {/* Soft Currency */}
-                 <div className="flex items-center justify-center md:justify-start space-x-2 text-neon-yellow font-bold font-mono text-xs md:text-lg bg-black/50 p-2 rounded border border-slate-700 shadow-inner">
+                 {/* Soft Currency (Desktop Only - Mobile has it in header) */}
+                 <div className="hidden md:flex items-center justify-start space-x-2 text-neon-yellow font-bold font-mono text-lg bg-black/50 p-2 rounded border border-slate-700 shadow-inner">
                     <Coins size={16} />
-                    <span className="hidden md:inline">{userCoins.toLocaleString()} ZC</span>
+                    <span>{userCoins.toLocaleString()} ZC</span>
                  </div>
              </div>
           </div>
@@ -149,7 +173,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
         <div className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#050510] to-black">
            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,18,20,0.3)_1px,transparent_1px),linear-gradient(90deg,rgba(18,18,20,0.3)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0"></div>
 
-           <div className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 custom-scrollbar">
+           <div className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 custom-scrollbar pb-20 md:pb-6">
               {children}
            </div>
 
