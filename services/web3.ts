@@ -1,6 +1,7 @@
 
 import { Chain, Wallet } from '../types';
 import { TOKENOMICS } from '../constants';
+import { generateSecureHex, generateSecureAlphaNumeric } from '../utils';
 
 // Simulated latency to mimic blockchain finality
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -8,8 +9,8 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export const connectWalletService = async (chain: Chain): Promise<Wallet> => {
     await delay(1000); // Simulate connection handshake
     const address = chain === 'solana' 
-        ? 'Sol' + Math.random().toString(36).substring(2, 10) 
-        : '0x' + Math.random().toString(36).substring(2, 40);
+        ? 'Sol' + generateSecureAlphaNumeric(8)
+        : '0x' + generateSecureHex(40);
     
     return {
         address,
