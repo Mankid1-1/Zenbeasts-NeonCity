@@ -36,6 +36,40 @@ export const formatNumber = (num: number): string => {
 };
 
 /**
+ * SECURITY: Use crypto.getRandomValues for secure hex string generation.
+ * Replaces insecure Math.random().
+ */
+export const generateSecureHex = (length: number): string => {
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const byteLength = Math.ceil(length / 2);
+    const array = new Uint8Array(byteLength);
+    crypto.getRandomValues(array);
+    return Array.from(array)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+      .substring(0, length);
+  }
+  // Fallback for environments without crypto (should be rare now)
+  return Array(length).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+};
+
+/**
+ * SECURITY: Use crypto.getRandomValues for secure alphanumeric string generation.
+ */
+export const generateSecureAlphaNumeric = (length: number): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    return Array.from(array)
+      .map(b => chars[b % chars.length])
+      .join('');
+  }
+  // Fallback
+  return Array(length).fill(0).map(() => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+};
+
+/**
  * SECURITY: Use crypto.randomUUID for secure ID generation instead of Math.random
  * Fallback for environments where crypto is not available (though widely supported now)
  */
