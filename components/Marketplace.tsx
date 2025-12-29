@@ -98,7 +98,25 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
                 onSelect={setSelectedBeast}
             />
         ))}
-        {filteredListings.length === 0 && <div className="col-span-full text-center text-gray-600 py-20 font-mono">NO LISTINGS FOUND</div>}
+        {filteredListings.length === 0 && (
+            <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-500 font-mono">
+                <Search size={48} className="mb-4 opacity-20" />
+                <p className="mb-4">NO LISTINGS FOUND</p>
+                {(searchTerm || selectedRarity || viewMode !== 'all') && (
+                    <button
+                        onClick={() => {
+                            setSearchTerm('');
+                            setSelectedRarity('');
+                            setViewMode('all');
+                        }}
+                        type="button"
+                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-neon-blue border border-neon-blue/30 rounded transition-colors text-xs tracking-widest hover:shadow-[0_0_10px_rgba(0,255,255,0.2)]"
+                    >
+                        CLEAR FILTERS
+                    </button>
+                )}
+            </div>
+        )}
       </div>
 
       {selectedBeast && (

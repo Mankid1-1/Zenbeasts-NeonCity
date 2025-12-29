@@ -113,14 +113,20 @@ const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboar
                          <h3 className="text-white font-mono text-sm mb-4 border-b border-gray-700 pb-2">AVAILABLE FIGHTERS</h3>
                          <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
                              {unstakedBeasts.map(b => (
-                                 <div key={b.id} onClick={() => setSelectedBeast(b)}
-                                    className={`p-2 border cursor-pointer flex items-center gap-3 ${selectedBeast?.id === b.id ? 'border-neon-green bg-neon-green/10' : 'border-gray-700 bg-black/40'}`}>
-                                    <img src={b.imageUrl} className="w-10 h-10 object-cover border border-gray-600" />
+                                 <button
+                                    key={b.id}
+                                    type="button"
+                                    onClick={() => setSelectedBeast(b)}
+                                    className={`w-full text-left p-2 border cursor-pointer flex items-center gap-3 transition-colors focus:outline-none focus:ring-2 focus:ring-neon-blue ${selectedBeast?.id === b.id ? 'border-neon-green bg-neon-green/10' : 'border-gray-700 bg-black/40 hover:bg-slate-800'}`}
+                                    aria-label={`Select ${b.name}, Level ${b.level}`}
+                                    aria-pressed={selectedBeast?.id === b.id}
+                                 >
+                                    <img src={b.imageUrl} alt="" className="w-10 h-10 object-cover border border-gray-600" />
                                     <div>
                                         <div className="font-bold text-sm truncate w-32">{b.name}</div>
                                         <div className="text-xs text-gray-400 font-mono">Lvl {b.level}</div>
                                     </div>
-                                 </div>
+                                 </button>
                              ))}
                          </div>
                     </div>
