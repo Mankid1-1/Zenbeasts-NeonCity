@@ -132,6 +132,25 @@ export const generateUUID = (): string => {
 };
 
 /**
+ sentinel/fix-weak-randomness-web3-11913555222010832222
+ * SECURITY: Generate a cryptographically secure hex string of a given byte length.
+ * Used for wallet address simulation and other security-sensitive mocks.
+ */
+export const generateSecureHex = (byteLength: number): string => {
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const bytes = new Uint8Array(byteLength);
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Fallback for environments without crypto (not recommended for production security)
+  console.warn("Using weak randomness for hex generation");
+  let res = '';
+  for (let i = 0; i < byteLength; i++) {
+    res += Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+  }
+  return res;
+
  * SECURITY: Generate a cryptographically secure hex string.
  */
 export const generateSecureHex = (length: number): string => {
@@ -169,6 +188,7 @@ export const generateSecureAlphaNumeric = (length: number): string => {
     result += charset[array[i] % charset.length];
   }
   return result;
+ ZenBeasts
 };
 
 export const sanitizeZenBeast = (data: any): ZenBeast => {
