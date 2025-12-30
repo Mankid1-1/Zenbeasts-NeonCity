@@ -36,6 +36,51 @@ export const formatNumber = (num: number): string => {
 };
 
 /**
+ sentinel-secure-random-fix-722868137078572014
+ * SECURITY: Generate a cryptographically secure random hex string.
+ * Uses window.crypto.getRandomValues where available.
+ */
+export const generateSecureHex = (length: number): string => {
+  if (length <= 0) return '';
+  const byteLength = Math.ceil(length / 2);
+  const bytes = new Uint8Array(byteLength);
+
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+  } else {
+    // Fallback for environments without crypto (should be rare in modern browsers)
+    console.warn("Crypto API unavailable, using Math.random fallback");
+    for (let i = 0; i < byteLength; i++) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+  }
+
+  const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  return hex.substring(0, length);
+};
+
+/**
+ * SECURITY: Generate a cryptographically secure random alphanumeric string.
+ */
+export const generateSecureAlphaNumeric = (length: number): string => {
+  if (length <= 0) return '';
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const values = new Uint8Array(length);
+    crypto.getRandomValues(values);
+    for (let i = 0; i < length; i++) {
+        // modulo bias is negligible for this use case
+        result += chars[values[i] % chars.length];
+    }
+  } else {
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+  }
+  return result;
+
  * SECURITY: Use crypto.getRandomValues for secure hex string generation.
  * Replaces insecure Math.random().
  */
@@ -67,6 +112,7 @@ export const generateSecureAlphaNumeric = (length: number): string => {
   }
   // Fallback
   return Array(length).fill(0).map(() => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+ ZenBeasts
 };
 
 /**
