@@ -218,6 +218,12 @@ export const useGameState = () => {
   }, [addNotification]);
 
   const claimEarnings = useCallback(async (amountZC: number) => {
+      // SECURITY: Validate amount to prevent NaN/Infinity or negative exploits
+      if (!Number.isFinite(amountZC) || amountZC <= 0) {
+          addNotification("Invalid Amount", "Please enter a valid positive number.", 'error');
+          return;
+      }
+
       if (!walletRef.current.isConnected) {
           addNotification("Wallet Required", "Connect wallet to claim earnings.", 'warning');
           return;
