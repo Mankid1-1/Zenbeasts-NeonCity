@@ -1,4 +1,5 @@
 
+ sentinel-secure-random-fix-722868137078572014
 import { describe, it, expect } from 'vitest';
 import { generateSecureHex, generateSecureAlphaNumeric } from '../utils';
 import { connectWalletService } from '../services/web3';
@@ -22,6 +23,45 @@ describe('Crypto Utilities', () => {
         const hex1 = generateSecureHex(16);
         const hex2 = generateSecureHex(16);
         expect(hex1).not.toBe(hex2);
+
+import { describe, it, expect, vi } from 'vitest';
+import { generateSecureHex, generateSecureAlphaNumeric } from '../utils';
+import { connectWalletService } from '../services/web3';
+
+// Mock crypto if not available (though it should be in Node/Vitest env)
+if (!global.crypto) {
+    Object.defineProperty(global, 'crypto', {
+        value: {
+            getRandomValues: (arr: Uint8Array) => {
+                for (let i = 0; i < arr.length; i++) {
+                    arr[i] = Math.floor(Math.random() * 256);
+                }
+                return arr;
+            }
+        }
+    });
+}
+
+describe('Crypto Security Utils', () => {
+    it('generateSecureHex should produce a string of correct length', () => {
+        const length = 40;
+        const result = generateSecureHex(length);
+        expect(result).toHaveLength(length);
+        expect(result).toMatch(/^[0-9a-f]+$/);
+    });
+
+    it('generateSecureHex should produce different results', () => {
+        const res1 = generateSecureHex(10);
+        const res2 = generateSecureHex(10);
+        expect(res1).not.toEqual(res2);
+    });
+
+    it('generateSecureAlphaNumeric should produce string of correct length', () => {
+        const length = 8;
+        const result = generateSecureAlphaNumeric(length);
+        expect(result).toHaveLength(length);
+        expect(result).toMatch(/^[a-zA-Z0-9]+$/);
+ ZenBeasts
     });
 });
 
@@ -32,5 +72,14 @@ describe('Web3 Service Security', () => {
 
         const solWallet = await connectWalletService('solana');
         expect(solWallet.address).toMatch(/^Sol[a-zA-Z0-9]{8}$/);
+    it('connectWalletService should generate secure-looking addresses for Ethereum', async () => {
+        const wallet = await connectWalletService('ethereum');
+        expect(wallet.address).toMatch(/^0x[0-9a-f]{40}$/);
+    });
+
+    it('connectWalletService should generate secure-looking addresses for Solana', async () => {
+        const wallet = await connectWalletService('solana');
+        // Expect 'Sol' + 8 alphanumeric chars
+        expect(wallet.address).toMatch(/^Sol[a-zA-Z0-9]{8}$/);
     });
 });

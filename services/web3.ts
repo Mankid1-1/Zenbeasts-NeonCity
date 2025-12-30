@@ -8,6 +8,8 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const connectWalletService = async (chain: Chain): Promise<Wallet> => {
     await delay(1000); // Simulate connection handshake
+
+    // SECURITY: Use cryptographically secure random generation for simulated addresses
     const address = chain === 'solana' 
         ? 'Sol' + generateSecureAlphaNumeric(8)
         : '0x' + generateSecureHex(40);
