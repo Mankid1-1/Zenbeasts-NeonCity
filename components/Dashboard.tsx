@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ZenBeast, LeaderboardEntry, TrainerPerk, Achievement } from '../types';
 import { Coins, Zap, Box, Activity, Trophy, CircuitBoard, Unlock, Star, ArrowRight } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
@@ -19,8 +19,11 @@ interface DashboardProps {
   onClaim: (amount: number) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ beasts, coins, leaderboard, trainerLevel, trainerExp, activePerks, achievements, coinHistory, onClaim }) => {
-  const totalPower = beasts.reduce((acc, b) => acc + b.stats.attack + b.stats.defense + b.stats.speed + b.stats.zen, 0);
+// Optimization: Dashboard is expensive to render due to charts and lists.
+// Memoizing it prevents re-renders when parent state (like inventory filters or unread logs) changes but dashboard props remain stable.
+const Dashboard = React.memo(({ beasts, coins, leaderboard, trainerLevel, trainerExp, activePerks, achievements, coinHistory, onClaim }: DashboardProps) => {
+  // Optimization: Prevent O(N) calculation on every render
+  const totalPower = useMemo(() => beasts.reduce((acc, b) => acc + b.stats.attack + b.stats.defense + b.stats.speed + b.stats.zen, 0), [beasts]);
   const [claimAmount, setClaimAmount] = useState<string>('1000');
 
   return (
@@ -163,6 +166,6 @@ const Dashboard: React.FC<DashboardProps> = ({ beasts, coins, leaderboard, train
       </div>
     </div>
   );
-};
+});
 
 export default Dashboard;
