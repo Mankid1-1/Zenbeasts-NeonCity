@@ -12,3 +12,8 @@
 **Vulnerability:** The marketplace listing logic in `useGameState.ts` did not validate that the listing price was positive. This allowed a user to list an item for a negative price (e.g., -1000). If another user (or the same user) bought it, the transaction logic `buyerBalance - price` would result in `buyerBalance - (-1000) = buyerBalance + 1000`, effectively printing infinite currency.
 **Learning:** Always validate numerical inputs, especially those related to financial transactions or game economy. Do not assume UI constraints (if any) prevent malicious API calls or internal logic execution.
 **Prevention:** Added explicit `if (price <= 0)` validation in the `handleListForSale` function in the core game state hook.
+
+## 2025-05-19 - [Insecure Randomness in Key Generation]
+**Vulnerability:** `services/web3.ts` was using `Math.random()` to generate simulated wallet addresses. This produces predictable values and establishes insecure patterns for security-critical identifiers.
+**Learning:** `Math.random()` is not cryptographically secure. Relying on it for ID or key generation, even in simulations, risks collisions and predictability.
+**Prevention:** Implemented `generateSecureHex` and `generateSecureAlphaNumeric` in `utils.ts` using `crypto.getRandomValues` and enforced their usage.

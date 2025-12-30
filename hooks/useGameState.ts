@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { ZenBeast, LeaderboardEntry, GymLeader, BattleResult, TrainerPerk, Achievement, Notification, BeastClass, Rarity, Wallet, Chain, Quest } from '../types';
 import { INITIAL_ZEN_COINS, INITIAL_LEADERBOARD, INITIAL_MARKET_LISTINGS, TRAINER_PERKS, LEVEL_THRESHOLDS, BASE_MINT_PRICE, ACHIEVEMENTS_LIST, TOKENOMICS, DAILY_CONTRACTS, STAKING_RATES, GENESIS_MULTIPLIER, BREEDING_COST, EVOLUTION_COST } from '../constants';
 import { generateZenBeast, breedZenBeasts, simulateBattle, evolveZenBeast } from '../services/geminiService';
@@ -158,7 +158,8 @@ export const useGameState = () => {
   useEffect(() => saveState(KEYS.WALLET, debouncedWallet), [debouncedWallet]);
   useEffect(() => saveState(KEYS.QUESTS, debouncedQuests), [debouncedQuests]);
 
-  const activePerks = TRAINER_PERKS.filter(p => p.unlockLevel <= trainerLevel);
+  // Optimization: Memoize activePerks to prevent new array reference on every render, allowing children like Dashboard to skip re-renders.
+  const activePerks = useMemo(() => TRAINER_PERKS.filter(p => p.unlockLevel <= trainerLevel), [trainerLevel]);
 
 
   const updateQuestProgress = useCallback((type: string, amount: number) => {
@@ -217,6 +218,12 @@ export const useGameState = () => {
   }, [addNotification]);
 
   const claimEarnings = useCallback(async (amountZC: number) => {
+      // SECURITY: Validate amount to prevent NaN/Infinity or negative exploits
+      if (!Number.isFinite(amountZC) || amountZC <= 0) {
+          addNotification("Invalid Amount", "Please enter a valid positive number.", 'error');
+          return;
+      }
+
       if (!walletRef.current.isConnected) {
           addNotification("Wallet Required", "Connect wallet to claim earnings.", 'warning');
           return;
@@ -530,7 +537,8 @@ export const useGameState = () => {
   }, [addNotification]);
 
   // Debug methods
-  const debugMethods = {
+  // Optimization: Memoize debug methods to prevent DebugConsole from re-rendering unnecessarily
+  const debugMethods = useMemo(() => ({
       addCoins: (amount: number) => setCoins(c => c + amount),
       addBeast: async () => { try { await handleMint(); } catch(e){} },
       levelUp: () => setTrainerLevel(l => l + 1),
@@ -538,7 +546,7 @@ export const useGameState = () => {
           localStorage.clear();
           window.location.reload();
       }
-  };
+  }), [handleMint]);
 
   return {
     coins,

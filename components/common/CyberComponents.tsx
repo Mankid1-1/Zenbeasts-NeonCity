@@ -34,9 +34,13 @@ export const CyberButton: React.FC<CyberButtonProps> = ({ children, variant = 'p
     };
 
     return (
-        <button className={`${baseStyles} ${variants[variant]} ${className}`} {...props}>
+        <button
+            className={`${baseStyles} ${variants[variant]} ${className}`}
+            aria-busy={loading}
+            {...props}
+        >
             <span className="relative z-10 flex items-center justify-center gap-2">
-                {loading && <span className="animate-spin">⟳</span>}
+                {loading && <span className="animate-spin" aria-hidden="true">⟳</span>}
                 {children}
             </span>
             {!loading && <div className="absolute inset-0 bg-current opacity-0 group-hover:opacity-10 transition-opacity z-0"></div>}
