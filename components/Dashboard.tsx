@@ -19,12 +19,20 @@ interface DashboardProps {
   onClaim: (amount: number) => void;
 }
 
+ bolt-dashboard-optimization-5078974167758471672
+// Optimization: Dashboard is expensive to render due to charts and lists.
+// Memoizing it prevents re-renders when parent state (like inventory filters or unread logs) changes but dashboard props remain stable.
+const Dashboard = React.memo(({ beasts, coins, leaderboard, trainerLevel, trainerExp, activePerks, achievements, coinHistory, onClaim }: DashboardProps) => {
+  // Optimization: Prevent O(N) calculation on every render
+  const totalPower = useMemo(() => beasts.reduce((acc, b) => acc + b.stats.attack + b.stats.defense + b.stats.speed + b.stats.zen, 0), [beasts]);
+
 const Dashboard: React.FC<DashboardProps> = ({ beasts, coins, leaderboard, trainerLevel, trainerExp, activePerks, achievements, coinHistory, onClaim }) => {
   // Optimization: Memoize totalPower to prevent O(N) recalculation on every render (e.g. when typing in input)
   const totalPower = useMemo(() => {
     return beasts.reduce((acc, b) => acc + b.stats.attack + b.stats.defense + b.stats.speed + b.stats.zen, 0);
   }, [beasts]);
 
+ ZenBeasts
   const [claimAmount, setClaimAmount] = useState<string>('1000');
 
   // Optimization: Memoize derived lists for rendering
@@ -176,7 +184,7 @@ const Dashboard: React.FC<DashboardProps> = ({ beasts, coins, leaderboard, train
       </div>
     </div>
   );
-};
+});
 
 // Optimization: Prevent re-renders when parent (App) re-renders but Dashboard props remain stable
 export default React.memo(Dashboard);
