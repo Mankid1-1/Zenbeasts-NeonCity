@@ -9,3 +9,7 @@
 ## 2024-05-25 - Invisible Focus on Overlays
 **Learning:** Elements hidden with `opacity-0` (like hover overlays) remain keyboard focusable but invisible, confusing users.
 **Action:** Add `focus-within:opacity-100` to the overlay container so it becomes visible when users tab into its interactive children.
+
+## 2025-10-24 - Accessible Toggle Buttons
+**Learning:** Custom toggle groups often lack semantic state indicators, leaving screen reader users unaware of the active selection.
+**Action:** Use `aria-pressed={isActive}` on the buttons to programmatically communicate their state, mirroring visual styling.
