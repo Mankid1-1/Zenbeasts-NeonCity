@@ -51,6 +51,46 @@ export const generateUUID = (): string => {
   });
 };
 
+/**
+ * SECURITY: Generate a cryptographically secure hex string.
+ */
+export const generateSecureHex = (length: number): string => {
+  const byteLength = Math.ceil(length / 2);
+  const array = new Uint8Array(byteLength);
+
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(array);
+  } else {
+    // Fallback for environments without crypto (unlikely)
+    for(let i=0; i<byteLength; i++) array[i] = Math.floor(Math.random() * 256);
+  }
+
+  return Array.from(array)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
+    .substring(0, length);
+};
+
+/**
+ * SECURITY: Generate a cryptographically secure alphanumeric string.
+ */
+export const generateSecureAlphaNumeric = (length: number): string => {
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  const array = new Uint8Array(length);
+
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(array);
+  } else {
+     for(let i=0; i<length; i++) array[i] = Math.floor(Math.random() * 256);
+  }
+
+  for (let i = 0; i < length; i++) {
+    result += charset[array[i] % charset.length];
+  }
+  return result;
+};
+
 export const sanitizeZenBeast = (data: any): ZenBeast => {
   if (!data || typeof data !== 'object') {
     data = {};
