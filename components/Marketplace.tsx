@@ -77,12 +77,16 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
         <div className="flex bg-black p-1 rounded border border-gray-800">
              <button 
                 onClick={() => setViewMode('all')}
+                aria-pressed={viewMode === 'all'}
+                aria-label="Show all listings"
                 className={`px-4 py-1 text-xs font-mono transition-colors ${viewMode === 'all' ? 'bg-neon-yellow text-black font-bold' : 'text-gray-500 hover:text-white'}`}
              >
                  GLOBAL
              </button>
              <button 
                 onClick={() => setViewMode('mine')}
+                aria-pressed={viewMode === 'mine'}
+                aria-label="Show only my listings"
                 className={`px-4 py-1 text-xs font-mono transition-colors flex items-center ${viewMode === 'mine' ? 'bg-neon-yellow text-black font-bold' : 'text-gray-500 hover:text-white'}`}
              >
                  <User size={12} className="mr-1"/> MY LISTINGS
