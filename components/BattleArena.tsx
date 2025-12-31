@@ -38,7 +38,8 @@ const BattleVisuals = ({
                  {activeEffect === 'crit' && !shakePlayer && <div className="absolute -top-10 text-neon-yellow font-black text-2xl animate-bounce">CRITICAL!</div>}
                  <div className="w-32 h-32 md:w-48 md:h-48 relative">
                      <img
-                        src={playerBeast?.imageUrl}
+                        src={playerBeast?.imageUrl || ''}
+                        alt={playerBeast?.name || 'Player Beast'}
                         className={`w-full h-full object-contain filter drop-shadow-[0_0_10px_rgba(57,255,20,0.5)] ${shakePlayer ? 'animate-shake' : 'animate-pulse'}`}
                         alt="Player"
                      />
