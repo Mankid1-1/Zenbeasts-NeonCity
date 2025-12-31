@@ -26,7 +26,9 @@ const NavItem = ({ to, icon, label }: { to: string, icon: React.ReactNode, label
     const isActive = location.pathname === to;
     return (
         <Link 
-            to={to} 
+            to={to}
+            aria-label={label}
+            aria-current={isActive ? 'page' : undefined}
             className={`
                 flex items-center p-3 rounded-md transition-all duration-300 group border-l-2
                 ${isActive 
@@ -79,7 +81,15 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
 
           <div className="p-2 md:p-4 border-t border-slate-800 bg-black/40">
              <div className="flex flex-col space-y-3">
+ palette/improve-navigation-accessibility-12893924475371976220
+                 <button
+                    onClick={() => setShowQuestLog(true)}
+                    aria-label="Quest Log"
+                    className="flex items-center justify-between w-full bg-slate-800 hover:bg-slate-700 p-2 rounded border border-gray-600 transition-colors group"
+                 >
+
                  <button onClick={() => setShowQuestLog(true)} className="flex items-center justify-between w-full bg-slate-800 hover:bg-slate-700 p-2 rounded border border-gray-600 transition-colors group" aria-label="Quest Log">
+ ZenBeasts
                     <div className="flex items-center text-neon-yellow">
                         <Gift size={16} className="mr-2 group-hover:animate-bounce"/> <span className="hidden md:inline font-mono text-xs">QUESTS</span>
                     </div>
@@ -89,12 +99,27 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
                  {/* Wallet Connection */}
                  <div className="relative">
                      {!wallet.isConnected ? (
+ palette/improve-navigation-accessibility-12893924475371976220
+                         <button
+                            onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)}
+                            aria-label="Connect Wallet"
+                            className="w-full flex items-center justify-center md:justify-start bg-blue-600/20 text-blue-400 border border-blue-500/50 p-2 rounded hover:bg-blue-600/30 transition-colors"
+                         >
+
                          <button onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)} className="w-full flex items-center justify-center md:justify-start bg-blue-600/20 text-blue-400 border border-blue-500/50 p-2 rounded hover:bg-blue-600/30 transition-colors" aria-label="Connect Wallet">
+ ZenBeasts
                             <WalletIcon size={16} className="md:mr-2" />
                             <span className="hidden md:inline font-mono text-xs">CONNECT WALLET</span>
                          </button>
                      ) : (
-                         <button className="w-full text-left bg-slate-800/80 p-2 rounded border border-slate-600 cursor-pointer hover:border-neon-green transition-colors" onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)} aria-label="Wallet Menu">
+ palette/improve-navigation-accessibility-12893924475371976220
+                         <button
+                            onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)}
+                            aria-label="Wallet Settings"
+                            className="w-full text-left bg-slate-800/80 p-2 rounded border border-slate-600 cursor-pointer hover:border-neon-green transition-colors"
+                         >
+
+                         <button className="w-full text-left bg-slate-800/80 p-2 rounded border border-slate-600 cursor-pointer hover:border-neon-green transition-colors" onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)} aria-label="Wallet Menu"> ZenBeasts
                              <div className="flex items-center justify-between mb-1">
                                 <span className="text-[10px] text-gray-400 font-mono uppercase">{wallet.chain}</span>
                                 <div className="h-2 w-2 rounded-full bg-neon-green animate-pulse shadow-[0_0_5px_#39ff14]"></div>
