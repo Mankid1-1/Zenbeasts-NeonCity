@@ -11,7 +11,9 @@ interface BattleArenaProps {
   leaderboard: LeaderboardEntry[];
 }
 
-const BattleArena: React.FC<BattleArenaProps> = ({ beasts, onBattle, leaderboard }) => {
+// Optimization: Memoize BattleArena to prevent re-renders when unrelated global state (like coins/wallet) changes.
+// The internal state (battle logs, selection) is preserved, and it only re-renders if beasts or leaderboard updates.
+const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboard }) => {
     const [selectedBeast, setSelectedBeast] = useState<ZenBeast | null>(null);
     const [selectedGymLeader, setSelectedGymLeader] = useState<GymLeader | null>(null);
     const [mode, setMode] = useState<'sparring' | 'gym'>('gym');
@@ -111,14 +113,19 @@ const BattleArena: React.FC<BattleArenaProps> = ({ beasts, onBattle, leaderboard
                          <h3 className="text-white font-mono text-sm mb-4 border-b border-gray-700 pb-2">AVAILABLE FIGHTERS</h3>
                          <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
                              {unstakedBeasts.map(b => (
-                                 <div key={b.id} onClick={() => setSelectedBeast(b)}
-                                    className={`p-2 border cursor-pointer flex items-center gap-3 ${selectedBeast?.id === b.id ? 'border-neon-green bg-neon-green/10' : 'border-gray-700 bg-black/40'}`}>
-                                    <img src={b.imageUrl} className="w-10 h-10 object-cover border border-gray-600" />
+                                 <button
+                                     key={b.id}
+                                     onClick={() => setSelectedBeast(b)}
+                                     type="button"
+                                     aria-pressed={selectedBeast?.id === b.id}
+                                     className={`w-full p-2 border cursor-pointer flex items-center gap-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-neon-green ${selectedBeast?.id === b.id ? 'border-neon-green bg-neon-green/10' : 'border-gray-700 bg-black/40 hover:bg-slate-800'}`}
+                                 >
+                                    <img src={b.imageUrl} alt="" className="w-10 h-10 object-cover border border-gray-600" />
                                     <div>
-                                        <div className="font-bold text-sm truncate w-32">{b.name}</div>
+                                        <div className="font-bold text-sm truncate w-32 text-white">{b.name}</div>
                                         <div className="text-xs text-gray-400 font-mono">Lvl {b.level}</div>
                                     </div>
-                                 </div>
+                                 </button>
                              ))}
                          </div>
                     </div>
@@ -185,7 +192,11 @@ const BattleArena: React.FC<BattleArenaProps> = ({ beasts, onBattle, leaderboard
             ) : null}
 
             {isBattling && (
-                <div className="flex-1 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm z-50 absolute inset-0">
+                <div
+                    role="status"
+                    aria-live="polite"
+                    className="flex-1 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm z-50 absolute inset-0"
+                >
                     <Sword size={64} className="text-neon-pink animate-spin mb-8" />
                     <div className="text-2xl font-mono text-neon-blue animate-pulse">COMPUTING COMBAT LOGIC...</div>
                 </div>
@@ -216,7 +227,11 @@ const BattleArena: React.FC<BattleArenaProps> = ({ beasts, onBattle, leaderboard
                             </div>
                         </div>
 
-                        <div className="bg-black border border-gray-700 p-4 font-mono text-sm h-64 overflow-y-auto custom-scrollbar shadow-inner mb-6">
+                        <div
+                            role="log"
+                            aria-label="Battle Log"
+                            className="bg-black border border-gray-700 p-4 font-mono text-sm h-64 overflow-y-auto custom-scrollbar shadow-inner mb-6"
+                        >
                             {visibleLogs.map((log, i) => (
                                 <div key={i} className="mb-2 border-l-2 border-gray-700 pl-3 animate-fade-in-up">
                                     <span className="text-gray-500 text-xs">TURN_{log.turn} </span>
@@ -252,6 +267,6 @@ const BattleArena: React.FC<BattleArenaProps> = ({ beasts, onBattle, leaderboard
             )}
         </div>
     );
-};
+});
 
 export default BattleArena;

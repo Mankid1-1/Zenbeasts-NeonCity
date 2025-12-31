@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { ZenBeast, Rarity } from '../types';
-import { RARITY_COLORS } from '../constants';
+import { ZenBeast, Rarity } from '../../types';
+import { RARITY_COLORS } from '../../constants';
 import { CircuitBoard, ChevronUp, Lock } from 'lucide-react';
-import { ClassIcon } from './common/CyberComponents';
+import { ClassIcon } from './CyberComponents';
 
 interface BeastCardProps {
   beast: ZenBeast;
@@ -14,7 +14,7 @@ interface BeastCardProps {
 
 // Optimization: Memoize card to prevent re-renders in large lists
 const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onClick, small }) => {
-  // CRITICAL CRASH FIX: Defensive check if beast data is missing or corrupted
+  // Defensive check if beast data is missing or corrupted
   if (!beast || !beast.stats) return null;
   
   // Defensive check for rarity color
