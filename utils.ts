@@ -36,7 +36,6 @@ export const formatNumber = (num: number): string => {
 };
 
 /**
- sentinel-secure-random-fix-722868137078572014
  * SECURITY: Generate a cryptographically secure random hex string.
  * Uses window.crypto.getRandomValues where available.
  */
@@ -61,6 +60,7 @@ export const generateSecureHex = (length: number): string => {
 
 /**
  * SECURITY: Generate a cryptographically secure random alphanumeric string.
+ * Uses rejection sampling to avoid modulo bias.
  */
 export const generateSecureAlphaNumeric = (length: number): string => {
   if (length <= 0) return '';
@@ -68,11 +68,25 @@ export const generateSecureAlphaNumeric = (length: number): string => {
   let result = '';
 
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    const values = new Uint8Array(length);
-    crypto.getRandomValues(values);
-    for (let i = 0; i < length; i++) {
-        // modulo bias is negligible for this use case
-        result += chars[values[i] % chars.length];
+    // Rejection sampling to avoid modulo bias
+    // 62 chars. Next power of 2 is 64.
+    // We can just take bytes and reject anything >= 62.
+    // This is simple and effective since 62 is close to 64 (less than 50% rejection rate).
+    // Actually 256 is not close to 62.
+    // 256 / 62 = 4.12.
+    // Limit = 62 * 4 = 248.
+    // We reject anything >= 248.
+    const limit = 248;
+    const step = 64; // Generate in chunks to minimize overhead
+    const buffer = new Uint8Array(step);
+
+    while (result.length < length) {
+        crypto.getRandomValues(buffer);
+        for (let i = 0; i < step && result.length < length; i++) {
+            if (buffer[i] < limit) {
+                result += chars[buffer[i] % chars.length];
+            }
+        }
     }
   } else {
     for (let i = 0; i < length; i++) {
@@ -80,39 +94,6 @@ export const generateSecureAlphaNumeric = (length: number): string => {
     }
   }
   return result;
-
- * SECURITY: Use crypto.getRandomValues for secure hex string generation.
- * Replaces insecure Math.random().
- */
-export const generateSecureHex = (length: number): string => {
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    const byteLength = Math.ceil(length / 2);
-    const array = new Uint8Array(byteLength);
-    crypto.getRandomValues(array);
-    return Array.from(array)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('')
-      .substring(0, length);
-  }
-  // Fallback for environments without crypto (should be rare now)
-  return Array(length).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-};
-
-/**
- * SECURITY: Use crypto.getRandomValues for secure alphanumeric string generation.
- */
-export const generateSecureAlphaNumeric = (length: number): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    const array = new Uint8Array(length);
-    crypto.getRandomValues(array);
-    return Array.from(array)
-      .map(b => chars[b % chars.length])
-      .join('');
-  }
-  // Fallback
-  return Array(length).fill(0).map(() => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
- ZenBeasts
 };
 
 /**
@@ -131,65 +112,6 @@ export const generateUUID = (): string => {
   });
 };
 
-/**
- sentinel/fix-weak-randomness-web3-11913555222010832222
- * SECURITY: Generate a cryptographically secure hex string of a given byte length.
- * Used for wallet address simulation and other security-sensitive mocks.
- */
-export const generateSecureHex = (byteLength: number): string => {
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    const bytes = new Uint8Array(byteLength);
-    crypto.getRandomValues(bytes);
-    return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-
-  // Fallback for environments without crypto (not recommended for production security)
-  console.warn("Using weak randomness for hex generation");
-  let res = '';
-  for (let i = 0; i < byteLength; i++) {
-    res += Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
-  }
-  return res;
-
- * SECURITY: Generate a cryptographically secure hex string.
- */
-export const generateSecureHex = (length: number): string => {
-  const byteLength = Math.ceil(length / 2);
-  const array = new Uint8Array(byteLength);
-
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    crypto.getRandomValues(array);
-  } else {
-    // Fallback for environments without crypto (unlikely)
-    for(let i=0; i<byteLength; i++) array[i] = Math.floor(Math.random() * 256);
-  }
-
-  return Array.from(array)
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('')
-    .substring(0, length);
-};
-
-/**
- * SECURITY: Generate a cryptographically secure alphanumeric string.
- */
-export const generateSecureAlphaNumeric = (length: number): string => {
-  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  const array = new Uint8Array(length);
-
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    crypto.getRandomValues(array);
-  } else {
-     for(let i=0; i<length; i++) array[i] = Math.floor(Math.random() * 256);
-  }
-
-  for (let i = 0; i < length; i++) {
-    result += charset[array[i] % charset.length];
-  }
-  return result;
- ZenBeasts
-};
 
 export const sanitizeZenBeast = (data: any): ZenBeast => {
   if (!data || typeof data !== 'object') {
