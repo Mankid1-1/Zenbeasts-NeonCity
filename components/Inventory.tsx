@@ -23,6 +23,12 @@ const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake,
   const [sellingId, setSellingId] = useState<string | null>(null);
   const [sellPrice, setSellPrice] = useState('100');
   const [evolvingId, setEvolvingId] = useState<string | null>(null);
+
+  // Performance: Use ref for coins to avoid recreating handlers on every coin update (every 5s)
+  const coinsRef = React.useRef(coins);
+  React.useEffect(() => {
+    coinsRef.current = coins;
+  }, [coins]);
   
   // Optimization: Use Ref pattern to keep handlers stable even when props (coins, callbacks) change.
   // This ensures InventoryItem (which is React.memo'd) doesn't re-render unnecessarily.
@@ -58,7 +64,11 @@ const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake,
     setEvolvingId(beast.id);
     await onEvolveRef.current(beast);
     setEvolvingId(null);
+ bolt-inventory-perf-12688513709303140167
+  }, [onEvolve]);
+
   }, []);
+ ZenBeasts
 
   // Filters
   const [filterRarity, setFilterRarity] = useState<string>('');
