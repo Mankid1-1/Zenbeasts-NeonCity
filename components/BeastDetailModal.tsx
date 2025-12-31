@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ZenBeast, Rarity } from '../types';
-import { X, Shield, Wind, Brain, Sword, Activity } from 'lucide-react';
+import { X, Shield, Wind, Brain, Sword, Activity, MessageSquare } from 'lucide-react';
 import { RARITY_COLORS } from '../constants';
+import { CyberButton } from './common/CyberComponents';
 
 interface BeastDetailModalProps {
   beast: ZenBeast;
@@ -12,6 +13,39 @@ interface BeastDetailModalProps {
 const BeastDetailModal: React.FC<BeastDetailModalProps> = ({ beast, onClose, children }) => {
   const rarityColor = RARITY_COLORS[beast.rarity].split(' ')[0] || 'text-gray-400';
   const borderColor = RARITY_COLORS[beast.rarity].split(' ')[1] || 'border-gray-600';
+
+  const [chatMessage, setChatMessage] = useState<string | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const handleChat = async () => {
+      setIsTyping(true);
+      setChatMessage(null);
+
+      // Simulate AI Latency
+      setTimeout(() => {
+          // Simple procedural generation based on stats/class since we don't have a live backend endpoint for this demo
+          const openers = [
+              "System online. Awaiting directive.",
+              "My ki flows with the digital current.",
+              "The neon lights whisper to me.",
+              "I am ready for combat, Master.",
+              "Do you seek wisdom or violence?"
+          ];
+          const classLines: Record<string, string> = {
+              'Tiger': "My claws are sharper than any firewall.",
+              'Dragon': "I burn with the fire of a thousand servers.",
+              'Snake': "Silence is my weapon. Data is my prey.",
+              'Panda': "Balance in all things. Even bandwidth.",
+              'Monkey': "Chaos is just another form of encryption."
+          };
+
+          const base = openers[Math.floor(Math.random() * openers.length)];
+          const specific = classLines[beast.class] || "I am unique.";
+
+          setChatMessage(`${base} ${specific}`);
+          setIsTyping(false);
+      }, 1500);
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-fade-in-up" onClick={onClose}>
@@ -100,9 +134,27 @@ const BeastDetailModal: React.FC<BeastDetailModalProps> = ({ beast, onClose, chi
            </div>
 
            {beast.description && (
-               <div className="mb-6 p-4 bg-neon-blue/5 border border-neon-blue/20 rounded">
+               <div className="mb-6 p-4 bg-neon-blue/5 border border-neon-blue/20 rounded relative">
                    <h3 className="text-neon-blue font-mono text-xs tracking-widest mb-1">LORE ENTRY</h3>
                    <p className="text-gray-300 text-sm italic">"{beast.description}"</p>
+
+                   <div className="mt-4 border-t border-gray-700 pt-3">
+                       {chatMessage ? (
+                           <div className="bg-black/40 p-3 rounded border-l-2 border-neon-green text-neon-green font-mono text-sm animate-fade-in-up">
+                               <span className="font-bold text-xs block mb-1">AI RESPONSE:</span>
+                               "{chatMessage}"
+                           </div>
+                       ) : (
+                           <button
+                                onClick={handleChat}
+                                disabled={isTyping}
+                                className="text-xs text-gray-400 hover:text-white flex items-center transition-colors"
+                            >
+                                <MessageSquare size={12} className="mr-1" />
+                                {isTyping ? "ESTABLISHING NEURAL LINK..." : "INITIATE CONVERSATION"}
+                           </button>
+                       )}
+                   </div>
                </div>
            )}
 
