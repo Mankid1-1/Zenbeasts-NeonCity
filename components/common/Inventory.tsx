@@ -152,7 +152,7 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
               </div>
               
               {/* Overlay Actions */}
-              <div className="absolute inset-0 bg-black/90 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center space-y-3 z-20 cursor-pointer p-4 text-center">
+              <div className="absolute inset-0 bg-black/90 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center space-y-3 z-20 cursor-pointer p-4 text-center">
                   <div className="text-neon-blue text-[10px] font-mono mb-1 tracking-widest animate-pulse">CLICK TO SCAN</div>
                   
                   <div className="flex space-x-2">

@@ -34,9 +34,13 @@ export const CyberButton: React.FC<CyberButtonProps> = ({ children, variant = 'p
     };
 
     return (
-        <button className={`${baseStyles} ${variants[variant]} ${className}`} {...props}>
+        <button
+            className={`${baseStyles} ${variants[variant]} ${className}`}
+            aria-busy={loading}
+            {...props}
+        >
             <span className="relative z-10 flex items-center justify-center gap-2">
-                {loading && <span className="animate-spin">⟳</span>}
+                {loading && <span className="animate-spin" aria-hidden="true">⟳</span>}
                 {children}
             </span>
             {!loading && <div className="absolute inset-0 bg-current opacity-0 group-hover:opacity-10 transition-opacity z-0"></div>}
@@ -76,13 +80,23 @@ const ToastItem: React.FC<{ notification: Notification; onDismiss: () => void }>
     };
 
     return (
-        <div className={`bg-black/90 border-l-4 ${borders[notification.type]} p-4 w-72 shadow-[0_0_15px_rgba(0,0,0,0.5)] animate-fade-in-up flex items-start gap-3 relative`}>
-            <div className="mt-1">{icons[notification.type]}</div>
+        <div
+            className={`bg-black/90 border-l-4 ${borders[notification.type]} p-4 w-72 shadow-[0_0_15px_rgba(0,0,0,0.5)] animate-fade-in-up flex items-start gap-3 relative`}
+            role={notification.type === 'error' ? 'alert' : 'status'}
+            aria-live={notification.type === 'error' ? 'assertive' : 'polite'}
+        >
+            <div className="mt-1" aria-hidden="true">{icons[notification.type]}</div>
             <div>
                 <h4 className="text-white font-mono font-bold text-sm">{notification.title}</h4>
                 <p className="text-gray-400 text-xs">{notification.message}</p>
             </div>
-            <button onClick={onDismiss} className="absolute top-2 right-2 text-gray-600 hover:text-white"><X size={12}/></button>
+            <button
+                onClick={onDismiss}
+                className="absolute top-2 right-2 text-gray-600 hover:text-white"
+                aria-label="Close notification"
+            >
+                <X size={12}/>
+            </button>
         </div>
     );
 };

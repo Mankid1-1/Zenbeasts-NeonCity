@@ -37,26 +37,28 @@ const InventoryItem: React.FC<InventoryItemProps> = React.memo(({
 
   return (
       <div className="relative group perspective-1000">
-          <BeastCard beast={beast} />
+          <BeastCard beast={beast} interactive={false} />
 
           {/* Overlay Actions */}
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center space-y-3 z-20">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center space-y-3 z-20">
               <div className="flex space-x-2">
                 {!beast.isStaked && (
                     <button
                         onClick={handleSellClick}
-                        className="bg-transparent border border-white text-white hover:bg-white hover:text-black px-4 py-2 text-xs font-mono tracking-widest transition-colors"
+                        aria-label={`Sell ${beast.name}`}
+                        className="bg-transparent border border-white text-white hover:bg-white hover:text-black focus:bg-white focus:text-black focus:outline-none px-4 py-2 text-xs font-mono tracking-widest transition-colors"
                     >
                         SELL
                     </button>
                 )}
                 <button
                     onClick={handleStakeClick}
+                    aria-label={`${beast.isStaked ? 'Unstake' : 'Stake'} ${beast.name}`}
                     className={`
-                        px-4 py-2 text-xs font-mono tracking-widest border transition-colors
+                        px-4 py-2 text-xs font-mono tracking-widest border transition-colors focus:outline-none
                         ${beast.isStaked
-                            ? 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white'
-                            : 'border-neon-purple text-neon-purple hover:bg-neon-purple hover:text-white'}
+                            ? 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white focus:bg-red-500 focus:text-white'
+                            : 'border-neon-purple text-neon-purple hover:bg-neon-purple hover:text-white focus:bg-neon-purple focus:text-white'}
                     `}
                 >
                     {beast.isStaked ? 'UNSTAKE' : 'STAKE'}
@@ -68,7 +70,8 @@ const InventoryItem: React.FC<InventoryItemProps> = React.memo(({
                 <button
                   onClick={handleEvolveClick}
                   disabled={isEvolving}
-                  className="flex items-center space-x-2 bg-neon-yellow/10 border border-neon-yellow text-neon-yellow px-4 py-2 text-xs font-mono tracking-widest hover:bg-neon-yellow hover:text-black transition-colors"
+                  aria-label={`Evolve ${beast.name}`}
+                  className="flex items-center space-x-2 bg-neon-yellow/10 border border-neon-yellow text-neon-yellow px-4 py-2 text-xs font-mono tracking-widest hover:bg-neon-yellow hover:text-black focus:bg-neon-yellow focus:text-black focus:outline-none transition-colors"
                 >
                   {isEvolving ? <span className="animate-spin text-lg">↻</span> : <><ArrowUpCircle size={14} /> <span>EVOLVE</span></>}
                 </button>

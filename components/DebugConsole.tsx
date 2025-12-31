@@ -44,12 +44,28 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
     };
 
     const execute = () => {
-        const cmd = command.trim().toLowerCase();
-        setLogs(prev => [...prev, `> ${cmd}`]);
+        let logCmd = command;
 
-        const parts = cmd.split(' ');
-        const baseCmd = parts[0];
-        const arg = parts.slice(1).join(' ');
+        // Regex to match "set" followed by whitespace, then "gemini" or "stability", then anything
+        const sensitiveRegex = /^set\s+(gemini|stability)\s+(.+)$/i;
+        const match = command.match(sensitiveRegex);
+
+        if (match) {
+            // match[1] is the provider (gemini/stability), match[2] is the key
+            logCmd = `set ${match[1]} ********`;
+        }
+
+        setLogs(prev => [...prev, `> ${logCmd}`]);
+
+        // Normalize for execution: collapse multiple spaces
+        // SECURITY FIX: We must NOT lowercase the arguments as API keys are case-sensitive!
+        const partsRaw = command.split(/\s+/);
+        const baseCmd = partsRaw[0].toLowerCase();
+
+        // Arguments might be multi-word for some commands (not currently used but good practice)
+        // For 'set', partsRaw[1] is provider (case-insensitive usually ok, but we match lower),
+        // partsRaw[2] is the KEY (must be case-preserved).
+        const arg = partsRaw.slice(1).join(' ').toLowerCase(); // For non-sensitive commands like 'add coin
 
         switch(baseCmd) {
             case 'add':
@@ -71,12 +87,24 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
                 setLogs(prev => [...prev, '>> Game State Reset [Reload Required]']);
                 break;
             case 'set':
-                if (parts[1] === 'gemini') {
-                    setGeminiApiKey(parts[2]);
-                    setLogs(prev => [...prev, '>> Gemini Key set in console. Press Save.']);
-                } else if (parts[1] === 'stability') {
-                    setStabilityApiKey(parts[2]);
-                    setLogs(prev => [...prev, '>> Stability Key set in console. Press Save.']);
+                // Check provider case-insensitively
+                const provider = partsRaw[1]?.toLowerCase();
+                const key = partsRaw[2]; // PRESERVE CASE
+
+                if (provider === 'gemini') {
+                    if (!key) {
+                        setLogs(prev => [...prev, '>> Error: Missing API Key']);
+                    } else {
+                        setGeminiApiKey(key);
+                        setLogs(prev => [...prev, '>> Gemini Key set in console. Press Save.']);
+                    }
+                } else if (provider === 'stability') {
+                    if (!key) {
+                         setLogs(prev => [...prev, '>> Error: Missing API Key']);
+                    } else {
+                        setStabilityApiKey(key);
+                        setLogs(prev => [...prev, '>> Stability Key set in console. Press Save.']);
+                    }
                 } else {
                     setLogs(prev => [...prev, '>> Usage: set [gemini|stability] [key]']);
                 }
@@ -96,7 +124,7 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
         <div className="fixed top-0 left-0 w-full md:w-1/2 h-auto bg-black/90 text-green-500 font-mono border-b-2 border-r-2 border-green-500 z-[9999] shadow-2xl flex flex-col p-4 animate-fade-in-up">
             <div className="flex justify-between items-center border-b border-green-900 pb-2 mb-2">
                 <div className="flex items-center gap-2"><Terminal size={14}/> NETRUNNER CONSOLE</div>
-                <button onClick={() => setIsOpen(false)}><X size={14}/></button>
+                <button aria-label="Close debug console" title="Close" onClick={() => setIsOpen(false)}><X size={14}/></button>
             </div>
 
             {/* API Key Management */}
@@ -104,6 +132,7 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
                  <div className="flex items-center gap-1">
                     <KeyRound size={12}/>
                     <input
+                        aria-label="Gemini API Key"
                         type="password"
                         value={geminiApiKey}
                         onChange={(e) => setGeminiApiKey(e.target.value)}
@@ -114,6 +143,7 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
                  <div className="flex items-center gap-1">
                      <KeyRound size={12}/>
                     <input
+                        aria-label="Stability API Key"
                         type="password"
                         value={stabilityApiKey}
                         onChange={(e) => setStabilityApiKey(e.target.value)}
@@ -132,6 +162,7 @@ const DebugConsole: React.FC<DebugConsoleProps> = ({ onAddCoins, onAddBeast, onL
             <div className="flex items-center gap-2 border-t border-green-900 pt-2">
                 <ChevronRight size={14}/>
                 <input 
+                    aria-label="Debug command input"
                     type="text" 
                     value={command} 
                     onChange={(e) => setCommand(e.target.value)}
