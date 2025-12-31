@@ -90,7 +90,9 @@ const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboar
 
     useEffect(() => { return () => clearInterval(logIntervalRef.current); }, []);
 
-    const unstakedBeasts = beasts.filter(b => !b.isStaked);
+    // Optimization: Memoize derived list to prevent O(N) filtering on every render during battle loop (every ~800ms)
+    // The filtering only needs to run when the `beasts` list actually changes.
+    const unstakedBeasts = React.useMemo(() => beasts.filter(b => !b.isStaked), [beasts]);
 
     return (
         <div className={`h-full flex flex-col animate-fade-in-up ${shake ? 'animate-shake' : ''}`}>
