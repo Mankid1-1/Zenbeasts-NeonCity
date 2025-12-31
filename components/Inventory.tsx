@@ -17,7 +17,8 @@ interface InventoryProps {
   coins: number;
 }
 
-const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, coins }) => {
+// Optimization: Memoize Inventory to prevent re-renders when parent (App) re-renders but props remain stable
+const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, coins }) => {
   const [isMinting, setIsMinting] = useState(false);
   const [sellingId, setSellingId] = useState<string | null>(null);
   const [sellPrice, setSellPrice] = useState('100');
@@ -201,6 +202,6 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
       )}
     </div>
   );
-};
+});
 
 export default Inventory;
