@@ -13,7 +13,11 @@ interface BeastCardProps {
 }
 
 // Optimization: Memoize card to prevent re-renders in large lists
+ fix-beast-card-crash-check-8981718995585845795
+const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onClick, small }) => {
+
 const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onClick, small, interactive = true }) => {
+ ZenBeasts
   // Defensive check if beast data is missing or corrupted
   if (!beast || !beast.stats) return null;
 
