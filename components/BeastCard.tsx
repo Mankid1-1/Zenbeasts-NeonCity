@@ -9,11 +9,12 @@ interface BeastCardProps {
   selected?: boolean;
   onClick?: () => void;
   small?: boolean;
+  interactive?: boolean;
 }
 
 // Optimization: Memoize card to prevent re-renders in large lists
-const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onClick, small }) => {
-  // CRITICAL CRASH FIX: Defensive check if beast data is missing or corrupted
+const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onClick, small, interactive = true }) => {
+  // Defensive check if beast data is missing or corrupted
   if (!beast || !beast.stats) return null;
 
   // Defensive check for rarity color
@@ -28,10 +29,20 @@ const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onCli
   if (small) {
     return (
       <div 
-        onClick={onClick}
+        onClick={interactive ? onClick : undefined}
+        role={interactive ? "button" : undefined}
+        tabIndex={interactive ? 0 : undefined}
+        onKeyDown={interactive ? (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick?.();
+          }
+        } : undefined}
+        aria-label={interactive ? `Select ${beast.name}` : undefined}
         className={`
-            relative bg-slate-900 border-2 transition-all duration-200 cursor-pointer overflow-hidden group
-            ${selected ? 'border-neon-pink shadow-[0_0_15px_#ff00ff] scale-105' : `${rarityBorderColor} hover:border-gray-300 hover:shadow-lg`}
+            relative bg-slate-900 border-2 transition-all duration-200 overflow-hidden group
+            ${interactive ? 'cursor-pointer' : ''}
+            ${selected ? 'border-neon-pink shadow-[0_0_15px_#ff00ff] scale-105' : `${rarityBorderColor} ${interactive ? 'hover:border-gray-300 hover:shadow-lg' : ''}`}
         `}
       >
         <img src={beast.imageUrl} alt={beast.name} className="w-full h-24 object-cover image-pixelated opacity-80 hover:opacity-100 transition-opacity" loading="lazy" />
@@ -52,10 +63,20 @@ const BeastCard: React.FC<BeastCardProps> = React.memo(({ beast, selected, onCli
 
   return (
     <div 
-      onClick={onClick}
+      onClick={interactive ? onClick : undefined}
+      role={interactive ? "button" : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onKeyDown={interactive ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick?.();
+        }
+      } : undefined}
+      aria-label={interactive ? `View details for ${beast.name}` : undefined}
       className={`
-        relative group bg-slate-900/80 transition-all duration-300 cursor-pointer cyber-border overflow-hidden
-        border-2 ${selected ? 'border-neon-pink shadow-[0_0_20px_#ff00ff] z-10' : `${rarityBorderColor} hover:scale-[1.02] hover:shadow-lg`}
+        relative group bg-slate-900/80 transition-all duration-300 cyber-border overflow-hidden
+        ${interactive ? 'cursor-pointer' : ''}
+        border-2 ${selected ? 'border-neon-pink shadow-[0_0_20px_#ff00ff] z-10' : `${rarityBorderColor} ${interactive ? 'hover:scale-[1.02] hover:shadow-lg' : ''}`}
       `}
     >
       {/* Evolution Glow Effect */}

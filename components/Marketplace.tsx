@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
-import BeastCard from './BeastCard';
 import BeastDetailModal from './BeastDetailModal';
-import { ShoppingBag, Search, Filter, X, Tag, Activity, Fuel, User } from 'lucide-react';
+import MarketplaceItem from './MarketplaceItem';
+import { ShoppingBag, Search, Activity, Fuel, User } from 'lucide-react';
 import { SectionHeader, CyberButton } from './common/CyberComponents';
 import { TOKENOMICS } from '../constants';
 
@@ -11,22 +11,24 @@ interface MarketplaceProps {
   listings: ZenBeast[];
   onBuy: (beast: ZenBeast) => void;
   onCancelListing: (id: string) => void;
-  userCoins: number; 
   marketHistory: string[];
 }
 
-const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelListing, userCoins, marketHistory }) => {
+const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelListing, marketHistory }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRarity, setSelectedRarity] = useState<string>('');
   const [selectedBeast, setSelectedBeast] = useState<ZenBeast | null>(null);
   const [viewMode, setViewMode] = useState<'all' | 'mine'>('all');
 
-  const filteredListings = listings.filter(beast => {
-    const matchesSearch = beast.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRarity = selectedRarity ? beast.rarity === selectedRarity : true;
-    const matchesMode = viewMode === 'mine' ? beast.originalOwner === 'player' : true;
-    return matchesSearch && matchesRarity && matchesMode;
-  });
+  // Optimization: Memoize filtered listings to prevent re-calculation on every render
+  const filteredListings = useMemo(() => {
+    return listings.filter(beast => {
+      const matchesSearch = beast.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesRarity = selectedRarity ? beast.rarity === selectedRarity : true;
+      const matchesMode = viewMode === 'mine' ? beast.originalOwner === 'player' : true;
+      return matchesSearch && matchesRarity && matchesMode;
+    });
+  }, [listings, searchTerm, selectedRarity, viewMode]);
 
   return (
     <div className="h-full flex flex-col animate-fade-in-up">
@@ -52,11 +54,21 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
         <div className="flex gap-4 items-center flex-1">
             <div className="relative flex-1">
                 <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
-                <input type="text" placeholder="Search Listings..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-black/50 border border-slate-700 text-white pl-10 pr-4 py-2 text-sm focus:border-neon-yellow outline-none" />
+                <input
+                    type="text"
+                    placeholder="Search Listings..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    aria-label="Search listings"
+                    className="w-full bg-black/50 border border-slate-700 text-white pl-10 pr-4 py-2 text-sm focus:border-neon-yellow outline-none"
+                />
             </div>
-            <select value={selectedRarity} onChange={(e) => setSelectedRarity(e.target.value)}
-                className="bg-black/50 border border-slate-700 text-gray-300 px-4 py-2 text-sm focus:border-neon-yellow outline-none">
+            <select
+                value={selectedRarity}
+                onChange={(e) => setSelectedRarity(e.target.value)}
+                aria-label="Filter by rarity"
+                className="bg-black/50 border border-slate-700 text-gray-300 px-4 py-2 text-sm focus:border-neon-yellow outline-none"
+            >
                 <option value="">All Rarities</option>
                 {Object.values(Rarity).map(r => <option key={r} value={r}>{r}</option>)}
             </select>
@@ -65,12 +77,22 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
         <div className="flex bg-black p-1 rounded border border-gray-800">
              <button 
                 onClick={() => setViewMode('all')}
+                aria-pressed={viewMode === 'all'}
+ palette-marketplace-a11y-7839589103584432219
+                aria-label="Show all listings"
+
+ ZenBeasts
                 className={`px-4 py-1 text-xs font-mono transition-colors ${viewMode === 'all' ? 'bg-neon-yellow text-black font-bold' : 'text-gray-500 hover:text-white'}`}
              >
                  GLOBAL
              </button>
              <button 
                 onClick={() => setViewMode('mine')}
+                aria-pressed={viewMode === 'mine'}
+ palette-marketplace-a11y-7839589103584432219
+                aria-label="Show only my listings"
+
+ ZenBeasts
                 className={`px-4 py-1 text-xs font-mono transition-colors flex items-center ${viewMode === 'mine' ? 'bg-neon-yellow text-black font-bold' : 'text-gray-500 hover:text-white'}`}
              >
                  <User size={12} className="mr-1"/> MY LISTINGS
@@ -80,19 +102,30 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pb-10">
         {filteredListings.map((beast) => (
-            <div key={beast.id} className="relative group cursor-pointer" onClick={() => setSelectedBeast(beast)}>
-                <BeastCard beast={beast} />
-                <div className="absolute top-2 left-2 bg-black border border-neon-yellow px-2 py-1 z-20 shadow-lg">
-                    <span className="text-neon-yellow font-bold font-mono text-xs flex items-center"><Tag size={12} className="mr-1"/> {beast.price} ZEN</span>
-                </div>
-                {beast.originalOwner === 'player' && (
-                    <div className="absolute top-2 right-2 bg-neon-blue px-2 py-1 z-20">
-                        <span className="text-black font-bold font-mono text-[10px]">YOURS</span>
-                    </div>
+            <MarketplaceItem
+                key={beast.id}
+                beast={beast}
+                onSelect={setSelectedBeast}
+            />
+        ))}
+        {filteredListings.length === 0 && (
+            <div className="col-span-full text-center text-gray-600 py-20 font-mono flex flex-col items-center">
+                <div className="mb-4">NO LISTINGS FOUND</div>
+                {(searchTerm || selectedRarity || viewMode === 'mine') && (
+                    <button
+                        onClick={() => {
+                            setSearchTerm('');
+                            setSelectedRarity('');
+                            setViewMode('all');
+                        }}
+                        aria-label="Clear all filters"
+                        className="text-xs text-neon-blue border border-neon-blue px-3 py-1 hover:bg-neon-blue hover:text-black transition-colors"
+                    >
+                        CLEAR FILTERS
+                    </button>
                 )}
             </div>
-        ))}
-        {filteredListings.length === 0 && <div className="col-span-full text-center text-gray-600 py-20 font-mono">NO LISTINGS FOUND</div>}
+        )}
       </div>
 
       {selectedBeast && (
@@ -131,4 +164,5 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
   );
 };
 
-export default Marketplace;
+// Optimization: Prevent re-renders when global state (like coins) changes but Marketplace props remain stable
+export default React.memo(Marketplace);
