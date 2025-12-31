@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
 import BeastCard from './BeastCard';
-import InventoryItem from './InventoryItem';
+import InventoryGrid from './InventoryGrid';
 import { useDebounce } from '../hooks/useDebounce';
 import { Filter, Search, X, ArrowUpCircle } from 'lucide-react';
 import { BASE_MINT_PRICE } from '../constants';
@@ -19,11 +19,22 @@ interface InventoryProps {
   mintPrice: number;
 }
 
+ feature/zenbeasts-10x-upgrade-10198197744876026392
 const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, onRename, coins, mintPrice }) => {
+
+// Optimization: Memoize Inventory to prevent re-renders when parent (App) re-renders but props remain stable
+const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, coins }) => {
+ ZenBeasts
   const [isMinting, setIsMinting] = useState(false);
   const [sellingId, setSellingId] = useState<string | null>(null);
   const [sellPrice, setSellPrice] = useState('100');
   const [evolvingId, setEvolvingId] = useState<string | null>(null);
+
+  // Performance: Use ref for coins to avoid recreating handlers on every coin update (every 5s)
+  const coinsRef = React.useRef(coins);
+  React.useEffect(() => {
+    coinsRef.current = coins;
+  }, [coins]);
   
   // Rename Modal State
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -68,7 +79,11 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
     setEvolvingId(beast.id);
     await onEvolveRef.current(beast);
     setEvolvingId(null);
+ bolt-inventory-perf-12688513709303140167
+  }, [onEvolve]);
+
   }, []);
+ ZenBeasts
 
   // Filters
   const [filterRarity, setFilterRarity] = useState<string>('');
@@ -199,6 +214,14 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
             </div>
         )}
       </div>
+      {/* Grid - Optimized with React.memo */}
+      <InventoryGrid
+        beasts={filteredBeasts}
+        onOpenSellModal={handleOpenSellModal}
+        onToggleStake={handleToggleStake}
+        onEvolve={handleEvolveAction}
+        evolvingId={evolvingId}
+      />
 
       {/* Sell Modal */}
       {sellingId && (
@@ -260,6 +283,6 @@ const Inventory: React.FC<InventoryProps> = ({ beasts, onMint, onSell, onStake, 
       )}
     </div>
   );
-};
+});
 
 export default Inventory;

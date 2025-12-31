@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ZenBeast, LeaderboardEntry, TrainerPerk, Achievement } from '../types';
-import { Coins, Zap, Box, Activity, Trophy, CircuitBoard, Unlock, Star, ArrowRight } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { Coins, Zap, Box, Activity, Trophy, Star } from 'lucide-react';
+import { XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import BeastCard from './BeastCard';
 import { TOKENOMICS } from '../constants';
 import { CyberButton } from './common/CyberComponents';
@@ -19,9 +19,21 @@ interface DashboardProps {
   onClaim: (amount: number) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ beasts, coins, leaderboard, trainerLevel, trainerExp, activePerks, achievements, coinHistory, onClaim }) => {
-  const totalPower = beasts.reduce((acc, b) => acc + b.stats.attack + b.stats.defense + b.stats.speed + b.stats.zen, 0);
+const Dashboard: React.FC<DashboardProps> = React.memo(({ beasts, coins, leaderboard, trainerLevel, trainerExp, activePerks, achievements, coinHistory, onClaim }) => {
+  const totalPower = useMemo(() => {
+    return beasts.reduce((acc, b) => acc + b.stats.attack + b.stats.defense + b.stats.speed + b.stats.zen, 0);
+  }, [beasts]);
+
   const [claimAmount, setClaimAmount] = useState<string>('1000');
+
+  // Optimization: Memoize derived lists for rendering
+  const topLeaderboard = useMemo(() => leaderboard.slice(0, 5), [leaderboard]);
+
+  const recentBeasts = useMemo(() => {
+    // Create a copy before reversing to avoid mutating the original array if it wasn't a slice (though slice creates copy)
+    // slice(-4) takes last 4.
+    return beasts.slice(-4).reverse();
+  }, [beasts]);
 
   return (
     <div className="space-y-6 animate-fade-in-up">
@@ -133,7 +145,7 @@ const Dashboard: React.FC<DashboardProps> = ({ beasts, coins, leaderboard, train
          <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-700 p-6 cyber-border">
             <h3 className="text-neon-yellow font-mono mb-6 flex items-center tracking-wider"><Trophy className="mr-2" size={18}/> GLOBAL RANKING</h3>
             <div className="space-y-4">
-                {leaderboard.slice(0, 5).map((entry, idx) => (
+                {topLeaderboard.map((entry, idx) => (
                     <div key={idx} className="flex justify-between items-center text-sm border-b border-white/5 pb-2 last:border-0 hover:bg-white/5 p-1 rounded transition-colors">
                         <div className="flex items-center">
                             <span className={`w-6 h-6 flex items-center justify-center rounded bg-slate-800 mr-3 font-mono text-xs ${idx === 0 ? 'text-black bg-neon-yellow font-bold' : 'text-gray-400'}`}>#{entry.rank}</span>
@@ -156,13 +168,14 @@ const Dashboard: React.FC<DashboardProps> = ({ beasts, coins, leaderboard, train
                 </button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {beasts.slice(-4).reverse().map(b => <BeastCard key={b.id} beast={b} small />)}
+            {recentBeasts.map(b => <BeastCard key={b.id} beast={b} small />)}
             {beasts.length === 0 && <div className="col-span-4 text-center text-gray-600 font-mono py-8">NO BEASTS DETECTED</div>}
             </div>
         </div>
       </div>
     </div>
   );
-};
+});
 
+// Optimization: Prevent re-renders when parent (App) re-renders but Dashboard props remain stable
 export default Dashboard;

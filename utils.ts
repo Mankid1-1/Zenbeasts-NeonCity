@@ -36,6 +36,67 @@ export const formatNumber = (num: number): string => {
 };
 
 /**
+ * SECURITY: Generate a cryptographically secure random hex string.
+ * Uses window.crypto.getRandomValues where available.
+ */
+export const generateSecureHex = (length: number): string => {
+  if (length <= 0) return '';
+  const byteLength = Math.ceil(length / 2);
+  const bytes = new Uint8Array(byteLength);
+
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+  } else {
+    // Fallback for environments without crypto (should be rare in modern browsers)
+    console.warn("Crypto API unavailable, using Math.random fallback");
+    for (let i = 0; i < byteLength; i++) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+  }
+
+  const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  return hex.substring(0, length);
+};
+
+/**
+ * SECURITY: Generate a cryptographically secure random alphanumeric string.
+ * Uses rejection sampling to avoid modulo bias.
+ */
+export const generateSecureAlphaNumeric = (length: number): string => {
+  if (length <= 0) return '';
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    // Rejection sampling to avoid modulo bias
+    // 62 chars. Next power of 2 is 64.
+    // We can just take bytes and reject anything >= 62.
+    // This is simple and effective since 62 is close to 64 (less than 50% rejection rate).
+    // Actually 256 is not close to 62.
+    // 256 / 62 = 4.12.
+    // Limit = 62 * 4 = 248.
+    // We reject anything >= 248.
+    const limit = 248;
+    const step = 64; // Generate in chunks to minimize overhead
+    const buffer = new Uint8Array(step);
+
+    while (result.length < length) {
+        crypto.getRandomValues(buffer);
+        for (let i = 0; i < step && result.length < length; i++) {
+            if (buffer[i] < limit) {
+                result += chars[buffer[i] % chars.length];
+            }
+        }
+    }
+  } else {
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+  }
+  return result;
+};
+
+/**
  * SECURITY: Use crypto.randomUUID for secure ID generation instead of Math.random
  * Fallback for environments where crypto is not available (though widely supported now)
  */
@@ -51,6 +112,10 @@ export const generateUUID = (): string => {
   });
 };
 
+ bolt-inventory-optimization-13009397555173551233
+
+
+ ZenBeasts
 export const sanitizeZenBeast = (data: any): ZenBeast => {
   if (!data || typeof data !== 'object') {
     data = {};
