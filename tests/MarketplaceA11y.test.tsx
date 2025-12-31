@@ -1,6 +1,11 @@
 
+ bolt-inventory-optimization-13009397555173551233
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+ ZenBeasts
 import Marketplace from '../components/Marketplace';
 import { CyberButton } from '../components/common/CyberComponents';
 import React from 'react';
@@ -26,11 +31,6 @@ const defaultProps = {
   onCancelListing: vi.fn(),
   marketHistory: ['Sold Dragon 1 for 100 ZEN']
 };
-
-// Ensure cleanup after each test
-afterEach(() => {
-  cleanup();
-});
 
 describe('Marketplace Accessibility', () => {
   beforeEach(() => {
