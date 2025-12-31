@@ -60,6 +60,7 @@ export const generateSecureHex = (length: number): string => {
 
 /**
  * SECURITY: Generate a cryptographically secure random alphanumeric string.
+ * Uses rejection sampling to avoid modulo bias.
  */
 export const generateSecureAlphaNumeric = (length: number): string => {
   if (length <= 0) return '';
@@ -67,11 +68,25 @@ export const generateSecureAlphaNumeric = (length: number): string => {
   let result = '';
 
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    const values = new Uint8Array(length);
-    crypto.getRandomValues(values);
-    for (let i = 0; i < length; i++) {
-        // modulo bias is negligible for this use case
-        result += chars[values[i] % chars.length];
+    // Rejection sampling to avoid modulo bias
+    // 62 chars. Next power of 2 is 64.
+    // We can just take bytes and reject anything >= 62.
+    // This is simple and effective since 62 is close to 64 (less than 50% rejection rate).
+    // Actually 256 is not close to 62.
+    // 256 / 62 = 4.12.
+    // Limit = 62 * 4 = 248.
+    // We reject anything >= 248.
+    const limit = 248;
+    const step = 64; // Generate in chunks to minimize overhead
+    const buffer = new Uint8Array(step);
+
+    while (result.length < length) {
+        crypto.getRandomValues(buffer);
+        for (let i = 0; i < step && result.length < length; i++) {
+            if (buffer[i] < limit) {
+                result += chars[buffer[i] % chars.length];
+            }
+        }
     }
   } else {
     for (let i = 0; i < length; i++) {
@@ -97,6 +112,10 @@ export const generateUUID = (): string => {
   });
 };
 
+ bolt-inventory-optimization-13009397555173551233
+
+
+ ZenBeasts
 export const sanitizeZenBeast = (data: any): ZenBeast => {
   if (!data || typeof data !== 'object') {
     data = {};
