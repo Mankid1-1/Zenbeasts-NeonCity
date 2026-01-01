@@ -41,7 +41,6 @@ const BattleVisuals = ({
                         src={playerBeast?.imageUrl || ''}
                         alt={playerBeast?.name || 'Player Beast'}
                         className={`w-full h-full object-contain filter drop-shadow-[0_0_10px_rgba(57,255,20,0.5)] ${shakePlayer ? 'animate-shake' : 'animate-pulse'}`}
-                        alt="Player"
                      />
                      {/* Health Bar */}
                      <div className="absolute -bottom-8 left-0 right-0">
