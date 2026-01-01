@@ -41,7 +41,6 @@ const BattleVisuals = ({
                         src={playerBeast?.imageUrl || ''}
                         alt={playerBeast?.name || 'Player Beast'}
                         className={`w-full h-full object-contain filter drop-shadow-[0_0_10px_rgba(57,255,20,0.5)] ${shakePlayer ? 'animate-shake' : 'animate-pulse'}`}
-                        alt="Player"
                      />
                      {/* Health Bar */}
                      <div className="absolute -bottom-8 left-0 right-0">
@@ -243,8 +242,13 @@ const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboar
                                 <h4 className="text-xs text-gray-500 mb-2 font-mono">SELECT TARGET</h4>
                                 <div className="grid grid-cols-3 gap-3">
                                     {GYM_LEADERS.map(l => (
-                                        <button key={l.id} onClick={() => setSelectedGymLeader(l)}
-                                            className={`p-2 border text-left transition-all ${selectedGymLeader?.id === l.id ? 'border-neon-pink bg-neon-pink/10' : 'border-gray-700 bg-black'}`}>
+                                        <button
+                                            key={l.id}
+                                            onClick={() => setSelectedGymLeader(l)}
+                                            aria-pressed={selectedGymLeader?.id === l.id}
+                                            aria-label={`Select Tier ${l.difficulty} Leader ${l.name}`}
+                                            className={`p-2 border text-left transition-all ${selectedGymLeader?.id === l.id ? 'border-neon-pink bg-neon-pink/10' : 'border-gray-700 bg-black'}`}
+                                        >
                                             <div className="text-[10px] text-neon-pink font-mono">TIER {l.difficulty}</div>
                                             <div className="font-bold text-xs text-white truncate">{l.name}</div>
                                         </button>
