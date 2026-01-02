@@ -169,7 +169,8 @@ const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboar
 
     useEffect(() => { return () => clearInterval(logIntervalRef.current); }, []);
 
-    const unstakedBeasts = beasts.filter(b => !b.isStaked);
+    // Optimization: Memoize filtering to prevent recalculation on every render tick during battle animation
+    const unstakedBeasts = React.useMemo(() => beasts.filter(b => !b.isStaked), [beasts]);
 
     // Get current opponent object for visuals
     const currentOpponent = mode === 'gym' && selectedGymLeader
