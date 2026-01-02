@@ -78,10 +78,8 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
              <button 
                 onClick={() => setViewMode('all')}
                 aria-pressed={viewMode === 'all'}
- palette-marketplace-a11y-7839589103584432219
                 aria-label="Show all listings"
 
- ZenBeasts
                 className={`px-4 py-1 text-xs font-mono transition-colors ${viewMode === 'all' ? 'bg-neon-yellow text-black font-bold' : 'text-gray-500 hover:text-white'}`}
              >
                  GLOBAL
@@ -89,10 +87,8 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
              <button 
                 onClick={() => setViewMode('mine')}
                 aria-pressed={viewMode === 'mine'}
- palette-marketplace-a11y-7839589103584432219
                 aria-label="Show only my listings"
 
- ZenBeasts
                 className={`px-4 py-1 text-xs font-mono transition-colors flex items-center ${viewMode === 'mine' ? 'bg-neon-yellow text-black font-bold' : 'text-gray-500 hover:text-white'}`}
              >
                  <User size={12} className="mr-1"/> MY LISTINGS

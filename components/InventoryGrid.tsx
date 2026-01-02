@@ -7,6 +7,7 @@ interface InventoryGridProps {
   onOpenSellModal: (id: string) => void;
   onToggleStake: (id: string, isStaked: boolean) => void;
   onEvolve: (beast: ZenBeast) => void;
+  onRename: (id: string) => void;
   evolvingId: string | null;
 }
 
@@ -17,6 +18,7 @@ const InventoryGrid: React.FC<InventoryGridProps> = React.memo(({
   onOpenSellModal,
   onToggleStake,
   onEvolve,
+  onRename,
   evolvingId
 }) => {
   return (
@@ -28,6 +30,7 @@ const InventoryGrid: React.FC<InventoryGridProps> = React.memo(({
           onOpenSellModal={onOpenSellModal}
           onToggleStake={onToggleStake}
           onEvolve={onEvolve}
+          onRename={onRename}
           isEvolving={evolvingId === b.id}
         />
       ))}
