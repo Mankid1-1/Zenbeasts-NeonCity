@@ -1,9 +1,5 @@
 
- bolt-inventory-optimization-13009397555173551233
 import { describe, it, expect, vi } from 'vitest';
-
-import { describe, it, expect } from 'vitest';
- ZenBeasts
 import { generateSecureHex, generateSecureAlphaNumeric } from '../utils';
 import { connectWalletService } from '../services/web3';
 
@@ -49,10 +45,6 @@ describe('Web3 Service Security', () => {
         expect(ethWallet.address).toMatch(/^0x[0-9a-f]{40}$/);
 
         const solWallet = await connectWalletService('solana');
- bolt-inventory-optimization-13009397555173551233
-        expect(solWallet.address).toMatch(/^Sol[a-zA-Z0-9]{8}$/);
-
         expect(solWallet.address).toMatch(/^Sol[a-zA-Z0-9]{40}$/);
- ZenBeasts
     });
 });
