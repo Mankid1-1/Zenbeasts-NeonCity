@@ -41,7 +41,6 @@ const BattleVisuals = ({
                         src={playerBeast?.imageUrl || ''}
                         alt={playerBeast?.name || 'Player Beast'}
                         className={`w-full h-full object-contain filter drop-shadow-[0_0_10px_rgba(57,255,20,0.5)] ${shakePlayer ? 'animate-shake' : 'animate-pulse'}`}
-                        alt="Player"
                      />
                      {/* Health Bar */}
                      <div className="absolute -bottom-8 left-0 right-0">
@@ -184,8 +183,20 @@ const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboar
                 icon={<Sword />}
                 rightElement={
                     <div className="flex bg-slate-900 border border-slate-700 p-1 rounded">
-                        <button onClick={() => setMode('gym')} className={`px-4 py-1 text-sm ${mode === 'gym' ? 'bg-neon-blue text-black font-bold' : 'text-gray-400'}`}>GYM</button>
-                        <button onClick={() => setMode('sparring')} className={`px-4 py-1 text-sm ${mode === 'sparring' ? 'bg-neon-blue text-black font-bold' : 'text-gray-400'}`}>SPARRING</button>
+                        <button
+                            onClick={() => setMode('gym')}
+                            aria-pressed={mode === 'gym'}
+                            className={`px-4 py-1 text-sm ${mode === 'gym' ? 'bg-neon-blue text-black font-bold' : 'text-gray-400'}`}
+                        >
+                            GYM
+                        </button>
+                        <button
+                            onClick={() => setMode('sparring')}
+                            aria-pressed={mode === 'sparring'}
+                            className={`px-4 py-1 text-sm ${mode === 'sparring' ? 'bg-neon-blue text-black font-bold' : 'text-gray-400'}`}
+                        >
+                            SPARRING
+                        </button>
                     </div>
                 }
             />
@@ -243,8 +254,12 @@ const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboar
                                 <h4 className="text-xs text-gray-500 mb-2 font-mono">SELECT TARGET</h4>
                                 <div className="grid grid-cols-3 gap-3">
                                     {GYM_LEADERS.map(l => (
-                                        <button key={l.id} onClick={() => setSelectedGymLeader(l)}
-                                            className={`p-2 border text-left transition-all ${selectedGymLeader?.id === l.id ? 'border-neon-pink bg-neon-pink/10' : 'border-gray-700 bg-black'}`}>
+                                        <button
+                                            key={l.id}
+                                            onClick={() => setSelectedGymLeader(l)}
+                                            aria-pressed={selectedGymLeader?.id === l.id}
+                                            className={`p-2 border text-left transition-all ${selectedGymLeader?.id === l.id ? 'border-neon-pink bg-neon-pink/10' : 'border-gray-700 bg-black'}`}
+                                        >
                                             <div className="text-[10px] text-neon-pink font-mono">TIER {l.difficulty}</div>
                                             <div className="font-bold text-xs text-white truncate">{l.name}</div>
                                         </button>
