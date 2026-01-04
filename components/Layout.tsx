@@ -104,10 +104,7 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
 
           <div className="p-4 border-t border-slate-800 bg-black/40">
              <div className="flex flex-col space-y-3">
- bolt-battle-arena-opt-cleanup-4174947626355481125
 
- feature/zenbeasts-10x-upgrade-10198197744876026392
- ZenBeasts
                  <button
                     onClick={() => { setShowQuestLog(true); setIsMobileMenuOpen(false); }}
                     aria-label="Quest Log"
@@ -127,13 +124,8 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
                             aria-label="Connect Wallet"
                             className="w-full flex items-center justify-center md:justify-start bg-blue-600/20 text-blue-400 border border-blue-500/50 p-2 rounded hover:bg-blue-600/30 transition-colors"
                          >
- bolt-battle-arena-opt-cleanup-4174947626355481125
-                            <WalletIcon size={16} className="md:mr-2" />
-                            <span className="hidden md:inline font-mono text-xs">CONNECT WALLET</span>
-
-                            <WalletIcon size={16} className="mr-2" />
+                            <WalletIcon size={16} className="mr-2 md:mr-2" />
                             <span className="font-mono text-xs">CONNECT WALLET</span>
- ZenBeasts
                          </button>
                      ) : (
                          <button

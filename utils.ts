@@ -37,7 +37,8 @@ export const formatNumber = (num: number): string => {
 
 /**
  * SECURITY: Generate a cryptographically secure random hex string.
- * Uses window.crypto.getRandomValues where available.
+ * Uses window.crypto.getRandomValues.
+ * Throws error if crypto is unavailable to prevent insecure fallbacks.
  */
 export const generateSecureHex = (length: number): string => {
   if (length <= 0) return '';
@@ -47,11 +48,7 @@ export const generateSecureHex = (length: number): string => {
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
     crypto.getRandomValues(bytes);
   } else {
-    // Fallback for environments without crypto (should be rare in modern browsers)
-    console.warn("Crypto API unavailable, using Math.random fallback");
-    for (let i = 0; i < byteLength; i++) {
-      bytes[i] = Math.floor(Math.random() * 256);
-    }
+    throw new Error("Cryptographically secure random number generation is unavailable.");
   }
 
   const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
@@ -61,6 +58,7 @@ export const generateSecureHex = (length: number): string => {
 /**
  * SECURITY: Generate a cryptographically secure random alphanumeric string.
  * Uses rejection sampling to avoid modulo bias.
+ * Throws error if crypto is unavailable.
  */
 export const generateSecureAlphaNumeric = (length: number): string => {
   if (length <= 0) return '';
@@ -69,14 +67,7 @@ export const generateSecureAlphaNumeric = (length: number): string => {
 
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
     // Rejection sampling to avoid modulo bias
-    // 62 chars. Next power of 2 is 64.
-    // We can just take bytes and reject anything >= 62.
-    // This is simple and effective since 62 is close to 64 (less than 50% rejection rate).
-    // Actually 256 is not close to 62.
-    // 256 / 62 = 4.12.
-    // Limit = 62 * 4 = 248.
-    // We reject anything >= 248.
-    const limit = 248;
+    const limit = 248; // Nearest multiple of 62 below 256
     const step = 64; // Generate in chunks to minimize overhead
     const buffer = new Uint8Array(step);
 
@@ -89,27 +80,27 @@ export const generateSecureAlphaNumeric = (length: number): string => {
         }
     }
   } else {
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    throw new Error("Cryptographically secure random number generation is unavailable.");
   }
   return result;
 };
 
 /**
- * SECURITY: Use crypto.randomUUID for secure ID generation instead of Math.random
- * Fallback for environments where crypto is not available (though widely supported now)
+ * SECURITY: Use crypto.randomUUID for secure ID generation.
+ * Falls back to crypto.getRandomValues if randomUUID is missing (e.g. some older browsers/Node).
+ * Throws if no crypto API is available.
  */
 export const generateUUID = (): string => {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
+  if (typeof crypto !== 'undefined') {
+    if (crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    // Fallback using getRandomValues if randomUUID is missing
+    return (([1e7] as any) + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c: any) =>
+        (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
+    );
   }
-  // Fallback (less secure, but better than nothing for legacy/test envs)
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
+  throw new Error("Cryptographically secure random number generation is unavailable.");
 };
 
 export const sanitizeZenBeast = (data: any): ZenBeast => {
