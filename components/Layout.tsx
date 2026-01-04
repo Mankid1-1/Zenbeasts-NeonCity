@@ -36,7 +36,6 @@ const NavItem = ({ to, icon, label, onClick }: { to: string, icon: React.ReactNo
                     ? 'bg-neon-pink/10 text-neon-pink border-neon-pink shadow-[0_0_10px_rgba(255,0,255,0.2)]' 
                     : 'border-transparent text-gray-500 hover:bg-white/5 hover:text-white hover:border-gray-500'}
             `}
-            aria-label={label}
         >
             <span className={`${isActive ? 'text-neon-pink' : 'text-gray-500 group-hover:text-white transition-colors'}`}>{icon}</span>
             <span className="ml-3 font-mono text-sm tracking-widest">{label}</span>
@@ -105,6 +104,10 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
 
           <div className="p-4 border-t border-slate-800 bg-black/40">
              <div className="flex flex-col space-y-3">
+ bolt-battle-arena-opt-cleanup-4174947626355481125
+
+ feature/zenbeasts-10x-upgrade-10198197744876026392
+ ZenBeasts
                  <button
                     onClick={() => { setShowQuestLog(true); setIsMobileMenuOpen(false); }}
                     aria-label="Quest Log"
@@ -124,13 +127,18 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
                             aria-label="Connect Wallet"
                             className="w-full flex items-center justify-center md:justify-start bg-blue-600/20 text-blue-400 border border-blue-500/50 p-2 rounded hover:bg-blue-600/30 transition-colors"
                          >
+ bolt-battle-arena-opt-cleanup-4174947626355481125
                             <WalletIcon size={16} className="md:mr-2" />
                             <span className="hidden md:inline font-mono text-xs">CONNECT WALLET</span>
+
+                            <WalletIcon size={16} className="mr-2" />
+                            <span className="font-mono text-xs">CONNECT WALLET</span>
+ ZenBeasts
                          </button>
                      ) : (
                          <button
                             onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)}
-                            aria-label="Wallet Settings"
+                            aria-label="Wallet Menu"
                             className="w-full text-left bg-slate-800/80 p-2 rounded border border-slate-600 cursor-pointer hover:border-neon-green transition-colors"
                          >
                              <div className="flex items-center justify-between mb-1">
