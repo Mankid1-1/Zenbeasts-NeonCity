@@ -1,19 +1,16 @@
-## 2024-12-12 - [Critical API Key Exposure]
-**Vulnerability:** A hardcoded Google Gemini API key was found in `.env.local` and `vite.config.ts` was configured to bake `API_KEY` from the environment into the client bundle via `process.env`.
-**Learning:** `vite.config.ts`'s `define` property replaces string literals during build. Mapping `process.env.API_KEY` to an environment variable means that if the build environment has that variable set, it gets embedded into the public JS code.
-**Prevention:** Avoid using `define` to map secrets in `vite.config.ts`. Use `import.meta.env` and ensure sensitive keys are not prefixed with `VITE_` unless they are truly public. For client-side only apps requiring keys, rely on user input or a backend proxy.
+# Sentinel's Journal
 
-## 2025-05-18 - [Sensitive Data in Logs]
-**Vulnerability:** The `DebugConsole` component was logging full command strings, including API keys provided via the `set gemini <KEY>` command, to the on-screen display.
-**Learning:** "Input echoing" is a common source of information leakage. Even in development tools, logs should be treated as potentially visible (e.g., screen sharing, screenshots).
-**Prevention:** Implement redaction for known sensitive commands before appending them to UI logs or console output. Use regex to reliably identify and mask sensitive parameters regardless of case or whitespace.
+## 2024-05-21 - Initial Security Assessment
+**Vulnerability:** Hardcoded API keys in `services/geminiService.ts` (using `import.meta.env`) and potential exposure in `DebugConsole`.
+**Learning:** Client-side only apps often struggle with secret management. `localStorage` is used for user-provided keys, which is a necessary trade-off but risky if XSS exists.
+**Prevention:** Ensure strict CSP and input validation to prevent XSS. Avoid storing high-value secrets in localStorage if possible, or assume they are ephemeral.
 
-## 2025-05-18 - [Negative Price Economy Exploit]
-**Vulnerability:** The marketplace listing logic in `useGameState.ts` did not validate that the listing price was positive. This allowed a user to list an item for a negative price (e.g., -1000). If another user (or the same user) bought it, the transaction logic `buyerBalance - price` would result in `buyerBalance - (-1000) = buyerBalance + 1000`, effectively printing infinite currency.
-**Learning:** Always validate numerical inputs, especially those related to financial transactions or game economy. Do not assume UI constraints (if any) prevent malicious API calls or internal logic execution.
-**Prevention:** Added explicit `if (price <= 0)` validation in the `handleListForSale` function in the core game state hook.
+## 2024-05-21 - Merge Conflict Vulnerability
+**Vulnerability:** Merge conflicts in `services/web3.ts` and `utils.ts` broke the build (Availability) and concealed a security regression (Solana address entropy reduced from 40 to 8 chars).
+**Learning:** Code corruption is a security issue. Merge conflicts can accidentally revert security fixes if not resolved carefully.
+**Prevention:** CI must fail if merge markers (`<<<<<<<`) are present.
 
-## 2025-05-19 - [Insecure Randomness in Key Generation]
-**Vulnerability:** `services/web3.ts` was using `Math.random()` to generate simulated wallet addresses. This produces predictable values and establishes insecure patterns for security-critical identifiers.
-**Learning:** `Math.random()` is not cryptographically secure. Relying on it for ID or key generation, even in simulations, risks collisions and predictability.
-**Prevention:** Implemented `generateSecureHex` and `generateSecureAlphaNumeric` in `utils.ts` using `crypto.getRandomValues` and enforced their usage.
+## 2024-05-22 - Merge Conflict Concealing Security Regression
+**Vulnerability:** `services/web3.ts` contained a merge conflict where one branch reduced entropy (8 chars vs 40 chars) and broke the build.
+**Learning:** Codebase integrity (Availability) is a prerequisite for security. Automated checks must ensure no merge markers exist.
+**Prevention:** Add a pre-commit hook or CI step to grep for `<<<<<<<`.
