@@ -26,21 +26,16 @@ const NavItem = ({ to, icon, label, onClick }: { to: string, icon: React.ReactNo
     const isActive = location.pathname === to;
     return (
         <Link 
- feature/zenbeasts-10x-upgrade-10198197744876026392
             to={to} 
             onClick={onClick}
-
-            to={to}
             aria-label={label}
             aria-current={isActive ? 'page' : undefined}
- ZenBeasts
             className={`
                 flex items-center p-3 rounded-md transition-all duration-300 group border-l-2
                 ${isActive 
                     ? 'bg-neon-pink/10 text-neon-pink border-neon-pink shadow-[0_0_10px_rgba(255,0,255,0.2)]' 
                     : 'border-transparent text-gray-500 hover:bg-white/5 hover:text-white hover:border-gray-500'}
             `}
-            aria-label={label}
         >
             <span className={`${isActive ? 'text-neon-pink' : 'text-gray-500 group-hover:text-white transition-colors'}`}>{icon}</span>
             <span className="ml-3 font-mono text-sm tracking-widest">{label}</span>
@@ -109,19 +104,15 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
 
           <div className="p-4 border-t border-slate-800 bg-black/40">
              <div className="flex flex-col space-y-3">
- feature/zenbeasts-10x-upgrade-10198197744876026392
-                 <button onClick={() => { setShowQuestLog(true); setIsMobileMenuOpen(false); }} className="flex items-center justify-between w-full bg-slate-800 hover:bg-slate-700 p-2 rounded border border-gray-600 transition-colors group" aria-label="Quest Log">
+ bolt-battle-arena-opt-cleanup-4174947626355481125
 
- palette/improve-navigation-accessibility-12893924475371976220
+ feature/zenbeasts-10x-upgrade-10198197744876026392
+ ZenBeasts
                  <button
-                    onClick={() => setShowQuestLog(true)}
+                    onClick={() => { setShowQuestLog(true); setIsMobileMenuOpen(false); }}
                     aria-label="Quest Log"
                     className="flex items-center justify-between w-full bg-slate-800 hover:bg-slate-700 p-2 rounded border border-gray-600 transition-colors group"
                  >
-
-                 <button onClick={() => setShowQuestLog(true)} className="flex items-center justify-between w-full bg-slate-800 hover:bg-slate-700 p-2 rounded border border-gray-600 transition-colors group" aria-label="Quest Log">
- ZenBeasts
- ZenBeasts
                     <div className="flex items-center text-neon-yellow">
                         <Gift size={16} className="mr-2 group-hover:animate-bounce"/> <span className="font-mono text-xs">QUESTS</span>
                     </div>
@@ -131,32 +122,25 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
                  {/* Wallet Connection */}
                  <div className="relative">
                      {!wallet.isConnected ? (
- palette/improve-navigation-accessibility-12893924475371976220
                          <button
                             onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)}
                             aria-label="Connect Wallet"
                             className="w-full flex items-center justify-center md:justify-start bg-blue-600/20 text-blue-400 border border-blue-500/50 p-2 rounded hover:bg-blue-600/30 transition-colors"
                          >
-
-                         <button onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)} className="w-full flex items-center justify-center md:justify-start bg-blue-600/20 text-blue-400 border border-blue-500/50 p-2 rounded hover:bg-blue-600/30 transition-colors" aria-label="Connect Wallet">
- feature/zenbeasts-10x-upgrade-10198197744876026392
-                            <WalletIcon size={16} className="mr-2" />
-                            <span className="font-mono text-xs">CONNECT WALLET</span>
-
- ZenBeasts
+ bolt-battle-arena-opt-cleanup-4174947626355481125
                             <WalletIcon size={16} className="md:mr-2" />
                             <span className="hidden md:inline font-mono text-xs">CONNECT WALLET</span>
+
+                            <WalletIcon size={16} className="mr-2" />
+                            <span className="font-mono text-xs">CONNECT WALLET</span>
  ZenBeasts
                          </button>
                      ) : (
- palette/improve-navigation-accessibility-12893924475371976220
                          <button
                             onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)}
-                            aria-label="Wallet Settings"
+                            aria-label="Wallet Menu"
                             className="w-full text-left bg-slate-800/80 p-2 rounded border border-slate-600 cursor-pointer hover:border-neon-green transition-colors"
                          >
-
-                         <button className="w-full text-left bg-slate-800/80 p-2 rounded border border-slate-600 cursor-pointer hover:border-neon-green transition-colors" onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)} aria-label="Wallet Menu"> ZenBeasts
                              <div className="flex items-center justify-between mb-1">
                                 <span className="text-[10px] text-gray-400 font-mono uppercase">{wallet.chain}</span>
                                 <div className="h-2 w-2 rounded-full bg-neon-green animate-pulse shadow-[0_0_5px_#39ff14]"></div>
