@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ZenBeast, GymLeader, BattleResult, LeaderboardEntry } from '../types';
 import { Sword, Trophy, Skull } from 'lucide-react';
 import { GYM_LEADERS } from '../constants';
@@ -168,7 +168,8 @@ const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboar
 
     useEffect(() => { return () => clearInterval(logIntervalRef.current); }, []);
 
-    const unstakedBeasts = beasts.filter(b => !b.isStaked);
+    // Optimization: Memoize the filtered list to prevent O(N) recalculation on every render tick during battle animations
+    const unstakedBeasts = useMemo(() => beasts.filter(b => !b.isStaked), [beasts]);
 
     // Get current opponent object for visuals
     const currentOpponent = mode === 'gym' && selectedGymLeader
