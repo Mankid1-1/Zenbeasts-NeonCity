@@ -139,6 +139,7 @@ const Layout: React.FC<LayoutProps> = ({
                     onClick={() => { setShowQuestLog(true); setIsMobileMenuOpen(false); }}
                     aria-label="Quest Log"
                     className="flex items-center justify-between w-full bg-slate-800 hover:bg-slate-700 p-2 rounded border border-gray-600 transition-colors group"
+                    aria-label="Quest Log"
                  >
                     <div className="flex items-center text-neon-yellow">
                         <Gift size={16} className="mr-2 group-hover:animate-bounce"/> <span className="font-mono text-xs">QUESTS</span>
@@ -151,8 +152,8 @@ const Layout: React.FC<LayoutProps> = ({
                      {!wallet.isConnected ? (
                          <button
                             onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)}
-                            aria-label="Connect Wallet"
                             className="w-full flex items-center justify-center md:justify-start bg-blue-600/20 text-blue-400 border border-blue-500/50 p-2 rounded hover:bg-blue-600/30 transition-colors"
+                            aria-label="Connect Wallet"
                          >
  sentinel/fix-code-corruption-and-csp-enhancement-15535713623322996782
                             <WalletIcon size={16} className="mr-2" />
@@ -168,6 +169,8 @@ const Layout: React.FC<LayoutProps> = ({
                             onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)}
                             aria-label="Wallet Menu"
                             className="w-full text-left bg-slate-800/80 p-2 rounded border border-slate-600 cursor-pointer hover:border-neon-green transition-colors"
+                            onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)}
+                            aria-label="Wallet Menu"
                          >
                              <div className="flex items-center justify-between mb-1">
                                 <span className="text-[10px] text-gray-400 font-mono uppercase">{wallet.chain}</span>
