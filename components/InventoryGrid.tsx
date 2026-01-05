@@ -8,6 +8,7 @@ interface InventoryGridProps {
   onToggleStake: (id: string, isStaked: boolean) => void;
   onEvolve: (beast: ZenBeast) => void;
   evolvingId: string | null;
+  onRename: (id: string) => void;
 }
 
 // Optimization: Memoize the grid to prevent re-rendering the list when parent state (like coins) changes
@@ -17,7 +18,8 @@ const InventoryGrid: React.FC<InventoryGridProps> = React.memo(({
   onOpenSellModal,
   onToggleStake,
   onEvolve,
-  evolvingId
+  evolvingId,
+  onRename
 }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 pb-10">
@@ -28,6 +30,7 @@ const InventoryGrid: React.FC<InventoryGridProps> = React.memo(({
           onOpenSellModal={onOpenSellModal}
           onToggleStake={onToggleStake}
           onEvolve={onEvolve}
+          onRename={onRename}
           isEvolving={evolvingId === b.id}
         />
       ))}
