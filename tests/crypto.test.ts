@@ -3,7 +3,6 @@
 import { describe, it, expect, vi } from 'vitest';
 
 import { describe, it, expect } from 'vitest';
- ZenBeasts
 import { generateSecureHex, generateSecureAlphaNumeric } from '../utils';
 import { connectWalletService } from '../services/web3';
 
