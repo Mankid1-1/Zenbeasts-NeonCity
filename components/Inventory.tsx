@@ -20,7 +20,7 @@ interface InventoryProps {
 }
 
 // Optimization: Memoize Inventory to prevent re-renders when parent (App) re-renders but props remain stable
-const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, coins }) => {
+const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, onRename, coins, mintPrice }) => {
   const [isMinting, setIsMinting] = useState(false);
   const [sellingId, setSellingId] = useState<string | null>(null);
   const [sellPrice, setSellPrice] = useState('100');
@@ -181,31 +181,13 @@ const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake,
         )}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 pb-10">
-        {filteredBeasts.map(b => (
-          <InventoryItem
-            key={b.id}
-            beast={b}
-            onOpenSellModal={handleOpenSellModal}
-            onToggleStake={handleToggleStake}
-            onEvolve={handleEvolveAction}
-            onRename={handleOpenRenameModal}
-            isEvolving={evolvingId === b.id}
-          />
-        ))}
-        {filteredBeasts.length === 0 && (
-            <div className="col-span-full py-20 text-center text-gray-600 font-mono">
-                NO BEASTS FOUND MATCHING PARAMETERS.
-            </div>
-        )}
-      </div>
       {/* Grid - Optimized with React.memo */}
       <InventoryGrid
         beasts={filteredBeasts}
         onOpenSellModal={handleOpenSellModal}
         onToggleStake={handleToggleStake}
         onEvolve={handleEvolveAction}
+        onRename={handleOpenRenameModal}
         evolvingId={evolvingId}
       />
 
