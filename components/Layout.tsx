@@ -1,66 +1,52 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Terminal, Home, Box, Dna, Sword, Coins, User, Wallet as WalletIcon, Map, Gift, LandPlot, Menu, X } from 'lucide-react';
-import { LEVEL_THRESHOLDS } from '../constants';
+import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import { LayoutProps } from '../types';
+import { Menu, X, Coins, Map, Home, Box, Dna, Sword, ShoppingBag, LandPlot, User, Wallet as WalletIcon, Terminal, Gift } from 'lucide-react';
 import { CyberToast } from './common/CyberComponents';
-import { Notification, Wallet, Chain, Quest } from '../types';
 import QuestLog from './QuestLog';
+import { calculateLevelProgress } from '../utils';
 
-interface LayoutProps {
-  children: React.ReactNode;
-  userCoins: number;
-  trainerLevel: number;
-  trainerExp: number;
-  notifications: Notification[];
-  wallet: Wallet;
-  quests: Quest[];
-  onDismissNotification: (id: string) => void;
-  onConnectWallet: (chain: Chain) => void;
-  onSwitchChain: (chain: Chain) => void;
-  onClaimQuest: (id: string) => void;
-}
+const NavItem: React.FC<{ to: string; icon: React.ReactNode; label: string; onClick?: () => void }> = ({ to, icon, label, onClick }) => (
+    <NavLink
+        to={to}
+        onClick={onClick}
+        className={({ isActive }) => `
+            flex items-center px-4 py-3 mb-1 text-sm font-mono tracking-wider transition-all duration-200 border-l-2
+            ${isActive
+                ? 'border-neon-pink bg-neon-pink/10 text-white shadow-[0_0_15px_rgba(255,0,255,0.2)]'
+                : 'border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'}
+        `}
+    >
+        <span className="mr-3">{icon}</span>
+        <span className="uppercase">{label}</span>
+    </NavLink>
+);
 
-const NavItem = ({ to, icon, label, onClick }: { to: string, icon: React.ReactNode, label: string, onClick?: () => void }) => {
-    const location = useLocation();
-    const isActive = location.pathname === to;
-    return (
-        <Link 
-            to={to} 
-            onClick={onClick}
-            aria-label={label}
-            aria-current={isActive ? 'page' : undefined}
-            className={`
-                flex items-center p-3 rounded-md transition-all duration-300 group border-l-2
-                ${isActive 
-                    ? 'bg-neon-pink/10 text-neon-pink border-neon-pink shadow-[0_0_10px_rgba(255,0,255,0.2)]' 
-                    : 'border-transparent text-gray-500 hover:bg-white/5 hover:text-white hover:border-gray-500'}
-            `}
-        >
-            <span className={`${isActive ? 'text-neon-pink' : 'text-gray-500 group-hover:text-white transition-colors'}`}>{icon}</span>
-            <span className="ml-3 font-mono text-sm tracking-widest">{label}</span>
-        </Link>
-    )
-}
-
-const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trainerExp, notifications, wallet, quests, onDismissNotification, onConnectWallet, onSwitchChain, onClaimQuest }) => {
-  const nextLevelExp = LEVEL_THRESHOLDS[trainerLevel + 1] || trainerExp;
-  const currentLevelExp = LEVEL_THRESHOLDS[trainerLevel] || 0;
-  const expProgress = nextLevelExp === currentLevelExp ? 100 : ((trainerExp - currentLevelExp) / (nextLevelExp - currentLevelExp)) * 100;
-
+const Layout: React.FC<LayoutProps> = ({
+    children,
+    userCoins,
+    trainerLevel,
+    trainerExp,
+    notifications,
+    wallet,
+    quests,
+    onDismissNotification,
+    onConnectWallet,
+    onSwitchChain,
+    onClaimQuest
+}) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isWalletMenuOpen, setIsWalletMenuOpen] = useState(false);
   const [showQuestLog, setShowQuestLog] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
+  const { nextLevelExp, progress: expProgress } = calculateLevelProgress(trainerLevel, trainerExp);
   const pendingClaims = quests.filter(q => q.completed && !q.claimed).length;
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-[#050510] text-gray-200 font-sans overflow-hidden crt relative selection:bg-neon-pink selection:text-white">
-        {/* Scanline Overlay */}
-        <div className="pointer-events-none fixed inset-0 z-50 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[size:100%_3px,3px_100%]"></div>
-
+    <div className="flex h-screen bg-[#050510] overflow-hidden selection:bg-neon-pink selection:text-white">
         {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between p-4 bg-slate-900 border-b border-slate-800 z-50">
+        <div className="md:hidden fixed top-0 left-0 right-0 h-[60px] flex items-center justify-between p-4 bg-slate-900 border-b border-slate-800 z-50">
             <div className="flex items-center">
                 <Terminal className="text-neon-pink w-6 h-6 mr-2 animate-pulse" />
                 <h1 className="text-xl font-mono font-bold text-white tracking-widest leading-none">
@@ -104,10 +90,6 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
 
           <div className="p-4 border-t border-slate-800 bg-black/40">
              <div className="flex flex-col space-y-3">
- bolt-battle-arena-opt-cleanup-4174947626355481125
-
- feature/zenbeasts-10x-upgrade-10198197744876026392
- ZenBeasts
                  <button
                     onClick={() => { setShowQuestLog(true); setIsMobileMenuOpen(false); }}
                     aria-label="Quest Log"
@@ -127,13 +109,9 @@ const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trai
                             aria-label="Connect Wallet"
                             className="w-full flex items-center justify-center md:justify-start bg-blue-600/20 text-blue-400 border border-blue-500/50 p-2 rounded hover:bg-blue-600/30 transition-colors"
                          >
- bolt-battle-arena-opt-cleanup-4174947626355481125
                             <WalletIcon size={16} className="md:mr-2" />
                             <span className="hidden md:inline font-mono text-xs">CONNECT WALLET</span>
-
-                            <WalletIcon size={16} className="mr-2" />
-                            <span className="font-mono text-xs">CONNECT WALLET</span>
- ZenBeasts
+                            <span className="md:hidden font-mono text-xs">CONNECT WALLET</span>
                          </button>
                      ) : (
                          <button
