@@ -125,9 +125,16 @@ const Slot = ({ beast, label, onRemove }: { beast: ZenBeast | null, label: strin
     <div className="relative w-64 h-80 group">
         <div className={`absolute inset-0 border-2 border-dashed ${beast ? 'border-neon-pink' : 'border-gray-600'} rounded-lg transition-colors`}></div>
         {beast ? (
-            <div className="relative w-full h-full cursor-pointer" onClick={onRemove}>
-                <BeastCard beast={beast} />
-                <div className="absolute inset-0 bg-red-500/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
+            <div
+                className="relative w-full h-full cursor-pointer focus:outline-none"
+                onClick={onRemove}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onRemove(); } }}
+                aria-label={`Remove ${beast.name} from ${label} slot`}
+            >
+                <BeastCard beast={beast} interactive={false} />
+                <div className="absolute inset-0 bg-red-500/50 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
                     <span className="font-bold text-white border-2 border-white px-4 py-2">REMOVE</span>
                 </div>
             </div>

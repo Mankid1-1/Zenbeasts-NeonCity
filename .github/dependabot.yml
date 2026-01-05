@@ -1,0 +1,27 @@
+version: 2
+updates:
+  # 1. Maintain TypeScript/JavaScript dependencies
+  # This handles npm, yarn, and pnpm automatically based on your lockfile.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      time: "09:00" # Optional: Specify time (UTC)
+    # Recommended: Groups updates to prevent Pull Request spam.
+    # This creates one PR for all production dependencies and one for dev dependencies (like types).
+    groups:
+      production-dependencies:
+        patterns:
+          - "*"
+        dependency-type: "production"
+      development-dependencies:
+        patterns:
+          - "*"
+        dependency-type: "development"
+
+  # 2. Maintain GitHub Actions (Best Practice)
+  # Keeps your CI/CD workflows secure and up to date.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

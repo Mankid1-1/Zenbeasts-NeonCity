@@ -1,7 +1,7 @@
 
 import { GoogleGenAI } from "@google/genai";
 import { ZenBeast, Rarity, BeastClass, BattleResult, GymLeader, Trait } from '../types';
-import { safeParseJSON } from '../utils';
+import { safeParseJSON, generateUUID } from '../utils';
 import { getBreedingPrompt, getEvolutionPrompt, getBattlePrompt } from './prompts';
 import { generateStableDiffusionImage } from './stableDiffusionService';
 import { getRandomName, getRandomDescription, generateMockBattleLogs } from './mockData';
@@ -24,7 +24,8 @@ const MOCK_MODE = !GEMINI_API_KEY;
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 const modelName = 'gemini-2.5-flash';
 
-const generateId = () => Math.random().toString(36).substring(2, 9);
+// SECURITY: Use stronger ID generation
+const generateId = () => generateUUID();
 
 // --- HASHLIPS GENERATION LOGIC ---
 
@@ -183,7 +184,8 @@ export const generateZenBeast = async (generation: number): Promise<ZenBeast> =>
       imageUrl: imageUrl
     };
   } catch (error) {
-    console.error("Generation failed", error);
+    // SECURITY: Log only the message to prevent potential leakage of config/keys in full error objects
+    console.error("Generation failed", error instanceof Error ? error.message : "Unknown error");
     throw error;
   }
 };

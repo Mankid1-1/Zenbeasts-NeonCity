@@ -1,10 +1,11 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { ZenBeast, LeaderboardEntry, GymLeader, BattleResult, TrainerPerk, Achievement, Notification, BeastClass, Rarity, Wallet, Chain, Quest } from '../types';
 import { INITIAL_ZEN_COINS, INITIAL_LEADERBOARD, INITIAL_MARKET_LISTINGS, TRAINER_PERKS, LEVEL_THRESHOLDS, BASE_MINT_PRICE, ACHIEVEMENTS_LIST, TOKENOMICS, DAILY_CONTRACTS, STAKING_RATES, GENESIS_MULTIPLIER, BREEDING_COST, EVOLUTION_COST } from '../constants';
 import { generateZenBeast, breedZenBeasts, simulateBattle, evolveZenBeast } from '../services/geminiService';
-import { loadState, saveState } from '../utils';
+import { loadState, saveState, generateUUID, sanitizeZenBeast } from '../utils';
 import { connectWalletService, simulateTransaction, bridgeOffChainToOnChain, estimateGas } from '../services/web3';
+import { useDebounce } from './useDebounce';
 
 export const useGameState = () => {
   // Persistence Keys
@@ -30,18 +31,14 @@ export const useGameState = () => {
     let loaded = loadState<ZenBeast[]>(KEYS.BEASTS, []);
     if (!Array.isArray(loaded)) loaded = []; // Ensure it's an array
     
-    return loaded.map(b => ({
-      ...b,
-      stats: b.stats || { attack: 10, defense: 10, speed: 10, zen: 10 },
-      rarity: b.rarity || Rarity.COMMON,
-      class: b.class || BeastClass.TIGER,
-      traits: b.traits || []
-    }));
+    return loaded.map(sanitizeZenBeast);
   });
 
   const [marketListings, setMarketListings] = useState<ZenBeast[]>(() => {
-      const loaded = loadState(KEYS.MARKET, INITIAL_MARKET_LISTINGS);
-      return Array.isArray(loaded) ? loaded : INITIAL_MARKET_LISTINGS;
+      let loaded = loadState<ZenBeast[]>(KEYS.MARKET, INITIAL_MARKET_LISTINGS);
+      if (!Array.isArray(loaded)) loaded = INITIAL_MARKET_LISTINGS;
+
+      return loaded.map(sanitizeZenBeast);
   });
   
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>(() => loadState(KEYS.LEADERBOARD, INITIAL_LEADERBOARD));
@@ -68,11 +65,38 @@ export const useGameState = () => {
   const [marketHistory, setMarketHistory] = useState<string[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
+  // Refs for stable callbacks
   const beastsRef = useRef(beasts);
   const trainerLevelRef = useRef(trainerLevel);
+  const coinsRef = useRef(coins);
+  const walletRef = useRef(wallet);
+  const marketListingsRef = useRef(marketListings);
+
+  // Track last notified level to handle Level Up notifications via Effect
+  const lastNotifiedLevelRef = useRef(trainerLevel);
   
   useEffect(() => { beastsRef.current = beasts; }, [beasts]);
   useEffect(() => { trainerLevelRef.current = trainerLevel; }, [trainerLevel]);
+  useEffect(() => { coinsRef.current = coins; }, [coins]);
+  useEffect(() => { walletRef.current = wallet; }, [wallet]);
+  useEffect(() => { marketListingsRef.current = marketListings; }, [marketListings]);
+
+  const addNotification = useCallback((title: string, message: string, type: 'success' | 'warning' | 'info' | 'error' = 'info') => {
+      const id = generateUUID();
+      setNotifications(prev => [...prev, { id, title, message, type }]);
+  }, []);
+
+  const removeNotification = useCallback((id: string) => {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
+
+  // Level Up Notification Effect
+  useEffect(() => {
+    if (trainerLevel > lastNotifiedLevelRef.current) {
+         addNotification("LEVEL UP!", `You reached Trainer Level ${trainerLevel}`, 'success');
+    }
+    lastNotifiedLevelRef.current = trainerLevel;
+  }, [trainerLevel, addNotification]);
 
   // Daily Reset & F2P Check
   useEffect(() => {
@@ -95,7 +119,7 @@ export const useGameState = () => {
     if (beasts.length === 0) {
         const initBeast = async () => {
             const starter: ZenBeast = {
-                id: 'starter-' + Math.random().toString(36).substr(2,9),
+                id: 'starter-' + generateUUID(),
                 name: 'Neon Initiate',
                 description: 'Your spirit companion. Bound to your soul, it cannot be traded.',
                 class: BeastClass.TIGER,
@@ -121,25 +145,24 @@ export const useGameState = () => {
     checkDailyReset();
   }, []); 
 
-  // Persistence
-  useEffect(() => saveState(KEYS.COINS, coins), [coins]);
-  useEffect(() => saveState(KEYS.BEASTS, beasts), [beasts]);
-  useEffect(() => saveState(KEYS.MARKET, marketListings), [marketListings]);
-  useEffect(() => saveState(KEYS.WALLET, wallet), [wallet]);
-  useEffect(() => saveState(KEYS.QUESTS, quests), [quests]);
+  // Persistence - Optimization: Debounce storage writes to prevent blocking main thread on rapid updates
+  const debouncedCoins = useDebounce(coins, 500);
+  const debouncedBeasts = useDebounce(beasts, 500);
+  const debouncedMarket = useDebounce(marketListings, 500);
+  const debouncedWallet = useDebounce(wallet, 500);
+  const debouncedQuests = useDebounce(quests, 500);
 
-  const activePerks = TRAINER_PERKS.filter(p => p.unlockLevel <= trainerLevel);
+  useEffect(() => saveState(KEYS.COINS, debouncedCoins), [debouncedCoins]);
+  useEffect(() => saveState(KEYS.BEASTS, debouncedBeasts), [debouncedBeasts]);
+  useEffect(() => saveState(KEYS.MARKET, debouncedMarket), [debouncedMarket]);
+  useEffect(() => saveState(KEYS.WALLET, debouncedWallet), [debouncedWallet]);
+  useEffect(() => saveState(KEYS.QUESTS, debouncedQuests), [debouncedQuests]);
 
-  const addNotification = useCallback((title: string, message: string, type: 'success' | 'warning' | 'info' | 'error' = 'info') => {
-      const id = Math.random().toString(36).substr(2, 9);
-      setNotifications(prev => [...prev, { id, title, message, type }]);
-  }, []);
+  // Optimization: Memoize activePerks to prevent new array reference on every render, allowing children like Dashboard to skip re-renders.
+  const activePerks = useMemo(() => TRAINER_PERKS.filter(p => p.unlockLevel <= trainerLevel), [trainerLevel]);
 
-  const removeNotification = useCallback((id: string) => {
-      setNotifications(prev => prev.filter(n => n.id !== id));
-  }, []);
 
-  const updateQuestProgress = (type: string, amount: number) => {
+  const updateQuestProgress = useCallback((type: string, amount: number) => {
       setQuests(prev => prev.map(q => {
           if (q.type === type && !q.completed) {
               const newCurrent = Math.min(q.target, q.current + amount);
@@ -151,9 +174,21 @@ export const useGameState = () => {
           }
           return q;
       }));
-  };
+  }, [addNotification]);
 
-  const claimQuestReward = (questId: string) => {
+  const addTrainerExp = useCallback((amount: number) => {
+    setTrainerExp(prev => {
+        const newExp = prev + amount;
+        // Use ref for threshold check to determine if we SHOULD level up
+        const nextLevelThreshold = LEVEL_THRESHOLDS[trainerLevelRef.current + 1];
+        if (nextLevelThreshold && newExp >= nextLevelThreshold) {
+            setTrainerLevel(l => l + 1);
+        }
+        return newExp;
+    });
+  }, []);
+
+  const claimQuestReward = useCallback((questId: string) => {
       setQuests(prev => prev.map(q => {
           if (q.id === questId && q.completed && !q.claimed) {
               setCoins(c => c + q.rewardCoins);
@@ -163,10 +198,10 @@ export const useGameState = () => {
           }
           return q;
       }));
-  };
+  }, [addNotification, addTrainerExp]);
 
   // Web3 Actions
-  const connectWallet = async (chain: Chain) => {
+  const connectWallet = useCallback(async (chain: Chain) => {
       try {
           const newWallet = await connectWalletService(chain);
           setWallet(newWallet);
@@ -174,16 +209,22 @@ export const useGameState = () => {
       } catch (e) {
           addNotification("Connection Error", "Failed to link wallet.", 'error');
       }
-  };
+  }, [addNotification]);
 
-  const switchChain = async (chain: Chain) => {
-      if (!wallet.isConnected) return;
+  const switchChain = useCallback(async (chain: Chain) => {
+      if (!walletRef.current.isConnected) return;
       setWallet(prev => ({ ...prev, chain }));
       addNotification("Network Switched", `Active Chain: ${chain.toUpperCase()}`, 'info');
-  };
+  }, [addNotification]);
 
-  const claimEarnings = async (amountZC: number) => {
-      if (!wallet.isConnected) {
+  const claimEarnings = useCallback(async (amountZC: number) => {
+      // SECURITY: Validate amount to prevent NaN/Infinity or negative exploits
+      if (!Number.isFinite(amountZC) || amountZC <= 0) {
+          addNotification("Invalid Amount", "Please enter a valid positive number.", 'error');
+          return;
+      }
+
+      if (!walletRef.current.isConnected) {
           addNotification("Wallet Required", "Connect wallet to claim earnings.", 'warning');
           return;
       }
@@ -191,48 +232,34 @@ export const useGameState = () => {
           addNotification("Threshold Not Met", `Minimum claim: ${TOKENOMICS.CLAIM_THRESHOLD} ZC`, 'warning');
           return;
       }
-      if (coins < amountZC) {
+      if (coinsRef.current < amountZC) {
           addNotification("Insufficient Funds", "Not enough ZenCoins.", 'error');
           return;
       }
 
       setCoins(prev => prev - amountZC);
       try {
-          const zenReceived = await bridgeOffChainToOnChain(amountZC, wallet.chain);
+          const zenReceived = await bridgeOffChainToOnChain(amountZC, walletRef.current.chain);
           setWallet(prev => ({ ...prev, zenBalance: prev.zenBalance + zenReceived }));
-          addNotification("Transfer Complete", `Bridged ${zenReceived.toFixed(4)} ZEN to ${wallet.chain}`, 'success');
+          addNotification("Transfer Complete", `Bridged ${zenReceived.toFixed(4)} ZEN to ${walletRef.current.chain}`, 'success');
       } catch (e: any) {
           setCoins(prev => prev + amountZC); // Refund
           addNotification("Bridge Error", e.message, 'error');
       }
-  };
+  }, [addNotification]);
 
-  const calculateMintPrice = () => {
+  const calculateMintPrice = useCallback(() => {
     let price = BASE_MINT_PRICE;
-    const currentActivePerks = TRAINER_PERKS.filter(p => p.unlockLevel <= trainerLevel);
+    const currentActivePerks = TRAINER_PERKS.filter(p => p.unlockLevel <= trainerLevelRef.current);
     const discountPerk = currentActivePerks.find(p => p.effectType === 'mint_discount');
     if (discountPerk) price = Math.floor(price * (1 - discountPerk.value));
     return price;
-  };
-
-  const addTrainerExp = (amount: number) => {
-    setTrainerExp(prev => {
-        const newExp = prev + amount;
-        const nextLevelThreshold = LEVEL_THRESHOLDS[trainerLevelRef.current + 1];
-        if (nextLevelThreshold && newExp >= nextLevelThreshold) {
-            setTrainerLevel(l => {
-                addNotification("LEVEL UP!", `You reached Trainer Level ${l + 1}`, 'success');
-                return l + 1;
-            });
-        }
-        return newExp;
-    });
-  };
+  }, []);
 
   // -------------------- STAKING LOGIC START --------------------
 
-  const handleStake = (id: string) => {
-    if (!wallet.isConnected) {
+  const handleStake = useCallback((id: string) => {
+    if (!walletRef.current.isConnected) {
          addNotification("Wallet Required", "Staking requires a secure wallet connection.", 'warning');
          return;
     }
@@ -252,9 +279,9 @@ export const useGameState = () => {
         return b;
     }));
     addNotification("Asset Locked", "Beast staked in Neural Vault.", 'success');
-  };
+  }, [addNotification]);
 
-  const calculatePendingRewards = (beast: ZenBeast) => {
+  const calculatePendingRewards = useCallback((beast: ZenBeast) => {
       if (!beast.isStaked || !beast.stakingStart) return 0;
       const now = Date.now();
       const hoursStaked = (now - beast.stakingStart) / (1000 * 60 * 60);
@@ -267,9 +294,9 @@ export const useGameState = () => {
       rate = rate * (1 + bonus);
 
       return (beast.accumulatedRewards || 0) + (hoursStaked * rate);
-  };
+  }, []);
 
-  const claimStakingRewards = (id: string, shouldUnstake: boolean) => {
+  const claimStakingRewards = useCallback((id: string, shouldUnstake: boolean) => {
       setBeasts(prev => prev.map(b => {
           if (b.id === id) {
               const rewards = calculatePendingRewards(b);
@@ -286,9 +313,9 @@ export const useGameState = () => {
           }
           return b;
       }));
-  };
+  }, [calculatePendingRewards, addNotification]);
 
-  const claimAllStakingRewards = () => {
+  const claimAllStakingRewards = useCallback(() => {
     let totalClaimed = 0;
     setBeasts(prev => prev.map(b => {
         if (b.isStaked) {
@@ -305,19 +332,19 @@ export const useGameState = () => {
     } else {
         addNotification("No Yields", "No pending rewards to harvest.", 'info');
     }
-  };
+  }, [calculatePendingRewards, addNotification]);
 
-  const handleUnstake = (id: string) => {
+  const handleUnstake = useCallback((id: string) => {
       // Unstaking automatically claims rewards
       claimStakingRewards(id, true);
       addNotification("Asset Withdrawn", "Beast returned to inventory.", 'info');
-  };
+  }, [claimStakingRewards, addNotification]);
 
   // -------------------- STAKING LOGIC END --------------------
 
-  const handleMint = async () => {
+  const handleMint = useCallback(async () => {
     const price = calculateMintPrice();
-    if (coins < price) {
+    if (coinsRef.current < price) {
         addNotification("Transaction Failed", "Insufficient ZenCoins.", 'error');
         throw new Error("Insufficient funds");
     }
@@ -336,10 +363,10 @@ export const useGameState = () => {
         addNotification("Mint Error", "Generation failed. Coins refunded.", 'error');
         throw e;
     }
-  };
+  }, [calculateMintPrice, addNotification, addTrainerExp, updateQuestProgress]);
 
-  const handleBreed = async (p1: ZenBeast, p2: ZenBeast) => {
-    if (coins < BREEDING_COST) {
+  const handleBreed = useCallback(async (p1: ZenBeast, p2: ZenBeast) => {
+    if (coinsRef.current < BREEDING_COST) {
          addNotification("Fusion Failed", "Insufficient ZC for catalyst.", 'error');
          throw new Error("Insufficient funds");
     }
@@ -365,10 +392,10 @@ export const useGameState = () => {
         addNotification("Fusion Error", "Genetic sequencing failed.", 'error');
         throw e;
     }
-  };
+  }, [addNotification, addTrainerExp, updateQuestProgress]);
 
-  const handleEvolve = async (beast: ZenBeast) => {
-    if (coins < EVOLUTION_COST) {
+  const handleEvolve = useCallback(async (beast: ZenBeast) => {
+    if (coinsRef.current < EVOLUTION_COST) {
         addNotification("Evolution Failed", "Insufficient ZenCoins.", 'error');
         throw new Error("Insufficient funds");
     }
@@ -382,20 +409,31 @@ export const useGameState = () => {
         setCoins(prev => prev + EVOLUTION_COST);
         addNotification("Evolution Error", "The process was unstable.", 'error');
     }
-  };
+  }, [addNotification, addTrainerExp]);
 
-  const handleRename = (id: string, newName: string) => {
+  const handleRename = useCallback((id: string, newName: string) => {
+      // SECURITY: Input validation to prevent excessively long or malicious names
+      const trimmedName = newName.trim();
+      if (trimmedName.length === 0 || trimmedName.length > 25) {
+          addNotification("Invalid Name", "Name must be 1-25 characters.", 'error');
+          return;
+      }
+      if (!/^[a-zA-Z0-9 -]+$/.test(trimmedName)) {
+          addNotification("Invalid Name", "Only alphanumeric, spaces, and hyphens allowed.", 'error');
+          return;
+      }
+
       const COST = 10;
-      if (coins < COST) {
+      if (coinsRef.current < COST) {
           addNotification("Insufficient Funds", `Rename costs ${COST} ZC`, 'error');
           return;
       }
       setCoins(c => c - COST);
-      setBeasts(prev => prev.map(b => b.id === id ? { ...b, name: newName } : b));
-      addNotification("Identity Updated", `Beast renamed to ${newName}`, 'success');
-  }
+      setBeasts(prev => prev.map(b => b.id === id ? { ...b, name: trimmedName } : b));
+      addNotification("Identity Updated", `Beast renamed to ${trimmedName}`, 'success');
+  }, [addNotification]);
 
-  const handleBattle = async (beast: ZenBeast, gymLeader?: GymLeader): Promise<BattleResult | null> => {
+  const handleBattle = useCallback(async (beast: ZenBeast, gymLeader?: GymLeader): Promise<BattleResult | null> => {
     if (beast.isStaked) {
         addNotification("Unit Unavailable", "Beast is currently staked in the Vault.", 'error');
         return null;
@@ -425,23 +463,29 @@ export const useGameState = () => {
         addTrainerExp(result.rewards.trainerExp || 20);
     }
     return result;
-  };
+  }, [addNotification, updateQuestProgress, addTrainerExp]);
 
-  const handleListForSale = async (id: string, price: number) => {
-    if (!wallet.isConnected) {
+  const handleListForSale = useCallback(async (id: string, price: number) => {
+    // SECURITY: Input validation to prevent negative price or NaN listings (Economy Exploit)
+    if (!Number.isFinite(price) || price <= 0) {
+        addNotification("Invalid Price", "Price must be a valid positive number.", 'error');
+        return;
+    }
+
+    if (!walletRef.current.isConnected) {
         addNotification("Wallet Locked", "Connect wallet to access Black Market.", 'warning');
         return;
     }
 
-    const gasFee = estimateGas(wallet.chain);
-    if (wallet.zenBalance < gasFee) {
+    const gasFee = estimateGas(walletRef.current.chain);
+    if (walletRef.current.zenBalance < gasFee) {
         addNotification("Gas Error", `Insufficient ZEN for gas (${gasFee}).`, 'error');
         return;
     }
 
     setWallet(prev => ({ ...prev, zenBalance: prev.zenBalance - gasFee }));
     
-    const beast = beasts.find(b => b.id === id);
+    const beast = beastsRef.current.find(b => b.id === id);
     if (beast) {
         if (beast.isSoulbound) {
             addNotification("Restriction", "Soulbound beasts cannot be sold.", 'error');
@@ -449,39 +493,39 @@ export const useGameState = () => {
         }
         setBeasts(prev => prev.filter(b => b.id !== id));
         // Add original owner info
-        setMarketListings(prev => [...prev, { ...beast, price, ownerId: 'player', originalOwner: wallet.address || 'player', isOnChain: true }]);
+        setMarketListings(prev => [...prev, { ...beast, price, ownerId: 'player', originalOwner: walletRef.current.address || 'player', isOnChain: true }]);
         addNotification("Market Listing", `${beast.name} listed for ${price} ZEN`, 'success');
     }
-  };
+  }, [addNotification]);
 
-  const handleCancelListing = async (id: string) => {
-      const listing = marketListings.find(l => l.id === id);
+  const handleCancelListing = useCallback(async (id: string) => {
+      const listing = marketListingsRef.current.find(l => l.id === id);
       if (!listing) return;
       
       // Simulate gas for cancellation
-      const gasFee = estimateGas(wallet.chain) / 2;
+      const gasFee = estimateGas(walletRef.current.chain) / 2;
       setWallet(prev => ({ ...prev, zenBalance: prev.zenBalance - gasFee }));
 
       setMarketListings(prev => prev.filter(l => l.id !== id));
       setBeasts(prev => [...prev, { ...listing, price: undefined, ownerId: 'player', isStaked: false }]);
       addNotification("Listing Cancelled", `${listing.name} returned to Armory`, 'info');
-  };
+  }, [addNotification]);
 
-  const handleBuy = async (beast: ZenBeast) => {
-    if (!wallet.isConnected) {
+  const handleBuy = useCallback(async (beast: ZenBeast) => {
+    if (!walletRef.current.isConnected) {
         addNotification("Wallet Locked", "Connect wallet to trade.", 'warning');
         return;
     }
     
-    const totalCost = (beast.price || 0) + estimateGas(wallet.chain);
+    const totalCost = (beast.price || 0) + estimateGas(walletRef.current.chain);
 
-    if (wallet.zenBalance < totalCost) {
+    if (walletRef.current.zenBalance < totalCost) {
         addNotification("Purchase Failed", `Insufficient ZEN. Cost: ${totalCost.toFixed(4)}`, 'error');
         return;
     }
 
     try {
-        await simulateTransaction(wallet.chain, 'transfer');
+        await simulateTransaction(walletRef.current.chain, 'transfer');
         setWallet(prev => ({ ...prev, zenBalance: prev.zenBalance - totalCost }));
         setMarketListings(prev => prev.filter(b => b.id !== beast.id));
         setBeasts(prev => [...prev, { ...beast, price: undefined, ownerId: 'player', isStaked: false, isOnChain: true }]);
@@ -490,10 +534,11 @@ export const useGameState = () => {
     } catch (e) {
         addNotification("Transaction Failed", "Blockchain rejected transfer.", 'error');
     }
-  };
+  }, [addNotification]);
 
   // Debug methods
-  const debugMethods = {
+  // Optimization: Memoize debug methods to prevent DebugConsole from re-rendering unnecessarily
+  const debugMethods = useMemo(() => ({
       addCoins: (amount: number) => setCoins(c => c + amount),
       addBeast: async () => { try { await handleMint(); } catch(e){} },
       levelUp: () => setTrainerLevel(l => l + 1),
@@ -501,7 +546,7 @@ export const useGameState = () => {
           localStorage.clear();
           window.location.reload();
       }
-  };
+  }), [handleMint]);
 
   return {
     coins,

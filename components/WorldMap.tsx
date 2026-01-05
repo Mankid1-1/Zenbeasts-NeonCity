@@ -25,10 +25,12 @@ const MapNode = ({ x, y, icon, label, path, color, delay, levelRequired, current
     };
 
     return (
-        <div 
-            className={`absolute group ${isLocked ? 'cursor-not-allowed grayscale opacity-70' : 'cursor-pointer'}`}
+        <button
+            className={`absolute group p-0 bg-transparent border-none outline-none focus-visible:ring-2 focus-visible:ring-neon-blue rounded-full ${isLocked ? 'cursor-not-allowed grayscale opacity-70' : 'cursor-pointer'}`}
             style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${delay}ms` }}
             onClick={handleClick}
+            disabled={isLocked}
+            aria-label={isLocked ? `${label} (Locked, Level ${levelRequired} Required)` : `Go to ${label}`}
         >
             <div className={`
                 w-16 h-16 md:w-24 md:h-24 rounded-full border-2 ${isLocked ? 'border-gray-600 bg-gray-900' : `${color} bg-black/80`} backdrop-blur-md
@@ -49,11 +51,13 @@ const MapNode = ({ x, y, icon, label, path, color, delay, levelRequired, current
             </div>
             {/* Connecting lines pulse effect could go here */}
             {!isLocked && <div className={`absolute inset-0 rounded-full ${color.replace('border-', 'bg-')} opacity-20 animate-ping`}></div>}
-        </div>
+        </button>
     );
 };
 
-const WorldMap = ({ trainerLevel }: { trainerLevel: number }) => {
+// Optimization: Memoize WorldMap to prevent re-renders when unrelated global state (like coins) changes.
+// It only depends on trainerLevel for unlocking nodes.
+const WorldMap = React.memo(({ trainerLevel }: { trainerLevel: number }) => {
     return (
         <div className="relative w-full h-full bg-[#050510] overflow-hidden animate-fade-in-up">
             {/* Background Grid */}
@@ -90,6 +94,6 @@ const WorldMap = ({ trainerLevel }: { trainerLevel: number }) => {
             </div>
         </div>
     );
-};
+});
 
 export default WorldMap;
