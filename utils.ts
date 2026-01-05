@@ -35,6 +35,12 @@ export const formatNumber = (num: number): string => {
   return new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(num);
 };
 
+export const calculateLevelProgress = (level: number, exp: number) => {
+    const nextLevelExp = level * 100;
+    const progress = (exp / nextLevelExp) * 100;
+    return { nextLevelExp, progress };
+};
+
 /**
  * SECURITY: Generate a cryptographically secure random hex string.
  * Uses window.crypto.getRandomValues where available.

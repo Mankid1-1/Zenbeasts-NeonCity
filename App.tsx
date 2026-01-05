@@ -1,50 +1,55 @@
+ bolt-inventory-rendering-optimization-13654411884582787274
 
-import React, { Suspense } from 'react';
+
+   ZenBeasts
+import React, { Suspense, lazy } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useGameState } from './hooks/useGameState';
 
 import Layout from './components/Layout';
-import DebugConsole from './components/DebugConsole';
 import PageLoader from './components/PageLoader';
+import DebugConsole from './components/DebugConsole';
 
 // Lazy load route components
-const Dashboard = React.lazy(() => import('./components/Dashboard'));
-const Inventory = React.lazy(() => import('./components/Inventory'));
-const Breeding = React.lazy(() => import('./components/Breeding'));
-const BattleArena = React.lazy(() => import('./components/BattleArena'));
-const Marketplace = React.lazy(() => import('./components/Marketplace'));
-const WorldMap = React.lazy(() => import('./components/WorldMap'));
-const Bank = React.lazy(() => import('./components/Bank'));
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const Inventory = lazy(() => import('./components/Inventory'));
+const Breeding = lazy(() => import('./components/Breeding'));
+const BattleArena = lazy(() => import('./components/BattleArena'));
+const Marketplace = lazy(() => import('./components/Marketplace'));
+const WorldMap = lazy(() => import('./components/WorldMap'));
+const Bank = lazy(() => import('./components/Bank'));
 
 const App = () => {
   const gameState = useGameState();
 
   return (
-    <>
-      <HashRouter>
-        <Layout 
-          userCoins={gameState.coins} 
-          trainerLevel={gameState.trainerLevel} 
-          trainerExp={gameState.trainerExp}
-          notifications={gameState.notifications}
-          wallet={gameState.wallet}
-          quests={gameState.quests}
-          onDismissNotification={gameState.removeNotification}
-          onConnectWallet={gameState.connectWallet}
-          onSwitchChain={gameState.switchChain}
-          onClaimQuest={gameState.claimQuestReward}
-        >
+    <HashRouter>
+      <Layout 
+        userCoins={gameState.coins} 
+        trainerLevel={gameState.trainerLevel} 
+        trainerExp={gameState.trainerExp}
+        notifications={gameState.notifications}
+        wallet={gameState.wallet}
+        quests={gameState.quests}
+        onDismissNotification={gameState.removeNotification}
+        onConnectWallet={gameState.connectWallet}
+        onSwitchChain={gameState.switchChain}
+        onClaimQuest={gameState.claimQuestReward}
+      >
+ bolt-inventory-rendering-optimization-13654411884582787274
+
+ palette-ux-improvements-12006417270454289975
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<WorldMap trainerLevel={gameState.trainerLevel} />} />
               <Route path="/dashboard" element={
-                  <Dashboard 
-                      beasts={gameState.beasts} 
-                      coins={gameState.coins} 
-                      leaderboard={gameState.leaderboard} 
-                      trainerLevel={gameState.trainerLevel} 
-                      trainerExp={gameState.trainerExp} 
+                  <Dashboard
+                      beasts={gameState.beasts}
+                      coins={gameState.coins}
+                      leaderboard={gameState.leaderboard}
+                      trainerLevel={gameState.trainerLevel}
+                      trainerExp={gameState.trainerExp}
                       activePerks={gameState.activePerks}
                       achievements={gameState.achievements}
                       coinHistory={gameState.coinHistory}
@@ -52,10 +57,10 @@ const App = () => {
                   />
               } />
               <Route path="/inventory" element={
-                <Inventory 
-                  beasts={gameState.beasts} 
-                  onMint={gameState.handleMint} 
-                  onSell={gameState.handleListForSale} 
+                <Inventory
+                  beasts={gameState.beasts}
+                  onMint={gameState.handleMint}
+                  onSell={gameState.handleListForSale}
                   onStake={gameState.handleStake}
                   onUnstake={gameState.handleUnstake}
                   onEvolve={gameState.handleEvolve}
@@ -67,16 +72,18 @@ const App = () => {
               <Route path="/breeding" element={<Breeding beasts={gameState.beasts} onBreed={gameState.handleBreed} coins={gameState.coins} />} />
               <Route path="/battle" element={<BattleArena beasts={gameState.beasts} onBattle={gameState.handleBattle} leaderboard={gameState.leaderboard} />} />
               <Route path="/market" element={
-                <Marketplace 
-                    listings={gameState.marketListings} 
-                    onBuy={gameState.handleBuy} 
+                <Marketplace
+                    listings={gameState.marketListings}
+                    onBuy={gameState.handleBuy}
                     onCancelListing={gameState.handleCancelListing}
-                    marketHistory={gameState.marketHistory} 
+                    // Removed userCoins prop as it is not present in MarketplaceProps (React.memo optimization)
+                    // If userCoins is needed, it should be added to MarketplaceProps in Marketplace.tsx
+                    marketHistory={gameState.marketHistory}
                 />
               } />
               <Route path="/bank" element={
-                  <Bank 
-                      beasts={gameState.beasts} 
+                  <Bank
+                      beasts={gameState.beasts}
                       wallet={gameState.wallet}
                       onStake={gameState.handleStake}
                       onUnstake={gameState.handleUnstake}
@@ -86,19 +93,72 @@ const App = () => {
               } />
             </Routes>
           </Suspense>
-            
-            {import.meta.env.DEV && (
-              <DebugConsole
-                onAddCoins={gameState.debugMethods.addCoins}
-                onAddBeast={gameState.debugMethods.addBeast}
-                onLevelUp={gameState.debugMethods.levelUp}
-                onReset={gameState.debugMethods.reset}
+
+ ZenBeasts
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<WorldMap trainerLevel={gameState.trainerLevel} />} />
+            <Route path="/dashboard" element={
+                <Dashboard 
+                    beasts={gameState.beasts} 
+                    coins={gameState.coins} 
+                    leaderboard={gameState.leaderboard} 
+                    trainerLevel={gameState.trainerLevel} 
+                    trainerExp={gameState.trainerExp} 
+                    activePerks={gameState.activePerks}
+                    achievements={gameState.achievements}
+                    coinHistory={gameState.coinHistory}
+                    onClaim={gameState.claimEarnings}
+                />
+            } />
+            <Route path="/inventory" element={
+              <Inventory 
+                beasts={gameState.beasts} 
+                onMint={gameState.handleMint} 
+                onSell={gameState.handleListForSale} 
+                onStake={gameState.handleStake}
+                onUnstake={gameState.handleUnstake}
+                onEvolve={gameState.handleEvolve}
+                onRename={gameState.handleRename}
+                coins={gameState.coins}
+                mintPrice={gameState.calculateMintPrice()}
               />
-            )}
-        </Layout>
-      </HashRouter>
-      <SpeedInsights />
-    </>
+            } />
+            <Route path="/breeding" element={<Breeding beasts={gameState.beasts} onBreed={gameState.handleBreed} coins={gameState.coins} />} />
+            <Route path="/battle" element={<BattleArena beasts={gameState.beasts} onBattle={gameState.handleBattle} leaderboard={gameState.leaderboard} />} />
+            <Route path="/market" element={
+              <Marketplace 
+                  listings={gameState.marketListings} 
+                  onBuy={gameState.handleBuy} 
+                  onCancelListing={gameState.handleCancelListing}
+                  userCoins={gameState.coins}
+                  marketHistory={gameState.marketHistory} 
+              />
+            } />
+            <Route path="/bank" element={
+                <Bank 
+                    beasts={gameState.beasts} 
+                    wallet={gameState.wallet}
+                    onStake={gameState.handleStake}
+                    onUnstake={gameState.handleUnstake}
+                    onClaimRewards={(id) => gameState.claimStakingRewards(id, false)}
+                    onClaimAll={gameState.claimAllStakingRewards}
+                />
+            } />
+          </Routes>
+        </Suspense>
+ ZenBeasts
+          
+        {import.meta.env.DEV && (
+          <DebugConsole
+            onAddCoins={gameState.debugMethods.addCoins}
+            onAddBeast={gameState.debugMethods.addBeast}
+            onLevelUp={gameState.debugMethods.levelUp}
+            onReset={gameState.debugMethods.reset}
+          />
+        )}
+      </Layout>
+    </HashRouter>
   );
 };
 
