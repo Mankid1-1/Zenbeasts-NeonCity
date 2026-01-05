@@ -16,6 +16,7 @@
     "@opentelemetry/instrumentation-fetch": "^0.208.0",
     "@opentelemetry/instrumentation-xml-http-request": "^0.208.0",
     "@opentelemetry/resources": "^2.2.0",
+    "@opentelemetry/sdk-trace-base": "^2.2.0",
     "@opentelemetry/sdk-trace-web": "^2.2.0",
     "@opentelemetry/semantic-conventions": "^1.38.0",
     "lucide-react": "^0.358.0",
