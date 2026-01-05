@@ -1,5 +1,8 @@
 
+ sentinel/fix-code-corruption-and-csp-enhancement-15535713623322996782
 import { describe, it, expect, vi } from 'vitest';
+
+import { describe, it, expect } from 'vitest';
 import { generateSecureHex, generateSecureAlphaNumeric } from '../utils';
 import { connectWalletService } from '../services/web3';
 
