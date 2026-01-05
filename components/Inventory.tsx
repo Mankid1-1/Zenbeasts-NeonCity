@@ -6,6 +6,7 @@ import InventoryGrid from './InventoryGrid';
 import { useDebounce } from '../hooks/useDebounce';
 import { Filter, Search, X, ArrowUpCircle } from 'lucide-react';
 import { BASE_MINT_PRICE } from '../constants';
+import InventoryItem from './InventoryItem';
 
 interface InventoryProps {
   beasts: ZenBeast[];
@@ -20,18 +21,16 @@ interface InventoryProps {
 }
 
 // Optimization: Memoize Inventory to prevent re-renders when parent (App) re-renders but props remain stable
+ sentinel/fix-code-corruption-and-csp-enhancement-15535713623322996782
 const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, onRename, coins, mintPrice }) => {
+
+const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, coins }) => {
+ ZenBeasts
   const [isMinting, setIsMinting] = useState(false);
   const [sellingId, setSellingId] = useState<string | null>(null);
   const [sellPrice, setSellPrice] = useState('100');
   const [evolvingId, setEvolvingId] = useState<string | null>(null);
 
-  // Performance: Use ref for coins to avoid recreating handlers on every coin update (every 5s)
-  const coinsRef = useRef(coins);
-  useEffect(() => {
-    coinsRef.current = coins;
-  }, [coins]);
-  
   // Rename Modal State
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
@@ -191,7 +190,9 @@ const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake,
         onOpenSellModal={handleOpenSellModal}
         onToggleStake={handleToggleStake}
         onEvolve={handleEvolveAction}
+        onRename={handleOpenRenameModal}
         evolvingId={evolvingId}
+        onRename={handleOpenRenameModal}
       />
 
       {/* Sell Modal */}
