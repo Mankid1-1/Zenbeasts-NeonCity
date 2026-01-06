@@ -7,6 +7,7 @@ interface InventoryGridProps {
   onOpenSellModal: (id: string) => void;
   onToggleStake: (id: string, isStaked: boolean) => void;
   onEvolve: (beast: ZenBeast) => void;
+  onRename: (id: string) => void;
   evolvingId: string | null;
   onRename: (id: string) => void;
 }
