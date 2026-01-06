@@ -20,6 +20,32 @@ body {
     0 100%, 0 15px
   );
 }
+
+/* Glitch Animation */
+@keyframes glitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
+}
+
+.glitch-hover:hover {
+  animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+}
+
+/* Neon Text Utilities */
+.text-shadow-neon {
+  text-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14, 0 0 20px #39ff14;
+}
+.text-shadow-neon-pink {
+  text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+}
+.text-shadow-neon-blue {
+  text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 20px #00ffff;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
@@ -50,6 +76,7 @@ body {
   background-size: 100% 2px, 3px 100%;
   pointer-events: none;
 }
+/* Flicker reduced for better UX, kept subtle */
 .crt::after {
   content: " ";
   display: block;
@@ -65,27 +92,9 @@ body {
   animation: flicker 0.15s infinite;
 }
 @keyframes flicker {
-  0% { opacity: 0.02795 }
-  5% { opacity: 0.03387 }
-  10% { opacity: 0.02871 }
-  15% { opacity: 0.03216 }
-  20% { opacity: 0.02823 }
-  25% { opacity: 0.03332 }
-  30% { opacity: 0.02832 }
-  35% { opacity: 0.03221 }
-  40% { opacity: 0.02815 }
-  45% { opacity: 0.03373 }
-  50% { opacity: 0.02864 }
-  55% { opacity: 0.03357 }
-  60% { opacity: 0.02964 }
-  65% { opacity: 0.03399 }
-  70% { opacity: 0.02869 }
-  75% { opacity: 0.0344 }
-  80% { opacity: 0.02874 }
-  85% { opacity: 0.03348 }
-  90% { opacity: 0.02847 }
-  95% { opacity: 0.03383 }
-  100% { opacity: 0.02888 }
+  0% { opacity: 0.01 }
+  50% { opacity: 0.03 }
+  100% { opacity: 0.01 }
 }
 
 .image-pixelated {
@@ -94,4 +103,15 @@ body {
 
 .clip-path-polygon {
    clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+}
+
+.animate-shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
 }
