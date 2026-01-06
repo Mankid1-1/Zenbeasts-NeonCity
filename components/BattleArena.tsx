@@ -191,7 +191,11 @@ const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboar
 
     useEffect(() => { return () => clearInterval(logIntervalRef.current); }, []);
 
+ bolt-inventory-rendering-optimization-13654411884582787274
+    // Optimization: Memoize the filtered list to avoid O(N) filtering on every render tick during battle playback
+
     // Optimization: Memoize derived list to prevent O(N) filtering on every render (especially during battle loop)
+ ZenBeasts
     const unstakedBeasts = useMemo(() => beasts.filter(b => !b.isStaked), [beasts]);
 
     // Get current opponent object for visuals
