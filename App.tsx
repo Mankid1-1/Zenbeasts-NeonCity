@@ -1,10 +1,10 @@
+ bolt-inventory-rendering-optimization-13654411884582787274
 
- bolt-code-splitting-16208616788671959758
+
+   ZenBeasts
 import React, { Suspense, lazy } from 'react';
-
-import React, { Suspense } from 'react';
- ZenBeasts
 import { HashRouter, Routes, Route } from 'react-router-dom';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { useGameState } from './hooks/useGameState';
 
 import Layout from './components/Layout';
@@ -19,19 +19,6 @@ const BattleArena = lazy(() => import('./components/BattleArena'));
 const Marketplace = lazy(() => import('./components/Marketplace'));
 const WorldMap = lazy(() => import('./components/WorldMap'));
 const Bank = lazy(() => import('./components/Bank'));
-
-import DebugConsole from './components/DebugConsole';
-import PageLoader from './components/PageLoader';
-
-// Lazy load route components
-const Dashboard = React.lazy(() => import('./components/Dashboard'));
-const Inventory = React.lazy(() => import('./components/Inventory'));
-const Breeding = React.lazy(() => import('./components/Breeding'));
-const BattleArena = React.lazy(() => import('./components/BattleArena'));
-const Marketplace = React.lazy(() => import('./components/Marketplace'));
-const WorldMap = React.lazy(() => import('./components/WorldMap'));
-const Bank = React.lazy(() => import('./components/Bank'));
- ZenBeasts
 
 const App = () => {
   const gameState = useGameState();
@@ -50,6 +37,9 @@ const App = () => {
         onSwitchChain={gameState.switchChain}
         onClaimQuest={gameState.claimQuestReward}
       >
+ bolt-inventory-rendering-optimization-13654411884582787274
+
+ palette-ux-improvements-12006417270454289975
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<WorldMap trainerLevel={gameState.trainerLevel} />} />
@@ -86,7 +76,8 @@ const App = () => {
                     listings={gameState.marketListings}
                     onBuy={gameState.handleBuy}
                     onCancelListing={gameState.handleCancelListing}
-                    userCoins={gameState.coins}
+                    // Removed userCoins prop as it is not present in MarketplaceProps (React.memo optimization)
+                    // If userCoins is needed, it should be added to MarketplaceProps in Marketplace.tsx
                     marketHistory={gameState.marketHistory}
                 />
               } />
@@ -102,6 +93,10 @@ const App = () => {
               } />
             </Routes>
           </Suspense>
+ palette-fix-build-and-inventory-duplication-17675332925925239658
+
+
+ ZenBeasts
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<WorldMap trainerLevel={gameState.trainerLevel} />} />
@@ -138,6 +133,7 @@ const App = () => {
                   listings={gameState.marketListings} 
                   onBuy={gameState.handleBuy} 
                   onCancelListing={gameState.handleCancelListing}
+                  userCoins={gameState.coins}
                   marketHistory={gameState.marketHistory} 
               />
             } />
@@ -153,15 +149,17 @@ const App = () => {
             } />
           </Routes>
         </Suspense>
+ ZenBeasts
+ ZenBeasts
           
-          {import.meta.env.DEV && (
-            <DebugConsole
-              onAddCoins={gameState.debugMethods.addCoins}
-              onAddBeast={gameState.debugMethods.addBeast}
-              onLevelUp={gameState.debugMethods.levelUp}
-              onReset={gameState.debugMethods.reset}
-            />
-          )}
+        {import.meta.env.DEV && (
+          <DebugConsole
+            onAddCoins={gameState.debugMethods.addCoins}
+            onAddBeast={gameState.debugMethods.addBeast}
+            onLevelUp={gameState.debugMethods.levelUp}
+            onReset={gameState.debugMethods.reset}
+          />
+        )}
       </Layout>
     </HashRouter>
   );
