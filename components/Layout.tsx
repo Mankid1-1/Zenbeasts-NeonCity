@@ -109,7 +109,6 @@ const Layout: React.FC<LayoutProps> = ({
                     onClick={() => { setShowQuestLog(true); setIsMobileMenuOpen(false); }}
                     aria-label="Quest Log"
                     className="flex items-center justify-between w-full bg-slate-800 hover:bg-slate-700 p-2 rounded border border-gray-600 transition-colors group"
-                    aria-label="Quest Log"
                  >
                     <div className="flex items-center text-neon-yellow">
                         <Gift size={16} className="mr-2 group-hover:animate-bounce"/> <span className="font-mono text-xs">QUESTS</span>

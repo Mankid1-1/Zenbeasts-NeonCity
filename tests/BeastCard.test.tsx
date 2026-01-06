@@ -1,4 +1,3 @@
- sentinel/fix-code-corruption-and-csp-enhancement-15535713623322996782
 
 import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
