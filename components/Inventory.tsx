@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
-import BeastCard from './BeastCard';
 import InventoryGrid from './InventoryGrid';
 import { useDebounce } from '../hooks/useDebounce';
 import { Filter, Search, X, ArrowUpCircle } from 'lucide-react';
@@ -36,7 +35,7 @@ const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake,
   const [newName, setNewName] = useState('');
 
   // Optimization: Use Ref pattern to keep handlers stable even when props (coins, callbacks) change.
-  // This ensures InventoryItem (which is React.memo'd) doesn't re-render unnecessarily.
+  // This ensures InventoryGrid (which is React.memo'd) doesn't re-render unnecessarily.
   const onStakeRef = useRef(onStake);
   const onUnstakeRef = useRef(onUnstake);
   const onEvolveRef = useRef(onEvolve);
