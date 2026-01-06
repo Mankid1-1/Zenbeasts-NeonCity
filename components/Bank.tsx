@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ZenBeast, Wallet, EconomicMetrics } from '../types';
 import { SectionHeader, CyberButton } from './common/CyberComponents';
-import { LandPlot, TrendingUp, TrendingDown, Lock, Unlock, DollarSign, Wallet as WalletIcon, Clock, Layers } from 'lucide-react';
+import { LandPlot, TrendingUp, TrendingDown, Lock, Unlock, DollarSign, Wallet as WalletIcon, Clock, Layers, Shield } from 'lucide-react';
 import { STAKING_RATES, GENESIS_MULTIPLIER } from '../constants';
 import BeastCard from './BeastCard';
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts';
@@ -68,6 +68,21 @@ const Bank: React.FC<BankProps> = ({ beasts, wallet, onStake, onUnstake, onClaim
     }, []);
 
     const currentPrice = liveData.length > 0 ? liveData[liveData.length - 1].price : 0;
+
+    // Helper to determine Vault Tier based on stake time (mocked for visualization)
+    const getVaultTier = (beast: ZenBeast) => {
+        if (!beast.stakingStart) return 'BRONZE';
+        const hours = (Date.now() - beast.stakingStart) / (1000 * 60 * 60);
+        if (hours > 24) return 'GOLD';
+        if (hours > 1) return 'SILVER';
+        return 'BRONZE';
+    }
+
+    const tierColors = {
+        'BRONZE': 'text-orange-400 border-orange-400',
+        'SILVER': 'text-gray-300 border-gray-300',
+        'GOLD': 'text-yellow-400 border-yellow-400',
+    }
 
     return (
         <div className="h-full flex flex-col animate-fade-in-up pb-8">
@@ -184,16 +199,21 @@ const Bank: React.FC<BankProps> = ({ beasts, wallet, onStake, onUnstake, onClaim
                     <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar relative z-10">
                          {stakedBeasts.map(b => {
                              const pending = calculateCurrentReward(b);
+                             const tier = getVaultTier(b);
+                             const tierColor = tierColors[tier];
+
                              return (
-                                <div key={b.id} className="flex items-center justify-between p-2 border border-neon-blue/50 bg-slate-900/80 shadow-[0_0_10px_rgba(0,255,255,0.1)]">
+                                <div key={b.id} className={`flex items-center justify-between p-2 border bg-slate-900/80 shadow-[0_0_10px_rgba(0,255,255,0.1)] ${tier === 'GOLD' ? 'border-yellow-400' : 'border-neon-blue/50'}`}>
                                     <div className="flex items-center gap-3">
                                         <div className="relative">
-                                            <img src={b.imageUrl} className="w-10 h-10 object-cover border border-neon-blue opacity-70"/>
-                                            <Lock size={12} className="absolute -top-1 -right-1 text-neon-blue bg-black rounded-full"/>
+                                            <img src={b.imageUrl} className={`w-10 h-10 object-cover border opacity-70 ${tierColor.split(' ')[1]}`}/>
+                                            <Lock size={12} className={`absolute -top-1 -right-1 bg-black rounded-full ${tierColor.split(' ')[0]}`}/>
                                         </div>
                                         <div>
-                                            <div className="text-xs font-bold text-neon-blue">{b.name}</div>
-                                            <div className="text-[10px] text-gray-400 font-mono">EARNING...</div>
+                                            <div className="text-xs font-bold text-white">{b.name}</div>
+                                            <div className={`text-[10px] font-mono border px-1 rounded inline-block ${tierColor}`}>
+                                                {tier} VAULT
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -201,8 +221,8 @@ const Bank: React.FC<BankProps> = ({ beasts, wallet, onStake, onUnstake, onClaim
                                             <div className="text-[10px] text-gray-500">PENDING</div>
                                             <div className="text-xs text-neon-yellow font-mono">+{pending.toFixed(4)}</div>
                                         </div>
-                                        <button onClick={() => onClaimRewards(b.id)} className="p-1 hover:text-neon-green transition-colors" title="Claim Rewards"><DollarSign size={14}/></button>
-                                        <button onClick={() => onUnstake(b.id)} className="p-1 hover:text-red-500 transition-colors" title="Unstake & Claim"><Unlock size={14}/></button>
+                                        <button onClick={() => onClaimRewards(b.id)} className="p-1 hover:text-neon-green transition-colors" title="Claim Rewards" aria-label={`Claim rewards for ${b.name}`}><DollarSign size={14}/></button>
+                                        <button onClick={() => onUnstake(b.id)} className="p-1 hover:text-red-500 transition-colors" title="Unstake & Claim" aria-label={`Unstake ${b.name} and claim rewards`}><Unlock size={14}/></button>
                                     </div>
                                 </div>
                              )

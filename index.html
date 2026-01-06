@@ -3,6 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- SECURITY: Content Security Policy to prevent XSS and unauthorized resource loading -->
+ sentinel/fix-code-corruption-and-csp-enhancement-15535713623322996782
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://aistudiocdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://picsum.photos https://fastly.picsum.photos https://via.placeholder.com; connect-src 'self' https://generativelanguage.googleapis.com https://api.stability.ai https://aistudiocdn.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.tailwindcss.com;">
+
+    <!-- Added object-src 'none' and base-uri 'self' for hardening -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://aistudiocdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://picsum.photos https://fastly.picsum.photos https://via.placeholder.com; connect-src 'self' https://generativelanguage.googleapis.com https://api.stability.ai https://aistudiocdn.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.tailwindcss.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+ ZenBeasts
     <title>ZenBeasts: Neon Dynasty</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=VT323&display=swap" rel="stylesheet">
