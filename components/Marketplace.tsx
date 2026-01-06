@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
 import BeastDetailModal from './BeastDetailModal';
 import MarketplaceItem from './MarketplaceItem';
-import { ShoppingBag, Search, Activity, Fuel, User } from 'lucide-react';
+import { ShoppingBag, Search, Activity, Fuel, User, X } from 'lucide-react';
 import { SectionHeader, CyberButton } from './common/CyberComponents';
 import { TOKENOMICS } from '../constants';
 
@@ -60,8 +60,17 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     aria-label="Search listings"
-                    className="w-full bg-black/50 border border-slate-700 text-white pl-10 pr-4 py-2 text-sm focus:border-neon-yellow outline-none"
+                    className="w-full bg-black/50 border border-slate-700 text-white pl-10 pr-10 py-2 text-sm focus:border-neon-yellow outline-none"
                 />
+                {searchTerm && (
+                    <button
+                        onClick={() => setSearchTerm('')}
+                        className="absolute right-2 top-2.5 text-gray-500 hover:text-white transition-colors"
+                        aria-label="Clear search"
+                    >
+                        <X size={16} />
+                    </button>
+                )}
             </div>
             <select
                 value={selectedRarity}
