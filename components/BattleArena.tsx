@@ -78,6 +78,29 @@ const BattleVisuals = ({
     )
 }
 
+// Optimization: Extracted FighterList to prevent reconciliation of the list when BattleArena re-renders during playback
+const FighterList = React.memo(({ beasts, selectedBeast, onSelect }: { beasts: ZenBeast[], selectedBeast: ZenBeast | null, onSelect: (b: ZenBeast) => void }) => {
+    return (
+        <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
+            {beasts.map(b => (
+                <button
+                    key={b.id}
+                    onClick={() => onSelect(b)}
+                    type="button"
+                    aria-pressed={selectedBeast?.id === b.id}
+                    className={`w-full p-2 border cursor-pointer flex items-center gap-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-neon-green ${selectedBeast?.id === b.id ? 'border-neon-green bg-neon-green/10' : 'border-gray-700 bg-black/40 hover:bg-slate-800'}`}
+                >
+                <img src={b.imageUrl} alt="" className="w-10 h-10 object-cover border border-gray-600" />
+                <div>
+                    <div className="font-bold text-sm truncate w-32 text-white">{b.name}</div>
+                    <div className="text-xs text-gray-400 font-mono">Lvl {b.level}</div>
+                </div>
+                </button>
+            ))}
+        </div>
+    );
+});
+
 const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboard }) => {
     const [selectedBeast, setSelectedBeast] = useState<ZenBeast | null>(null);
     const [selectedGymLeader, setSelectedGymLeader] = useState<GymLeader | null>(null);
@@ -168,7 +191,11 @@ const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboar
 
     useEffect(() => { return () => clearInterval(logIntervalRef.current); }, []);
 
-    // Optimization: Memoize the filtered list to prevent O(N) recalculation on every render tick during battle animations
+ bolt-inventory-rendering-optimization-13654411884582787274
+    // Optimization: Memoize the filtered list to avoid O(N) filtering on every render tick during battle playback
+
+    // Optimization: Memoize derived list to prevent O(N) filtering on every render (especially during battle loop)
+ ZenBeasts
     const unstakedBeasts = useMemo(() => beasts.filter(b => !b.isStaked), [beasts]);
 
     // Get current opponent object for visuals
@@ -207,23 +234,7 @@ const BattleArena = React.memo<BattleArenaProps>(({ beasts, onBattle, leaderboar
                     {/* Selection */}
                     <div className="lg:col-span-3 bg-slate-900/40 border border-slate-800 p-4 rounded cyber-border flex flex-col">
                          <h3 className="text-white font-mono text-sm mb-4 border-b border-gray-700 pb-2">AVAILABLE FIGHTERS</h3>
-                         <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
-                             {unstakedBeasts.map(b => (
-                                 <button
-                                     key={b.id}
-                                     onClick={() => setSelectedBeast(b)}
-                                     type="button"
-                                     aria-pressed={selectedBeast?.id === b.id}
-                                     className={`w-full p-2 border cursor-pointer flex items-center gap-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-neon-green ${selectedBeast?.id === b.id ? 'border-neon-green bg-neon-green/10' : 'border-gray-700 bg-black/40 hover:bg-slate-800'}`}
-                                 >
-                                    <img src={b.imageUrl} alt="" className="w-10 h-10 object-cover border border-gray-600" />
-                                    <div>
-                                        <div className="font-bold text-sm truncate w-32 text-white">{b.name}</div>
-                                        <div className="text-xs text-gray-400 font-mono">Lvl {b.level}</div>
-                                    </div>
-                                 </button>
-                             ))}
-                         </div>
+                         <FighterList beasts={unstakedBeasts} selectedBeast={selectedBeast} onSelect={setSelectedBeast} />
                     </div>
 
                     {/* Arena Setup */}

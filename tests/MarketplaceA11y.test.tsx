@@ -28,6 +28,10 @@ const defaultProps = {
 };
 
 describe('Marketplace Accessibility', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
