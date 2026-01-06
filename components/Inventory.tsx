@@ -20,11 +20,7 @@ interface InventoryProps {
 }
 
 // Optimization: Memoize Inventory to prevent re-renders when parent (App) re-renders but props remain stable
- sentinel/fix-code-corruption-and-csp-enhancement-15535713623322996782
-const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, onRename, coins, mintPrice }) => {
-
 const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, coins }) => {
- ZenBeasts
   const [isMinting, setIsMinting] = useState(false);
   const [sellingId, setSellingId] = useState<string | null>(null);
   const [sellPrice, setSellPrice] = useState('100');
