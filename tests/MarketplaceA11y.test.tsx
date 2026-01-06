@@ -28,9 +28,15 @@ const defaultProps = {
 };
 
 describe('Marketplace Accessibility', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
+
+  afterEach(cleanup);
 
   it('toggles have correct aria-pressed state', () => {
     render(<Marketplace {...defaultProps} />);
@@ -67,6 +73,8 @@ describe('Marketplace Accessibility', () => {
 });
 
 describe('CyberButton Accessibility', () => {
+  afterEach(cleanup);
+
   it('applies aria-busy when loading', () => {
     render(<CyberButton loading>Submit</CyberButton>);
     const button = screen.getByRole('button', { name: /submit/i });

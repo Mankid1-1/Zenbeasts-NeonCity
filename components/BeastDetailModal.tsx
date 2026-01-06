@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ZenBeast, Rarity } from '../types';
 import { X, Shield, Wind, Brain, Sword, Activity, MessageSquare } from 'lucide-react';
 import { RARITY_COLORS } from '../constants';
@@ -13,9 +13,19 @@ interface BeastDetailModalProps {
 const BeastDetailModal: React.FC<BeastDetailModalProps> = ({ beast, onClose, children }) => {
   const rarityColor = RARITY_COLORS[beast.rarity].split(' ')[0] || 'text-gray-400';
   const borderColor = RARITY_COLORS[beast.rarity].split(' ')[1] || 'border-gray-600';
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const [chatMessage, setChatMessage] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    modalRef.current?.focus();
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const handleChat = async () => {
       setIsTyping(true);
@@ -48,9 +58,17 @@ const BeastDetailModal: React.FC<BeastDetailModalProps> = ({ beast, onClose, chi
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-fade-in-up" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-fade-in-up"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="beast-detail-title"
+    >
       <div 
-        className={`bg-slate-900 border-2 ${borderColor} w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row cyber-border shadow-[0_0_50px_rgba(0,0,0,0.5)] relative`}
+        ref={modalRef}
+        tabIndex={-1}
+        className={`bg-slate-900 border-2 ${borderColor} w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row cyber-border shadow-[0_0_50px_rgba(0,0,0,0.5)] relative outline-none`}
         onClick={(e) => e.stopPropagation()}
       >
         <button 
@@ -67,7 +85,7 @@ const BeastDetailModal: React.FC<BeastDetailModalProps> = ({ beast, onClose, chi
            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
            
            <div className="absolute bottom-6 left-6 right-6">
-                <div className={`text-4xl font-mono font-bold text-white mb-2 drop-shadow-md leading-none`}>{beast.name}</div>
+                <div id="beast-detail-title" className={`text-4xl font-mono font-bold text-white mb-2 drop-shadow-md leading-none`}>{beast.name}</div>
                 <div className="flex flex-wrap gap-2">
                     <span className={`text-xs px-2 py-1 bg-black/60 border ${borderColor} ${rarityColor} rounded font-mono uppercase tracking-wider`}>
                         {beast.rarity}
