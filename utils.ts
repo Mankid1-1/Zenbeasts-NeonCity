@@ -35,44 +35,71 @@ export const formatNumber = (num: number): string => {
   return new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(num);
 };
 
-/**
- * SECURITY: Use crypto.getRandomValues for secure hex string generation.
- * Replaces insecure Math.random().
- */
-export const generateSecureHex = (length: number): string => {
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    const byteLength = Math.ceil(length / 2);
-    const array = new Uint8Array(byteLength);
-    crypto.getRandomValues(array);
-    return Array.from(array)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('')
-      .substring(0, length);
-  }
-
-  // Fallback for environments without crypto (should be rare now)
-  const byteLength = Math.ceil(length / 2);
-  let res = '';
-  for (let i = 0; i < byteLength; i++) {
-    res += Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
-  }
-  return res.substring(0, length);
+export const calculateLevelProgress = (level: number, exp: number) => {
+    const nextLevelExp = level * 100;
+    const progress = (exp / nextLevelExp) * 100;
+    return { nextLevelExp, progress };
 };
 
 /**
- * SECURITY: Use crypto.getRandomValues for secure alphanumeric string generation.
+ * SECURITY: Generate a cryptographically secure random hex string.
+ * Uses window.crypto.getRandomValues where available.
+ */
+export const generateSecureHex = (length: number): string => {
+  if (length <= 0) return '';
+  const byteLength = Math.ceil(length / 2);
+  const bytes = new Uint8Array(byteLength);
+
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+  } else {
+    // Fallback for environments without crypto (should be rare in modern browsers)
+    console.warn("Crypto API unavailable, using Math.random fallback");
+    for (let i = 0; i < byteLength; i++) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+  }
+
+  const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  return hex.substring(0, length);
+};
+
+/**
+ * SECURITY: Generate a cryptographically secure random alphanumeric string.
+ * Uses rejection sampling to avoid modulo bias.
  */
 export const generateSecureAlphaNumeric = (length: number): string => {
+  if (length <= 0) return '';
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    const array = new Uint8Array(length);
-    crypto.getRandomValues(array);
-    return Array.from(array)
-      .map(b => chars[b % chars.length])
-      .join('');
+    // Rejection sampling to avoid modulo bias
+    // 62 chars. Next power of 2 is 64.
+    // We can just take bytes and reject anything >= 62.
+    // This is simple and effective since 62 is close to 64 (less than 50% rejection rate).
+    // Actually 256 is not close to 62.
+    // 256 / 62 = 4.12.
+    // Limit = 62 * 4 = 248.
+    // We reject anything >= 248.
+    const limit = 248;
+    const step = 64; // Generate in chunks to minimize overhead
+    const buffer = new Uint8Array(step);
+
+    while (result.length < length) {
+        crypto.getRandomValues(buffer);
+        for (let i = 0; i < step && result.length < length; i++) {
+            if (buffer[i] < limit) {
+                result += chars[buffer[i] % chars.length];
+            }
+        }
+    }
+  } else {
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
   }
-  // Fallback
-  return Array(length).fill(0).map(() => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+  return result;
 };
 
 /**

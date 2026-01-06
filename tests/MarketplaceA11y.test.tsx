@@ -1,5 +1,4 @@
 
- palette-marketplace-a11y-7839589103584432219
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Marketplace from '../components/Marketplace';
@@ -17,8 +16,8 @@ vi.mock('../components/BeastDetailModal', () => ({
 }));
 
 const mockListings = [
-  { id: '1', price: 100, originalOwner: '0x123', name: 'Dragon 1', rarity: 'LEGENDARY', class: 'DRAGON', stats: { attack: 10, defense: 10, speed: 10, magic: 10 }, level: 1, exp: 0 },
-  { id: '2', price: 200, originalOwner: 'player', name: 'Tiger 1', rarity: 'COMMON', class: 'TIGER', stats: { attack: 5, defense: 5, speed: 5, magic: 5 }, level: 1, exp: 0 }
+  { id: '1', price: 100, originalOwner: '0x123', name: 'Dragon 1', rarity: 'LEGENDARY', class: 'DRAGON', stats: { attack: 10, defense: 10, speed: 10, magic: 10 }, level: 1, exp: 0, traits: [] },
+  { id: '2', price: 200, originalOwner: 'player', name: 'Tiger 1', rarity: 'COMMON', class: 'TIGER', stats: { attack: 5, defense: 5, speed: 5, magic: 5 }, level: 1, exp: 0, traits: [] }
 ];
 
 const defaultProps = {
@@ -28,15 +27,16 @@ const defaultProps = {
   marketHistory: ['Sold Dragon 1 for 100 ZEN']
 };
 
-// Ensure cleanup after each test
-afterEach(() => {
-  cleanup();
-});
-
 describe('Marketplace Accessibility', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
+
+  afterEach(cleanup);
 
   it('toggles have correct aria-pressed state', () => {
     render(<Marketplace {...defaultProps} />);
@@ -73,6 +73,8 @@ describe('Marketplace Accessibility', () => {
 });
 
 describe('CyberButton Accessibility', () => {
+  afterEach(cleanup);
+
   it('applies aria-busy when loading', () => {
     render(<CyberButton loading>Submit</CyberButton>);
     const button = screen.getByRole('button', { name: /submit/i });
@@ -90,59 +92,4 @@ describe('CyberButton Accessibility', () => {
     const button = screen.getByRole('button', { name: /submit/i });
     expect(button.getAttribute('aria-busy')).toBeNull();
   });
-
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import Marketplace from '../components/Marketplace';
-import React from 'react';
-
-describe('Marketplace Accessibility', () => {
-    const mockListings = [
-        { id: '1', name: 'Fire Beast', rarity: 'Common', price: 10, originalOwner: 'other', traits: [], stats: {}, imageUrl: '' },
-        { id: '2', name: 'Water Beast', rarity: 'Rare', price: 20, originalOwner: 'player', traits: [], stats: {}, imageUrl: '' }
-    ];
-
-    it('toggle buttons have aria-pressed state', () => {
-        render(<Marketplace listings={mockListings} onBuy={vi.fn()} onCancelListing={vi.fn()} marketHistory={[]} />);
-
-        const globalBtn = screen.getByText('GLOBAL').closest('button');
-        const mineBtn = screen.getByText('MY LISTINGS').closest('button');
-
-        expect(globalBtn).toBeTruthy();
-        expect(mineBtn).toBeTruthy();
-
-        // Initially 'GLOBAL' is active
-        // This is expected to FAIL before implementation
-        expect(globalBtn?.getAttribute('aria-pressed')).toBe('true');
-        expect(mineBtn?.getAttribute('aria-pressed')).toBe('false');
-
-        // Click 'MY LISTINGS'
-        fireEvent.click(mineBtn!);
-        expect(globalBtn?.getAttribute('aria-pressed')).toBe('false');
-        expect(mineBtn?.getAttribute('aria-pressed')).toBe('true');
-    });
-
-    it('shows CLEAR FILTERS button when no results found due to filters', () => {
-        render(<Marketplace listings={mockListings} onBuy={vi.fn()} onCancelListing={vi.fn()} marketHistory={[]} />);
-
-        // Handle potential multiple inputs
-        const searchInputs = screen.getAllByLabelText('Search listings');
-        const searchInput = searchInputs[0];
-
-        fireEvent.change(searchInput, { target: { value: 'NonExistent' } });
-
-        expect(screen.getByText('NO LISTINGS FOUND')).toBeTruthy();
-
-        // This assertion will FAIL before implementation
-        const clearBtn = screen.queryByText('CLEAR FILTERS');
-        expect(clearBtn).toBeTruthy();
-
-        // Click it
-        fireEvent.click(clearBtn!);
-
-        // Should clear search
-        expect((searchInput as HTMLInputElement).value).toBe('');
-        expect(screen.queryByText('NO LISTINGS FOUND')).toBeNull();
-    });
- ZenBeasts
 });
