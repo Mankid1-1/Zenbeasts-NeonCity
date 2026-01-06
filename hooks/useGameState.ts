@@ -511,13 +511,27 @@ export const useGameState = () => {
       addNotification("Listing Cancelled", `${listing.name} returned to Armory`, 'info');
   }, [addNotification]);
 
-  const handleBuy = useCallback(async (beast: ZenBeast) => {
+  const handleBuy = useCallback(async (beastInput: ZenBeast) => {
     if (!walletRef.current.isConnected) {
         addNotification("Wallet Locked", "Connect wallet to trade.", 'warning');
         return;
     }
+
+    // SECURITY: Verify listing exists and use server-side (state) price to prevent client-side manipulation
+    const listing = marketListingsRef.current.find(l => l.id === beastInput.id);
+    if (!listing) {
+        addNotification("Transaction Error", "Listing no longer available.", 'error');
+        return;
+    }
     
-    const totalCost = (beast.price || 0) + estimateGas(walletRef.current.chain);
+    // Use price from valid listing, not input
+    const price = listing.price || 0;
+    if (price <= 0) {
+         addNotification("Transaction Error", "Invalid price detected.", 'error');
+         return;
+    }
+
+    const totalCost = price + estimateGas(walletRef.current.chain);
 
     if (walletRef.current.zenBalance < totalCost) {
         addNotification("Purchase Failed", `Insufficient ZEN. Cost: ${totalCost.toFixed(4)}`, 'error');
@@ -527,10 +541,10 @@ export const useGameState = () => {
     try {
         await simulateTransaction(walletRef.current.chain, 'transfer');
         setWallet(prev => ({ ...prev, zenBalance: prev.zenBalance - totalCost }));
-        setMarketListings(prev => prev.filter(b => b.id !== beast.id));
-        setBeasts(prev => [...prev, { ...beast, price: undefined, ownerId: 'player', isStaked: false, isOnChain: true }]);
-        addNotification("Asset Acquired", `Purchased ${beast.name}`, 'success');
-        setMarketHistory(prev => [`${beast.name} sold for ${beast.price} ZEN`, ...prev].slice(0, 5));
+        setMarketListings(prev => prev.filter(b => b.id !== listing.id));
+        setBeasts(prev => [...prev, { ...listing, price: undefined, ownerId: 'player', isStaked: false, isOnChain: true }]);
+        addNotification("Asset Acquired", `Purchased ${listing.name}`, 'success');
+        setMarketHistory(prev => [`${listing.name} sold for ${price} ZEN`, ...prev].slice(0, 5));
     } catch (e) {
         addNotification("Transaction Failed", "Blockchain rejected transfer.", 'error');
     }

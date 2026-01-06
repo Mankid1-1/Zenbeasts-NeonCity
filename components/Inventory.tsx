@@ -3,7 +3,9 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
 import InventoryGrid from './InventoryGrid';
 import { useDebounce } from '../hooks/useDebounce';
-import { Filter, Search, X } from 'lucide-react';
+import { Filter, Search, X, ArrowUpCircle } from 'lucide-react';
+import { BASE_MINT_PRICE } from '../constants';
+import InventoryItem from './InventoryItem';
 
 interface InventoryProps {
   beasts: ZenBeast[];
@@ -18,39 +20,31 @@ interface InventoryProps {
 }
 
 // Optimization: Memoize Inventory to prevent re-renders when parent (App) re-renders but props remain stable
-const Inventory = React.memo<InventoryProps>(({
-  beasts,
-  onMint,
-  onSell,
-  onStake,
-  onUnstake,
-  onEvolve,
-  onRename,
-  coins,
-  mintPrice
-}) => {
+ sentinel/fix-code-corruption-and-csp-enhancement-15535713623322996782
+const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, onRename, coins, mintPrice }) => {
+
+const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, coins }) => {
+ ZenBeasts
   const [isMinting, setIsMinting] = useState(false);
   const [sellingId, setSellingId] = useState<string | null>(null);
   const [sellPrice, setSellPrice] = useState('100');
   const [evolvingId, setEvolvingId] = useState<string | null>(null);
-  
+
   // Rename Modal State
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
 
   // Optimization: Use Ref pattern to keep handlers stable even when props (coins, callbacks) change.
-  // This ensures InventoryItem (which is React.memo'd) doesn't re-render unnecessarily.
+  // This ensures InventoryGrid (which is React.memo'd) doesn't re-render unnecessarily.
   const onStakeRef = useRef(onStake);
   const onUnstakeRef = useRef(onUnstake);
   const onEvolveRef = useRef(onEvolve);
-  const coinsRef = useRef(coins);
 
   useEffect(() => {
     onStakeRef.current = onStake;
     onUnstakeRef.current = onUnstake;
     onEvolveRef.current = onEvolve;
-    coinsRef.current = coins;
-  }, [onStake, onUnstake, onEvolve, coins]);
+  }, [onStake, onUnstake, onEvolve]);
 
   const handleOpenSellModal = React.useCallback((id: string) => {
     setSellingId(id);
@@ -77,8 +71,7 @@ const Inventory = React.memo<InventoryProps>(({
     setEvolvingId(beast.id);
     await onEvolveRef.current(beast);
     setEvolvingId(null);
-  }, [onEvolve]);
-
+  }, []);
 
   // Filters
   const [filterRarity, setFilterRarity] = useState<string>('');
@@ -198,6 +191,7 @@ const Inventory = React.memo<InventoryProps>(({
         onEvolve={handleEvolveAction}
         onRename={handleOpenRenameModal}
         evolvingId={evolvingId}
+        onRename={handleOpenRenameModal}
       />
 
       {/* Sell Modal */}

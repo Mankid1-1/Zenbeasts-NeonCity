@@ -1,4 +1,5 @@
 
+ sentinel/fix-code-corruption-and-csp-enhancement-15535713623322996782
 import { describe, it, expect, vi } from 'vitest';
 
 import { describe, it, expect } from 'vitest';
@@ -47,8 +48,6 @@ describe('Web3 Service Security', () => {
         expect(ethWallet.address).toMatch(/^0x[0-9a-f]{40}$/);
 
         const solWallet = await connectWalletService('solana');
-
-
         expect(solWallet.address).toMatch(/^Sol[a-zA-Z0-9]{40}$/);
     });
 });

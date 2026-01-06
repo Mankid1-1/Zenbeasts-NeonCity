@@ -1,7 +1,8 @@
+ sentinel/fix-code-corruption-and-csp-enhancement-15535713623322996782
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
+import { describe, it, expect, afterEach } from 'vitest';
 import BeastCard from '../components/BeastCard';
 import { ZenBeast, Rarity, BeastClass } from '../types';
 
@@ -30,6 +31,8 @@ const mockBeast: ZenBeast = {
 };
 
 describe('BeastCard', () => {
+  afterEach(cleanup);
+
   it('renders correctly with valid beast data', () => {
     render(<BeastCard beast={mockBeast} />);
     // Use getAllByText to handle potential multiple occurrences or just check for existence
