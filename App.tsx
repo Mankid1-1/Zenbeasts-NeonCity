@@ -5,6 +5,7 @@
 import React, { Suspense, lazy } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from '@vercel/analytics/react';
 import { useGameState } from './hooks/useGameState';
 
 import Layout from './components/Layout';
@@ -25,6 +26,7 @@ const App = () => {
 
   return (
     <HashRouter>
+      <Analytics />
       <Layout 
         userCoins={gameState.coins} 
         trainerLevel={gameState.trainerLevel} 

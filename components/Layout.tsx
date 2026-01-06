@@ -5,7 +5,6 @@ import { LayoutProps } from '../types';
 import { Menu, X, Coins, Map, Home, Box, Dna, Sword, ShoppingBag, LandPlot, User, Wallet as WalletIcon, Terminal, Gift } from 'lucide-react';
 import { CyberToast } from './common/CyberComponents';
 import QuestLog from './QuestLog';
- sentinel/fix-code-corruption-and-csp-enhancement-15535713623322996782
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -20,34 +19,6 @@ interface LayoutProps {
   onSwitchChain: (chain: Chain) => void;
   onClaimQuest: (id: string) => void;
 }
-
-const NavItem = ({ to, icon, label, onClick }: { to: string, icon: React.ReactNode, label: string, onClick?: () => void }) => {
-    const location = useLocation();
-    const isActive = location.pathname === to;
-    return (
-        <Link 
-            to={to} 
-            onClick={onClick}
-            aria-label={label}
-            aria-current={isActive ? 'page' : undefined}
-            className={`
-                flex items-center p-3 rounded-md transition-all duration-300 group border-l-2
-                ${isActive 
-                    ? 'bg-neon-pink/10 text-neon-pink border-neon-pink shadow-[0_0_10px_rgba(255,0,255,0.2)]' 
-                    : 'border-transparent text-gray-500 hover:bg-white/5 hover:text-white hover:border-gray-500'}
-            `}
-        >
-            <span className={`${isActive ? 'text-neon-pink' : 'text-gray-500 group-hover:text-white transition-colors'}`}>{icon}</span>
-            <span className="ml-3 font-mono text-sm tracking-widest">{label}</span>
-        </Link>
-    )
-}
-
-const Layout: React.FC<LayoutProps> = ({ children, userCoins, trainerLevel, trainerExp, notifications, wallet, quests, onDismissNotification, onConnectWallet, onSwitchChain, onClaimQuest }) => {
-  const nextLevelExp = LEVEL_THRESHOLDS[trainerLevel + 1] || trainerExp;
-  const currentLevelExp = LEVEL_THRESHOLDS[trainerLevel] || 0;
-  const expProgress = nextLevelExp === currentLevelExp ? 100 : ((trainerExp - currentLevelExp) / (nextLevelExp - currentLevelExp)) * 100;
-
 
 import { calculateLevelProgress } from '../utils';
 
@@ -81,7 +52,6 @@ const Layout: React.FC<LayoutProps> = ({
     onClaimQuest
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
- ZenBeasts
   const [isWalletMenuOpen, setIsWalletMenuOpen] = useState(false);
   const [showQuestLog, setShowQuestLog] = useState(false);
 
@@ -155,22 +125,14 @@ const Layout: React.FC<LayoutProps> = ({
                             className="w-full flex items-center justify-center md:justify-start bg-blue-600/20 text-blue-400 border border-blue-500/50 p-2 rounded hover:bg-blue-600/30 transition-colors"
                             aria-label="Connect Wallet"
                          >
- sentinel/fix-code-corruption-and-csp-enhancement-15535713623322996782
                             <WalletIcon size={16} className="mr-2" />
                             <span className="font-mono text-xs">CONNECT WALLET</span>
-
-                            <WalletIcon size={16} className="md:mr-2" />
-                            <span className="hidden md:inline font-mono text-xs">CONNECT WALLET</span>
-                            <span className="md:hidden font-mono text-xs">CONNECT WALLET</span>
- ZenBeasts
                          </button>
                      ) : (
                          <button
                             onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)}
                             aria-label="Wallet Menu"
                             className="w-full text-left bg-slate-800/80 p-2 rounded border border-slate-600 cursor-pointer hover:border-neon-green transition-colors"
-                            onClick={() => setIsWalletMenuOpen(!isWalletMenuOpen)}
-                            aria-label="Wallet Menu"
                          >
                              <div className="flex items-center justify-between mb-1">
                                 <span className="text-[10px] text-gray-400 font-mono uppercase">{wallet.chain}</span>
