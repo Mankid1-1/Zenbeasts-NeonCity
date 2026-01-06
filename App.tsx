@@ -1,7 +1,3 @@
- bolt-inventory-rendering-optimization-13654411884582787274
-
-
-   ZenBeasts
 import React, { Suspense, lazy } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { SpeedInsights } from '@vercel/speed-insights/react';
@@ -27,6 +23,7 @@ const App = () => {
   return (
     <HashRouter>
       <Analytics />
+      <SpeedInsights />
       <Layout 
         userCoins={gameState.coins} 
         trainerLevel={gameState.trainerLevel} 
@@ -39,9 +36,6 @@ const App = () => {
         onSwitchChain={gameState.switchChain}
         onClaimQuest={gameState.claimQuestReward}
       >
- bolt-inventory-rendering-optimization-13654411884582787274
-
- palette-ux-improvements-12006417270454289975
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<WorldMap trainerLevel={gameState.trainerLevel} />} />
@@ -78,8 +72,6 @@ const App = () => {
                     listings={gameState.marketListings}
                     onBuy={gameState.handleBuy}
                     onCancelListing={gameState.handleCancelListing}
-                    // Removed userCoins prop as it is not present in MarketplaceProps (React.memo optimization)
-                    // If userCoins is needed, it should be added to MarketplaceProps in Marketplace.tsx
                     marketHistory={gameState.marketHistory}
                 />
               } />
@@ -95,64 +87,6 @@ const App = () => {
               } />
             </Routes>
           </Suspense>
- palette-fix-build-and-inventory-duplication-17675332925925239658
-
-
- ZenBeasts
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<WorldMap trainerLevel={gameState.trainerLevel} />} />
-            <Route path="/dashboard" element={
-                <Dashboard 
-                    beasts={gameState.beasts} 
-                    coins={gameState.coins} 
-                    leaderboard={gameState.leaderboard} 
-                    trainerLevel={gameState.trainerLevel} 
-                    trainerExp={gameState.trainerExp} 
-                    activePerks={gameState.activePerks}
-                    achievements={gameState.achievements}
-                    coinHistory={gameState.coinHistory}
-                    onClaim={gameState.claimEarnings}
-                />
-            } />
-            <Route path="/inventory" element={
-              <Inventory 
-                beasts={gameState.beasts} 
-                onMint={gameState.handleMint} 
-                onSell={gameState.handleListForSale} 
-                onStake={gameState.handleStake}
-                onUnstake={gameState.handleUnstake}
-                onEvolve={gameState.handleEvolve}
-                onRename={gameState.handleRename}
-                coins={gameState.coins}
-                mintPrice={gameState.calculateMintPrice()}
-              />
-            } />
-            <Route path="/breeding" element={<Breeding beasts={gameState.beasts} onBreed={gameState.handleBreed} coins={gameState.coins} />} />
-            <Route path="/battle" element={<BattleArena beasts={gameState.beasts} onBattle={gameState.handleBattle} leaderboard={gameState.leaderboard} />} />
-            <Route path="/market" element={
-              <Marketplace 
-                  listings={gameState.marketListings} 
-                  onBuy={gameState.handleBuy} 
-                  onCancelListing={gameState.handleCancelListing}
-                  userCoins={gameState.coins}
-                  marketHistory={gameState.marketHistory} 
-              />
-            } />
-            <Route path="/bank" element={
-                <Bank 
-                    beasts={gameState.beasts} 
-                    wallet={gameState.wallet}
-                    onStake={gameState.handleStake}
-                    onUnstake={gameState.handleUnstake}
-                    onClaimRewards={(id) => gameState.claimStakingRewards(id, false)}
-                    onClaimAll={gameState.claimAllStakingRewards}
-                />
-            } />
-          </Routes>
-        </Suspense>
- ZenBeasts
- ZenBeasts
           
         {import.meta.env.DEV && (
           <DebugConsole
