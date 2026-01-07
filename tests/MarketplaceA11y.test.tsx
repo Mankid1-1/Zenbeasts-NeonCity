@@ -35,6 +35,9 @@ describe('Marketplace Accessibility', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
+  afterEach(() => {
+    cleanup();
+  });
 
   afterEach(cleanup);
 

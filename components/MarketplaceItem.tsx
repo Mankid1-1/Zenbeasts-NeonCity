@@ -24,8 +24,20 @@ const MarketplaceItem: React.FC<MarketplaceItemProps> = React.memo(({
   const historyData = React.useMemo(() => generateMockHistory(), []);
 
   return (
-    <div className="relative group cursor-pointer" onClick={() => onSelect(beast)}>
-        <BeastCard beast={beast} />
+    <div
+      className="relative group cursor-pointer focus:outline-none focus:ring-2 focus:ring-neon-yellow rounded-sm"
+      onClick={() => onSelect(beast)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(beast);
+        }
+      }}
+      aria-label={`View listing for ${beast.name}, Price: ${beast.price} ZenCoins`}
+    >
+        <BeastCard beast={beast} interactive={false} />
 
         {/* Price Tag */}
         <div className="absolute top-2 left-2 bg-black/90 border border-neon-yellow px-2 py-1 z-20 shadow-[0_0_10px_rgba(255,255,0,0.3)]">
