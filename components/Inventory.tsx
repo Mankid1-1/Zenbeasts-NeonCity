@@ -1,7 +1,12 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
+ bolt-battle-arena-perf-8017939904022776355
+import BeastCard from './BeastCard';
+import InventoryItem from './InventoryItem';
+
 import InventoryGrid from './InventoryGrid';
+ ZenBeasts
 import { useDebounce } from '../hooks/useDebounce';
 import { Filter, Search, X, ArrowUpCircle } from 'lucide-react';
 import { BASE_MINT_PRICE } from '../constants';
@@ -179,6 +184,35 @@ const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake,
         )}
       </div>
 
+ bolt-battle-arena-perf-8017939904022776355
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 pb-10">
+        {filteredBeasts.map(b => (
+          <InventoryItem
+            key={b.id}
+            beast={b}
+            onOpenSellModal={handleOpenSellModal}
+            onToggleStake={handleToggleStake}
+            onEvolve={handleEvolveAction}
+            onRename={handleOpenRenameModal}
+            isEvolving={evolvingId === b.id}
+          />
+        ))}
+        {filteredBeasts.length === 0 && (
+            <div className="col-span-full py-20 text-center text-gray-600 font-mono">
+                NO BEASTS FOUND MATCHING PARAMETERS.
+            </div>
+        )}
+      </div>
+
+      {/*
+         Optimization Note: We are using the manual map above instead of InventoryGrid because
+         InventoryGrid does not yet support the `onRename` prop which is required for this view.
+         We removed the duplicate InventoryGrid that was causing double rendering.
+
+         Future optimization: Update InventoryGrid to accept onRename and switch to using it.
+      */}
+
       {/* Grid - Optimized with React.memo */}
       <InventoryGrid
         beasts={filteredBeasts}
@@ -188,6 +222,7 @@ const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake,
         onRename={handleOpenRenameModal}
         evolvingId={evolvingId}
       />
+ ZenBeasts
 
       {/* Sell Modal */}
       {sellingId && (
