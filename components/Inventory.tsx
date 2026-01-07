@@ -187,7 +187,6 @@ const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake,
         onEvolve={handleEvolveAction}
         onRename={handleOpenRenameModal}
         evolvingId={evolvingId}
-        onRename={handleOpenRenameModal}
       />
 
       {/* Sell Modal */}
