@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Quest } from '../types';
-import { CheckCircle, Circle, Gift } from 'lucide-react';
+import { CheckCircle, Circle, Gift, X } from 'lucide-react';
 import { CyberButton } from './common/CyberComponents';
 
 interface QuestLogProps {
@@ -12,10 +12,24 @@ interface QuestLogProps {
 
 const QuestLog: React.FC<QuestLogProps> = ({ quests, onClaim, onClose }) => {
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in-up" onClick={onClose}>
-            <div className="w-full max-w-lg bg-slate-900 border-2 border-neon-blue cyber-border p-6 shadow-[0_0_30px_rgba(0,255,255,0.2)]" onClick={e => e.stopPropagation()}>
+        <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in-up"
+            onClick={onClose}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="quest-log-title"
+        >
+            <div className="w-full max-w-lg bg-slate-900 border-2 border-neon-blue cyber-border p-6 shadow-[0_0_30px_rgba(0,255,255,0.2)] relative" onClick={e => e.stopPropagation()}>
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
+                    aria-label="Close quest log"
+                >
+                    <X size={24} />
+                </button>
+
                 <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
-                    <h2 className="text-2xl font-mono font-bold text-white flex items-center">
+                    <h2 id="quest-log-title" className="text-2xl font-mono font-bold text-white flex items-center">
                         <Gift className="mr-2 text-neon-pink" /> DAILY CONTRACTS
                     </h2>
                     <div className="text-xs font-mono text-gray-500">REFRESHES IN: 14H 22M</div>
@@ -33,7 +47,14 @@ const QuestLog: React.FC<QuestLogProps> = ({ quests, onClaim, onClose }) => {
                             </div>
                             
                             {/* Progress Bar */}
-                            <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden mb-3 relative z-10">
+                            <div
+                                className="w-full bg-gray-800 h-2 rounded-full overflow-hidden mb-3 relative z-10"
+                                role="progressbar"
+                                aria-valuenow={quest.current}
+                                aria-valuemin={0}
+                                aria-valuemax={quest.target}
+                                aria-label={`${quest.title} progress`}
+                            >
                                 <div 
                                     className={`h-full ${quest.completed ? 'bg-neon-green' : 'bg-neon-blue'} transition-all duration-500`} 
                                     style={{ width: `${Math.min(100, (quest.current / quest.target) * 100)}%` }}
