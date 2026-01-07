@@ -22,6 +22,9 @@ const Breeding: React.FC<BreedingProps> = ({ beasts, onBreed, coins }) => {
 
   const availableBeasts = beasts.filter(b => !b.isStaked && b.id !== parentA?.id && b.id !== parentB?.id && !b.isSoulbound);
 
+  // UX Improvement: Helper to explain why user can't select
+  const canAfford = coins >= BREEDING_COST;
+
   const handleSelect = (beast: ZenBeast) => {
     if (!parentA) setParentA(beast);
     else if (!parentB) setParentB(beast);
@@ -55,8 +58,12 @@ const Breeding: React.FC<BreedingProps> = ({ beasts, onBreed, coins }) => {
                     <Coins size={14} className="text-neon-purple mr-2" />
                     <span className="text-neon-purple font-mono text-xs">COST: {BREEDING_COST} ZC</span>
                 </div>
-                 <div className="inline-flex items-center px-4 py-1 bg-red-500/10 border border-red-500/50 rounded-full">
-                    <AlertTriangle size={14} className="text-red-500 mr-2" />
+                 <div
+                    className="inline-flex items-center px-4 py-1 bg-red-500/10 border border-red-500/50 rounded-full"
+                    role="alert"
+                    title="Warning: Parent beasts will be permanently destroyed"
+                 >
+                    <AlertTriangle size={14} className="text-red-500 mr-2" aria-hidden="true" />
                     <span className="text-red-400 font-mono text-xs uppercase">Parents are Burned</span>
                 </div>
             </div>
@@ -64,7 +71,7 @@ const Breeding: React.FC<BreedingProps> = ({ beasts, onBreed, coins }) => {
       />
 
       {/* Fusion Stage */}
-      <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-10 bg-slate-900/40 p-8 border-y border-slate-800 relative">
+      <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-10 bg-slate-900/40 p-8 border-y border-slate-800 relative" role="region" aria-label="Fusion Stage">
         <Slot beast={parentA} label="FATHER" onRemove={() => setParentA(null)} />
         
         <div className="flex flex-col items-center z-10 relative">
@@ -72,18 +79,19 @@ const Breeding: React.FC<BreedingProps> = ({ beasts, onBreed, coins }) => {
                 <Dna size={40} className={`text-neon-pink ${isBreeding ? 'animate-spin' : ''}`} />
             </div>
             {parentA && parentB && (
-                <div className="mt-6 flex flex-col items-center bg-black/60 p-4 border border-gray-700 rounded-lg backdrop-blur-sm">
+                <div className="mt-6 flex flex-col items-center bg-black/60 p-4 border border-gray-700 rounded-lg backdrop-blur-sm animate-fade-in-up">
                     <CyberButton 
                         onClick={handleBreedConfirm} 
                         loading={isBreeding} 
-                        disabled={isBreeding || coins < BREEDING_COST}
-                        variant={coins < BREEDING_COST ? 'danger' : 'secondary'}
+                        disabled={isBreeding || !canAfford}
+                        variant={!canAfford ? 'danger' : 'secondary'}
                         className="w-full"
+                        aria-label={!canAfford ? "Insufficient funds to breed" : "Initiate fusion process"}
                     >
-                        {coins < BREEDING_COST ? 'INSUFFICIENT FUNDS' : 'INITIATE FUSION'}
+                        {!canAfford ? 'INSUFFICIENT FUNDS' : 'INITIATE FUSION'}
                     </CyberButton>
-                    <div className={`text-[10px] font-mono mt-2 flex items-center justify-center w-full ${coins < BREEDING_COST ? 'text-red-500' : 'text-gray-400'}`}>
-                        {coins < BREEDING_COST && <AlertTriangle size={10} className="mr-1"/>}
+                    <div className={`text-[10px] font-mono mt-2 flex items-center justify-center w-full ${!canAfford ? 'text-red-500' : 'text-gray-400'}`} aria-live="polite">
+                        {!canAfford && <AlertTriangle size={10} className="mr-1" aria-hidden="true"/>}
                         REQ: {BREEDING_COST} ZC
                     </div>
                 </div>
@@ -98,12 +106,18 @@ const Breeding: React.FC<BreedingProps> = ({ beasts, onBreed, coins }) => {
         <h3 className="text-gray-400 font-mono mb-4 text-sm tracking-widest border-b border-gray-800 pb-2">
             CANDIDATE POOL ({availableBeasts.length})
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-6 gap-4 pb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-6 gap-4 pb-8" role="list" aria-label="Available candidates for breeding">
             {availableBeasts.map(b => (
-                <BeastCard key={b.id} beast={b} small onClick={() => handleSelect(b)} />
+                <div key={b.id} role="listitem">
+                    <BeastCard beast={b} small onClick={() => handleSelect(b)} />
+                </div>
             ))}
             {availableBeasts.length === 0 && (
-                <div className="col-span-full text-center text-gray-600 font-mono py-10">NO COMPATIBLE SUBJECTS (Unstake or Mint more)</div>
+                <div className="col-span-full flex flex-col items-center justify-center py-10 text-gray-600 font-mono border-2 border-dashed border-gray-800 rounded bg-black/20">
+                    <Dna size={48} className="mb-4 opacity-20" aria-hidden="true" />
+                    <span className="text-lg mb-2">NO GENETIC MATERIAL</span>
+                    <span className="text-xs text-gray-500">Unstake beasts or acquire new subjects to proceed.</span>
+                </div>
             )}
         </div>
       </div>
