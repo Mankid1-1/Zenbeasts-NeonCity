@@ -43,38 +43,35 @@ const InventoryItem: React.FC<InventoryItemProps> = React.memo(({
   };
 
   return (
-      <div className="relative group perspective-1000">
+      <div className="relative group">
           <BeastCard beast={beast} interactive={false} />
 
           {/* Overlay Actions */}
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center space-y-3 z-20">
-              <div className="flex space-x-2">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all duration-300 flex flex-col items-center justify-center space-y-4 z-20">
+              <div className="flex gap-2">
                 {!beast.isStaked && (
                     <>
                         <button
                             onClick={handleSellClick}
-                            aria-label={`Sell ${beast.name}`}
-                            className="bg-transparent border border-white text-white hover:bg-white hover:text-black focus:bg-white focus:text-black focus:outline-none px-3 py-2 text-xs font-mono tracking-widest transition-colors"
+                            className="bg-background border border-border text-foreground hover:bg-foreground hover:text-background px-4 py-2 text-[10px] font-display font-bold tracking-widest transition-all duration-300 rounded-sm"
                         >
                             SELL
                         </button>
                         <button
                              onClick={handleRenameClick}
-                             aria-label={`Rename ${beast.name}`}
-                             className="bg-transparent border border-neon-blue text-neon-blue hover:bg-neon-blue hover:text-black focus:bg-neon-blue focus:text-black focus:outline-none px-3 py-2 text-xs font-mono tracking-widest transition-colors"
+                             className="bg-background border border-primary text-primary hover:bg-primary hover:text-background px-4 py-2 text-[10px] font-display font-bold tracking-widest transition-all duration-300 rounded-sm"
                         >
-                             <Edit3 size={12} />
+                             <Edit3 size={14} />
                         </button>
                     </>
                 )}
                 <button
                     onClick={handleStakeClick}
-                    aria-label={`${beast.isStaked ? 'Unstake' : 'Stake'} ${beast.name}`}
                     className={`
-                        px-3 py-2 text-xs font-mono tracking-widest border transition-colors focus:outline-none
+                        px-4 py-2 text-[10px] font-display font-bold tracking-widest border transition-all duration-300 rounded-sm
                         ${beast.isStaked
-                            ? 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white focus:bg-red-500 focus:text-white'
-                            : 'border-neon-purple text-neon-purple hover:bg-neon-purple hover:text-white focus:bg-neon-purple focus:text-white'}
+                            ? 'border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground'
+                            : 'border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground'}
                     `}
                 >
                     {beast.isStaked ? 'UNSTAKE' : 'STAKE'}
@@ -86,10 +83,9 @@ const InventoryItem: React.FC<InventoryItemProps> = React.memo(({
                 <button
                   onClick={handleEvolveClick}
                   disabled={isEvolving}
-                  aria-label={`Evolve ${beast.name}`}
-                  className="flex items-center space-x-2 bg-neon-yellow/10 border border-neon-yellow text-neon-yellow px-4 py-2 text-xs font-mono tracking-widest hover:bg-neon-yellow hover:text-black focus:bg-neon-yellow focus:text-black focus:outline-none transition-colors"
+                  className="flex items-center space-x-2 bg-accent/10 border border-accent text-accent px-6 py-2 text-[10px] font-display font-bold tracking-widest hover:bg-accent hover:text-accent-foreground transition-all duration-300 rounded-sm cyber-button"
                 >
-                  {isEvolving ? <span className="animate-spin text-lg">↻</span> : <><ArrowUpCircle size={14} /> <span>EVOLVE</span></>}
+                  {isEvolving ? <span className="animate-spin text-lg">↻</span> : <><ArrowUpCircle size={16} /> <span>EVOLVE</span></>}
                 </button>
               )}
           </div>

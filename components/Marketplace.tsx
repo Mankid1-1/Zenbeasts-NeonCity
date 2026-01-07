@@ -1,10 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
 import BeastDetailModal from './BeastDetailModal';
 import MarketplaceItem from './MarketplaceItem';
-import { ShoppingBag, Search, Activity, Fuel, User, X } from 'lucide-react';
-import { SectionHeader, CyberButton } from './common/CyberComponents';
+import { ShoppingBag, Search, Activity, Fuel, User, X, Tag } from 'lucide-react';
 import { TOKENOMICS } from '../constants';
 
 interface MarketplaceProps {
@@ -20,7 +18,6 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
   const [selectedBeast, setSelectedBeast] = useState<ZenBeast | null>(null);
   const [viewMode, setViewMode] = useState<'all' | 'mine'>('all');
 
-  // Optimization: Memoize filtered listings to prevent re-calculation on every render
   const filteredListings = useMemo(() => {
     return listings.filter(beast => {
       const matchesSearch = beast.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -31,79 +28,83 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
   }, [listings, searchTerm, selectedRarity, viewMode]);
 
   return (
-    <div className="h-full flex flex-col animate-fade-in-up">
-      <SectionHeader 
-        title="BLACK MARKET" 
-        subtitle="SECURE P2P TRADING NETWORK (ZEN ONLY)" 
-        icon={<ShoppingBag />}
-        rightElement={
-            <div className="hidden md:flex flex-col items-end">
-                <div className="flex items-center text-xs text-neon-green mb-1"><Activity size={12} className="mr-1"/> RECENT TRANSACTIONS</div>
-                <div className="h-6 overflow-hidden w-64 bg-black border border-gray-800 px-2 rounded">
-                    <div className="animate-[translateY_-100%]">
-                        {marketHistory.length > 0 ? marketHistory.map((msg, i) => (
-                            <div key={i} className="text-[10px] text-gray-400 font-mono truncate">{msg}</div>
-                        )) : <div className="text-[10px] text-gray-600">No recent activity...</div>}
-                    </div>
+    <div className="h-full flex flex-col space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-8 h-[2px] bg-primary"></span>
+            <h2 className="text-4xl font-display font-black text-foreground tracking-tight uppercase italic">BLACK <span className="text-primary">MARKET</span></h2>
+          </div>
+          <p className="text-sm text-muted-foreground font-display font-bold tracking-widest uppercase ml-10">SECURE P2P TRADING // DISTRIBUTED LEDGER</p>
+        </div>
+        <div className="flex bg-card/40 backdrop-blur-md border border-border p-1.5 rounded-xl">
+            <button 
+                onClick={() => setViewMode('all')}
+                className={`px-6 py-2 rounded-lg text-xs font-display font-black uppercase tracking-widest transition-all ${viewMode === 'all' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+                GLOBAL LISTINGS
+            </button>
+            <button 
+                onClick={() => setViewMode('mine')}
+                className={`px-6 py-2 rounded-lg text-xs font-display font-black uppercase tracking-widest transition-all flex items-center gap-2 ${viewMode === 'mine' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+                <User size={12} />
+                MY ASSETS
+            </button>
+        </div>
+      </header>
+
+      {/* Market Feed (Marquee-like) */}
+      <div className="cyber-card p-4 bg-primary/5 border-primary/20">
+        <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-primary whitespace-nowrap">
+                <Activity size={14} className="animate-pulse" />
+                <span className="text-[10px] font-display font-black uppercase tracking-widest">LIVE FEED:</span>
+            </div>
+            <div className="flex-1 overflow-hidden relative h-5">
+                <div className="absolute flex gap-8 animate-marquee whitespace-nowrap">
+                    {marketHistory.length > 0 ? marketHistory.map((msg, i) => (
+                        <span key={i} className="text-[10px] text-muted-foreground font-mono uppercase tracking-tighter">
+                            {msg} <span className="mx-2 text-primary/30">|</span>
+                        </span>
+                    )) : (
+                        <span className="text-[10px] text-muted-foreground font-mono uppercase">AWAITING SYSTEM TRANSACTIONS...</span>
+                    )}
                 </div>
             </div>
-        }
-      />
-
-      <div className="bg-slate-900/50 p-4 border border-slate-700 mb-6 flex flex-col md:flex-row gap-4 items-center rounded-sm justify-between">
-        <div className="flex gap-4 items-center flex-1">
-            <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
-                <input
-                    type="text"
-                    placeholder="Search Listings..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    aria-label="Search listings"
-                    className="w-full bg-black/50 border border-slate-700 text-white pl-10 pr-10 py-2 text-sm focus:border-neon-yellow outline-none"
-                />
-                {searchTerm && (
-                    <button
-                        onClick={() => setSearchTerm('')}
-                        className="absolute right-2 top-2.5 text-gray-500 hover:text-white transition-colors"
-                        aria-label="Clear search"
-                    >
-                        <X size={16} />
-                    </button>
-                )}
-            </div>
-            <select
-                value={selectedRarity}
-                onChange={(e) => setSelectedRarity(e.target.value)}
-                aria-label="Filter by rarity"
-                className="bg-black/50 border border-slate-700 text-gray-300 px-4 py-2 text-sm focus:border-neon-yellow outline-none"
-            >
-                <option value="">All Rarities</option>
-                {Object.values(Rarity).map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
-        </div>
-        
-        <div className="flex bg-black p-1 rounded border border-gray-800">
-             <button 
-                onClick={() => setViewMode('all')}
-                aria-pressed={viewMode === 'all'}
-                aria-label="Show all listings"
-                className={`px-4 py-1 text-xs font-mono transition-colors ${viewMode === 'all' ? 'bg-neon-yellow text-black font-bold' : 'text-gray-500 hover:text-white'}`}
-             >
-                 GLOBAL
-             </button>
-             <button 
-                onClick={() => setViewMode('mine')}
-                aria-pressed={viewMode === 'mine'}
-                aria-label="Show only my listings"
-                className={`px-4 py-1 text-xs font-mono transition-colors flex items-center ${viewMode === 'mine' ? 'bg-neon-yellow text-black font-bold' : 'text-gray-500 hover:text-white'}`}
-             >
-                 <User size={12} className="mr-1"/> MY LISTINGS
-             </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pb-10">
+      <div className="bg-card/40 backdrop-blur-md p-6 border border-border flex flex-col md:flex-row gap-6 items-center rounded-xl">
+        <div className="relative flex-1 w-full">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+            <input 
+                type="text" 
+                placeholder="SEARCH ASSET CATALOG..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-background/50 border border-border text-foreground pl-12 pr-12 py-3 rounded-lg text-sm font-display font-bold tracking-widest focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X size={18} />
+              </button>
+            )}
+        </div>
+        <select
+            value={selectedRarity}
+            onChange={(e) => setSelectedRarity(e.target.value)}
+            className="w-full md:w-48 bg-background/50 border border-border text-muted-foreground px-4 py-3 rounded-lg text-xs font-display font-bold tracking-widest focus:border-primary outline-none cursor-pointer hover:border-primary/50 transition-all uppercase"
+        >
+            <option value="">RARITY: ALL</option>
+            {Object.values(Rarity).map(r => <option key={r} value={r}>{r}</option>)}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 pb-10">
         {filteredListings.map((beast) => (
             <MarketplaceItem
                 key={beast.id}
@@ -112,8 +113,14 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
             />
         ))}
         {filteredListings.length === 0 && (
-            <div className="col-span-full text-center text-gray-600 py-20 font-mono flex flex-col items-center">
-                <div className="mb-4">NO LISTINGS FOUND</div>
+            <div className="col-span-full cyber-card p-20 text-center flex flex-col items-center gap-6">
+                <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center border border-border">
+                    <Search size={32} className="text-muted-foreground opacity-20" />
+                </div>
+                <div>
+                    <p className="text-sm font-display font-bold text-foreground uppercase tracking-widest mb-2">NO ASSETS DETECTED</p>
+                    <p className="text-xs text-muted-foreground font-display font-bold uppercase tracking-widest">ADJUST YOUR SCAN PARAMETERS OR CLEAR FILTERS</p>
+                </div>
                 {(searchTerm || selectedRarity || viewMode === 'mine') && (
                     <button
                         onClick={() => {
@@ -121,10 +128,9 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
                             setSelectedRarity('');
                             setViewMode('all');
                         }}
-                        aria-label="Clear all filters"
-                        className="text-xs text-neon-blue border border-neon-blue px-3 py-1 hover:bg-neon-blue hover:text-black transition-colors"
+                        className="text-[10px] font-display font-black text-primary hover:text-foreground tracking-[0.2em] uppercase transition-colors px-6 py-2 border border-primary/20 rounded-full hover:border-foreground"
                     >
-                        CLEAR FILTERS
+                        RESET SCANNER
                     </button>
                 )}
             </div>
@@ -133,32 +139,38 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
 
       {selectedBeast && (
           <BeastDetailModal beast={selectedBeast} onClose={() => setSelectedBeast(null)}>
-             <div className="flex flex-col items-end gap-2">
-                <div className="text-neon-yellow font-mono text-xl font-bold">{selectedBeast.price} ZEN</div>
+             <div className="flex flex-col items-end gap-4 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                <div className="flex flex-col items-end">
+                    <div className="text-[10px] font-display font-black text-primary uppercase tracking-widest mb-1">ASSET VALUATION</div>
+                    <div className="text-4xl font-display font-black text-foreground italic uppercase tracking-tighter neon-text">{selectedBeast.price} <span className="text-primary text-2xl">ZEN</span></div>
+                </div>
                 
                 {selectedBeast.originalOwner === 'player' ? (
-                     <div className="flex flex-col items-end">
-                         <div className="text-xs text-gray-400 font-mono mb-2">YOU OWN THIS LISTING</div>
-                         <CyberButton 
+                     <div className="w-full space-y-4">
+                         <div className="text-[10px] text-accent font-display font-bold uppercase tracking-widest text-center">OWNERSHIP VERIFIED</div>
+                         <button 
                              onClick={() => { onCancelListing(selectedBeast.id); setSelectedBeast(null); }}
-                             variant="danger"
+                             className="w-full py-4 bg-destructive text-destructive-foreground font-display font-black tracking-widest uppercase rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-destructive/20"
                          >
                              CANCEL LISTING
-                         </CyberButton>
+                         </button>
                      </div>
                 ) : (
-                    <>
-                        <div className="text-xs text-gray-400 font-mono flex items-center">
-                            <Fuel size={12} className="mr-1 text-neon-purple"/> 
-                            EST. GAS: ~0.005 ZEN
+                    <div className="w-full space-y-4">
+                        <div className="flex justify-between items-center text-[10px] text-muted-foreground font-display font-bold uppercase tracking-widest">
+                            <div className="flex items-center gap-1">
+                                <Fuel size={12} className="text-secondary"/> 
+                                EST. NETWORK FEE: ~0.005 ZEN
+                            </div>
+                            <span className="text-accent">TRANSACTION SECURE</span>
                         </div>
-                        <CyberButton 
+                        <button 
                             onClick={() => { onBuy(selectedBeast); setSelectedBeast(null); }}
-                            variant="primary"
+                            className="w-full py-4 bg-primary text-primary-foreground font-display font-black tracking-widest uppercase rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20"
                         >
-                            PURCHASE ASSET
-                        </CyberButton>
-                    </>
+                            ACQUIRE ASSET
+                        </button>
+                    </div>
                 )}
              </div>
           </BeastDetailModal>
@@ -167,5 +179,4 @@ const Marketplace: React.FC<MarketplaceProps> = ({ listings, onBuy, onCancelList
   );
 };
 
-// Optimization: Prevent re-renders when global state (like coins) changes but Marketplace props remain stable
 export default React.memo(Marketplace);

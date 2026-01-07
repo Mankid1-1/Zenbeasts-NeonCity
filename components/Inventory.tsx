@@ -1,16 +1,10 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ZenBeast, Rarity, BeastClass } from '../types';
- bolt-battle-arena-perf-8017939904022776355
 import BeastCard from './BeastCard';
 import InventoryItem from './InventoryItem';
-
 import InventoryGrid from './InventoryGrid';
- ZenBeasts
 import { useDebounce } from '../hooks/useDebounce';
-import { Filter, Search, X, ArrowUpCircle } from 'lucide-react';
-import { BASE_MINT_PRICE } from '../constants';
-import InventoryItem from './InventoryItem';
+import { Filter, Search, X, ArrowUpCircle, Sparkles } from 'lucide-react';
 
 interface InventoryProps {
   beasts: ZenBeast[];
@@ -24,28 +18,26 @@ interface InventoryProps {
   mintPrice: number;
 }
 
-// Optimization: Memoize Inventory to prevent re-renders when parent (App) re-renders but props remain stable
-const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, coins }) => {
+const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake, onUnstake, onEvolve, onRename, coins, mintPrice }) => {
   const [isMinting, setIsMinting] = useState(false);
   const [sellingId, setSellingId] = useState<string | null>(null);
   const [sellPrice, setSellPrice] = useState('100');
   const [evolvingId, setEvolvingId] = useState<string | null>(null);
 
-  // Rename Modal State
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
 
-  // Optimization: Use Ref pattern to keep handlers stable even when props (coins, callbacks) change.
-  // This ensures InventoryGrid (which is React.memo'd) doesn't re-render unnecessarily.
   const onStakeRef = useRef(onStake);
   const onUnstakeRef = useRef(onUnstake);
   const onEvolveRef = useRef(onEvolve);
+  const coinsRef = useRef(coins);
 
   useEffect(() => {
     onStakeRef.current = onStake;
     onUnstakeRef.current = onUnstake;
     onEvolveRef.current = onEvolve;
-  }, [onStake, onUnstake, onEvolve]);
+    coinsRef.current = coins;
+  }, [onStake, onUnstake, onEvolve, coins]);
 
   const handleOpenSellModal = React.useCallback((id: string) => {
     setSellingId(id);
@@ -74,12 +66,10 @@ const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake,
     setEvolvingId(null);
   }, []);
 
-  // Filters
   const [filterRarity, setFilterRarity] = useState<string>('');
   const [filterClass, setFilterClass] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Optimization: Debounce search query to prevent filtering on every keystroke
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   const filteredBeasts = useMemo(() => {
@@ -113,105 +103,74 @@ const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake,
   };
 
   return (
-    <div className="h-full flex flex-col animate-fade-in-up">
+    <div className="h-full flex flex-col space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-           <h2 className="text-3xl font-mono text-white mb-1">ARMORY & BARRACKS</h2>
-           <p className="text-xs text-gray-500 font-mono">
-             STAKE: +1 ZC/5s | EVOLVE: LVL 5+ (COST 200 ZC)
+           <div className="flex items-center gap-2 mb-1">
+             <span className="w-8 h-[2px] bg-primary"></span>
+             <h2 className="text-4xl font-display font-black text-foreground tracking-tight uppercase italic">ARMORY <span className="text-primary">&</span> BARRACKS</h2>
+           </div>
+           <p className="text-sm text-muted-foreground font-display font-bold tracking-widest uppercase ml-10">
+             STAKE: <span className="text-accent">+1 ZC/5s</span> | EVOLVE: <span className="text-primary">LVL 5+</span> (COST 200 ZC)
            </p>
         </div>
         <button 
           onClick={handleMint}
           disabled={isMinting || coins < mintPrice}
-          className={`
-            relative px-8 py-3 bg-neon-blue/10 border-2 border-neon-blue text-neon-blue font-bold font-mono tracking-wider cyber-border
-            hover:bg-neon-blue hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden
-          `}
+          className="relative px-10 py-4 bg-primary text-primary-foreground font-display font-black tracking-[0.2em] uppercase cyber-button shadow-xl shadow-primary/20 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden"
         >
-          <span className="relative z-10 flex items-center">
-            {isMinting ? <span className="animate-pulse">SUMMONING ENTITY...</span> : `MINT BEAST (${mintPrice} ZC)`}
+          <span className="relative z-10 flex items-center gap-2">
+            {isMinting ? <><Sparkles className="animate-spin" size={20} /> SUMMONING...</> : <>SUMMON ENTITY ({mintPrice} ZC)</>}
           </span>
-          <div className="absolute inset-0 bg-neon-blue transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 origin-left z-0"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] pointer-events-none"></div>
         </button>
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-slate-900/50 p-4 border border-slate-700 mb-6 flex flex-col md:flex-row gap-4 items-center rounded-sm">
+      <div className="bg-card/40 backdrop-blur-md p-6 border border-border flex flex-col md:flex-row gap-6 items-center rounded-xl">
         <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-3 text-gray-500 pointer-events-none" size={16} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
             <input 
                 type="text" 
-                aria-label="Search beasts by name"
-                placeholder="Search database..." 
+                placeholder="SEARCH DATABASE..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-black/50 border border-slate-700 text-white pl-10 pr-10 py-2 text-sm focus:border-neon-blue focus:outline-none transition-colors"
+                className="w-full bg-background/50 border border-border text-foreground pl-12 pr-12 py-3 rounded-lg text-sm font-display font-bold tracking-widest focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-2 text-gray-500 hover:text-white transition-colors"
-                aria-label="Clear search"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             )}
         </div>
-        <select 
-            aria-label="Filter by rarity"
-            value={filterRarity} 
-            onChange={(e) => setFilterRarity(e.target.value)}
-            className="w-full md:w-auto bg-black/50 border border-slate-700 text-gray-300 px-4 py-2 text-sm focus:border-neon-blue outline-none cursor-pointer"
-        >
-            <option value="">All Rarities</option>
-            {Object.values(Rarity).map(r => <option key={r} value={r}>{r}</option>)}
-        </select>
-        <select 
-            aria-label="Filter by class"
-            value={filterClass} 
-            onChange={(e) => setFilterClass(e.target.value)}
-            className="w-full md:w-auto bg-black/50 border border-slate-700 text-gray-300 px-4 py-2 text-sm focus:border-neon-blue outline-none cursor-pointer"
-        >
-            <option value="">All Classes</option>
-            {Object.values(BeastClass).map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <div className="flex gap-4 w-full md:w-auto">
+          <select 
+              value={filterRarity} 
+              onChange={(e) => setFilterRarity(e.target.value)}
+              className="flex-1 md:w-48 bg-background/50 border border-border text-muted-foreground px-4 py-3 rounded-lg text-xs font-display font-bold tracking-widest focus:border-primary outline-none cursor-pointer hover:border-primary/50 transition-all uppercase"
+          >
+              <option value="">RARITY: ALL</option>
+              {Object.values(Rarity).map(r => <option key={r} value={r}>{r}</option>)}
+          </select>
+          <select 
+              value={filterClass} 
+              onChange={(e) => setFilterClass(e.target.value)}
+              className="flex-1 md:w-48 bg-background/50 border border-border text-muted-foreground px-4 py-3 rounded-lg text-xs font-display font-bold tracking-widest focus:border-primary outline-none cursor-pointer hover:border-primary/50 transition-all uppercase"
+          >
+              <option value="">CLASS: ALL</option>
+              {Object.values(BeastClass).map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
         {(filterRarity || filterClass || searchQuery) && (
-             <button onClick={() => {setFilterRarity(''); setFilterClass(''); setSearchQuery('')}} className="p-2 text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/50 rounded" aria-label="Clear all filters">
-                 <X size={18} />
+             <button onClick={() => {setFilterRarity(''); setFilterClass(''); setSearchQuery('')}} className="p-3 text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/50 rounded-lg transition-all" aria-label="Clear all filters">
+                 <X size={20} />
              </button>
         )}
       </div>
-
- bolt-battle-arena-perf-8017939904022776355
-      {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 pb-10">
-        {filteredBeasts.map(b => (
-          <InventoryItem
-            key={b.id}
-            beast={b}
-            onOpenSellModal={handleOpenSellModal}
-            onToggleStake={handleToggleStake}
-            onEvolve={handleEvolveAction}
-            onRename={handleOpenRenameModal}
-            isEvolving={evolvingId === b.id}
-          />
-        ))}
-        {filteredBeasts.length === 0 && (
-            <div className="col-span-full py-20 text-center text-gray-600 font-mono">
-                NO BEASTS FOUND MATCHING PARAMETERS.
-            </div>
-        )}
-      </div>
-
-      {/*
-         Optimization Note: We are using the manual map above instead of InventoryGrid because
-         InventoryGrid does not yet support the `onRename` prop which is required for this view.
-         We removed the duplicate InventoryGrid that was causing double rendering.
-
-         Future optimization: Update InventoryGrid to accept onRename and switch to using it.
-      */}
 
       {/* Grid - Optimized with React.memo */}
       <InventoryGrid
@@ -222,33 +181,26 @@ const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake,
         onRename={handleOpenRenameModal}
         evolvingId={evolvingId}
       />
- ZenBeasts
 
       {/* Sell Modal */}
       {sellingId && (
-          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-              <div className="bg-slate-900 border-2 border-neon-blue p-8 max-w-md w-full cyber-border shadow-[0_0_30px_rgba(0,255,255,0.2)]">
-                  <h3 className="text-2xl text-white font-mono mb-2">LIST ON BLACK MARKET</h3>
-                  <label htmlFor="sell-price-input" className="text-gray-400 mb-6 text-sm font-mono block">Enter listing price in ZenCoins.</label>
-                  <div className="relative mb-6">
+          <div className="fixed inset-0 bg-background/90 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-300">
+              <div className="bg-card border-2 border-primary p-8 max-w-md w-full rounded-2xl shadow-2xl shadow-primary/20 animate-in zoom-in-95 duration-300">
+                  <h3 className="text-3xl font-display font-black text-foreground mb-2 italic uppercase tracking-tighter">LIST ON <span className="text-primary">MARKET</span></h3>
+                  <p className="text-muted-foreground mb-8 text-sm font-display font-bold tracking-widest uppercase">Set your asking price in ZenCoins.</p>
+                  <div className="relative mb-8">
                       <input 
-                        id="sell-price-input"
                         type="number" 
                         value={sellPrice} 
                         onChange={(e) => setSellPrice(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') confirmSell();
-                            if (e.key === 'Escape') setSellingId(null);
-                        }}
+                        className="w-full bg-background/50 border-2 border-border p-6 rounded-xl text-4xl text-primary font-mono font-bold text-center focus:border-primary outline-none transition-all"
                         autoFocus
-                        aria-label="Listing Price (ZenCoins)"
-                        className="w-full bg-black border border-slate-700 p-4 text-2xl text-neon-blue font-mono text-center focus:border-neon-blue outline-none"
                       />
-                      <span className="absolute right-4 top-4 text-gray-500 font-mono">ZC</span>
+                      <span className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground font-display font-bold tracking-widest">ZC</span>
                   </div>
-                  <div className="flex space-x-4">
-                      <button onClick={confirmSell} className="flex-1 bg-neon-blue text-black font-bold font-mono py-3 hover:bg-white transition-colors">CONFIRM LISTING</button>
-                      <button onClick={() => setSellingId(null)} className="flex-1 bg-transparent border border-red-500 text-red-500 font-mono py-3 hover:bg-red-500/10 transition-colors">CANCEL</button>
+                  <div className="flex gap-4">
+                      <button onClick={confirmSell} className="flex-1 bg-primary text-primary-foreground font-display font-black py-4 rounded-xl hover:scale-105 transition-all duration-300 tracking-widest uppercase shadow-lg shadow-primary/20">CONFIRM</button>
+                      <button onClick={() => setSellingId(null)} className="flex-1 bg-transparent border border-border text-muted-foreground font-display font-bold py-4 rounded-xl hover:bg-muted transition-all tracking-widest uppercase">CANCEL</button>
                   </div>
               </div>
           </div>
@@ -256,28 +208,23 @@ const Inventory = React.memo<InventoryProps>(({ beasts, onMint, onSell, onStake,
 
       {/* Rename Modal */}
       {renamingId && (
-          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-              <div className="bg-slate-900 border-2 border-neon-purple p-8 max-w-md w-full cyber-border shadow-[0_0_30px_rgba(180,0,255,0.2)]">
-                  <h3 className="text-2xl text-white font-mono mb-2">REWRITE IDENTITY</h3>
-                  <p className="text-gray-400 mb-6 text-sm font-mono">Cost: 10 ZC. Max 25 chars.</p>
-                  <div className="relative mb-6">
+          <div className="fixed inset-0 bg-background/90 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-300">
+              <div className="bg-card border-2 border-secondary p-8 max-w-md w-full rounded-2xl shadow-2xl shadow-secondary/20 animate-in zoom-in-95 duration-300">
+                  <h3 className="text-3xl font-display font-black text-foreground mb-2 italic uppercase tracking-tighter">REWRITE <span className="text-secondary">IDENTITY</span></h3>
+                  <p className="text-muted-foreground mb-8 text-sm font-display font-bold tracking-widest uppercase">COST: 10 ZC | MAX 25 CHARS</p>
+                  <div className="relative mb-8">
                       <input
                         type="text"
                         value={newName}
                         onChange={(e) => setNewName(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') confirmRename();
-                            if (e.key === 'Escape') setRenamingId(null);
-                        }}
+                        placeholder="NEW IDENTIFIER..."
+                        className="w-full bg-background/50 border-2 border-border p-6 rounded-xl text-2xl text-secondary font-display font-black text-center focus:border-secondary outline-none transition-all"
                         autoFocus
-                        placeholder="New Name"
-                        aria-label="New Beast Name"
-                        className="w-full bg-black border border-slate-700 p-4 text-xl text-neon-purple font-mono text-center focus:border-neon-purple outline-none"
                       />
                   </div>
-                  <div className="flex space-x-4">
-                      <button onClick={confirmRename} className="flex-1 bg-neon-purple text-white font-bold font-mono py-3 hover:bg-white hover:text-black transition-colors">CONFIRM RENAME</button>
-                      <button onClick={() => setRenamingId(null)} className="flex-1 bg-transparent border border-gray-500 text-gray-500 font-mono py-3 hover:bg-gray-500/10 transition-colors">CANCEL</button>
+                  <div className="flex gap-4">
+                      <button onClick={confirmRename} className="flex-1 bg-secondary text-secondary-foreground font-display font-black py-4 rounded-xl hover:scale-105 transition-all duration-300 tracking-widest uppercase shadow-lg shadow-secondary/20">CONFIRM</button>
+                      <button onClick={() => setRenamingId(null)} className="flex-1 bg-transparent border border-border text-muted-foreground font-display font-bold py-4 rounded-xl hover:bg-muted transition-all tracking-widest uppercase">CANCEL</button>
                   </div>
               </div>
           </div>

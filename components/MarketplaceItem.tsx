@@ -25,38 +25,32 @@ const MarketplaceItem: React.FC<MarketplaceItemProps> = React.memo(({
 
   return (
     <div
-      className="relative group cursor-pointer focus:outline-none focus:ring-2 focus:ring-neon-yellow rounded-sm"
+      className="relative group cursor-pointer animate-in fade-in zoom-in-95 duration-300"
       onClick={() => onSelect(beast)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onSelect(beast);
-        }
-      }}
-      aria-label={`View listing for ${beast.name}, Price: ${beast.price} ZenCoins`}
     >
         <BeastCard beast={beast} interactive={false} />
 
         {/* Price Tag */}
-        <div className="absolute top-2 left-2 bg-black/90 border border-neon-yellow px-2 py-1 z-20 shadow-[0_0_10px_rgba(255,255,0,0.3)]">
-            <span className="text-neon-yellow font-bold font-mono text-xs flex items-center"><Tag size={12} className="mr-1"/> {beast.price} ZEN</span>
+        <div className="absolute top-3 left-3 bg-background/80 backdrop-blur-md border border-primary px-3 py-1 z-20 rounded-lg shadow-xl shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
+            <span className="text-primary font-display font-black text-xs flex items-center gap-1.5 uppercase italic"><Tag size={12}/> {beast.price} ZEN</span>
         </div>
 
         {beast.originalOwner === 'player' && (
-            <div className="absolute top-2 right-2 bg-neon-blue px-2 py-1 z-20 shadow-[0_0_10px_rgba(0,255,255,0.3)]">
-                <span className="text-black font-bold font-mono text-[10px]">YOURS</span>
+            <div className="absolute top-3 right-3 bg-secondary px-3 py-1 z-20 rounded-lg shadow-xl shadow-secondary/20">
+                <span className="text-secondary-foreground font-display font-black text-[8px] uppercase tracking-widest">OWNED</span>
             </div>
         )}
 
         {/* Mini Price Graph Overlay (Visible on Hover) */}
-        <div className="absolute bottom-[80px] left-0 right-0 h-16 bg-black/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 px-2 py-1 border-t border-b border-gray-700">
-             <div className="text-[9px] text-gray-400 font-mono mb-1">PRICE TREND</div>
+        <div className="absolute top-[40%] left-0 right-0 h-20 bg-background/80 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none z-10 px-4 py-2 border-y border-white/5 translate-y-2 group-hover:translate-y-0">
+             <div className="text-[8px] text-muted-foreground font-display font-bold uppercase tracking-widest mb-1 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+                MARKET TREND
+             </div>
              <div className="h-full w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={historyData}>
-                        <Line type="monotone" dataKey="price" stroke="#39ff14" strokeWidth={2} dot={false} />
+                        <Line type="monotone" dataKey="price" stroke="hsla(var(--accent))" strokeWidth={2} dot={false} animationDuration={1000} />
                     </LineChart>
                 </ResponsiveContainer>
              </div>

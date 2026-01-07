@@ -26,72 +26,97 @@ const MapNode = ({ x, y, icon, label, path, color, delay, levelRequired, current
 
     return (
         <button
-            className={`absolute group p-0 bg-transparent border-none outline-none focus-visible:ring-2 focus-visible:ring-neon-blue rounded-full ${isLocked ? 'cursor-not-allowed grayscale opacity-70' : 'cursor-pointer'}`}
+            className={`absolute group p-0 bg-transparent border-none outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl ${isLocked ? 'cursor-not-allowed grayscale opacity-70' : 'cursor-pointer'}`}
             style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${delay}ms` }}
             onClick={handleClick}
             disabled={isLocked}
-            aria-label={isLocked ? `${label} (Locked, Level ${levelRequired} Required)` : `Go to ${label}`}
         >
             <div className={`
-                w-16 h-16 md:w-24 md:h-24 rounded-full border-2 ${isLocked ? 'border-gray-600 bg-gray-900' : `${color} bg-black/80`} backdrop-blur-md
-                flex flex-col items-center justify-center relative z-10 transition-transform duration-300
-                ${!isLocked && 'hover:scale-110 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_30px_currentColor]'}
+                w-20 h-20 md:w-28 md:h-28 rounded-xl border-2 ${isLocked ? 'border-border bg-card/80' : `border-primary/50 bg-background/80`} backdrop-blur-md
+                flex flex-col items-center justify-center relative z-10 transition-all duration-500
+                ${!isLocked && 'hover:scale-110 hover:border-primary shadow-xl group-hover:shadow-primary/20'}
+                cyber-border
             `}>
-                <div className={`${!isLocked && color.replace('border-', 'text-')} mb-1 transform ${!isLocked && 'group-hover:-translate-y-1'} transition-transform`}>
-                    {isLocked ? <Lock size={24} className="text-gray-500"/> : icon}
+                <div className={`${!isLocked ? 'text-primary' : 'text-muted-foreground'} mb-1 transform transition-all duration-300 ${!isLocked && 'group-hover:-translate-y-1'}`}>
+                    {isLocked ? <Lock size={24} /> : icon}
                 </div>
-                <div className="text-[8px] md:text-[10px] font-mono font-bold tracking-widest text-white uppercase bg-black/50 px-2 rounded">
+                <div className="text-[10px] md:text-xs font-display font-bold tracking-widest text-foreground uppercase px-2 py-1 rounded bg-black/40">
                     {label}
                 </div>
                 {isLocked && (
-                    <div className="absolute -bottom-6 bg-red-900/80 text-red-200 text-[10px] px-2 py-0.5 rounded font-mono border border-red-800 whitespace-nowrap">
-                        LVL {levelRequired} REQ
+                    <div className="absolute -bottom-8 bg-destructive/90 text-destructive-foreground text-[10px] px-3 py-1 rounded-sm font-display font-bold border border-destructive/50 whitespace-nowrap">
+                        LVL {levelRequired} REQUIRED
                     </div>
                 )}
             </div>
-            {/* Connecting lines pulse effect could go here */}
-            {!isLocked && <div className={`absolute inset-0 rounded-full ${color.replace('border-', 'bg-')} opacity-20 animate-ping`}></div>}
+            {!isLocked && (
+                <div className="absolute inset-0 rounded-xl bg-primary/20 animate-pulse-neon blur-xl -z-10"></div>
+            )}
         </button>
     );
 };
 
-// Optimization: Memoize WorldMap to prevent re-renders when unrelated global state (like coins) changes.
-// It only depends on trainerLevel for unlocking nodes.
 const WorldMap = React.memo(({ trainerLevel }: { trainerLevel: number }) => {
     return (
-        <div className="relative w-full h-full bg-[#050510] overflow-hidden animate-fade-in-up">
-            {/* Background Grid */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.05)_1px,transparent_1px)] bg-[size:50px_50px] [perspective:1000px] [transform:rotateX(20deg)_scale(1.2)] origin-top"></div>
-            
-            <div className="absolute top-8 left-8 z-20 pointer-events-none">
-                <h1 className="text-4xl md:text-6xl font-black font-mono text-white tracking-tighter italic">NEON <span className="text-neon-pink text-shadow-neon">CITY</span></h1>
-                <p className="text-neon-blue font-mono text-sm tracking-widest">SECTOR 7 // OPEN WORLD</p>
-                <p className="text-gray-500 font-mono text-xs mt-1">ACCESS LEVEL: {trainerLevel}</p>
+        <div className="relative w-full h-full min-h-[600px] bg-background overflow-hidden rounded-2xl border border-border">
+            {/* Background Image with Overlay */}
+            <div className="absolute inset-0 z-0">
+                <img 
+                    src="https://images.unsplash.com/photo-1641650265007-b2db704cd9f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NzI1Njd8MHwxfHNlYXJjaHwxfHxjeWJlcnB1bmslMjBuZW9uJTIwY2l0eSUyMG5pZ2h0fGVufDB8MHx8fDE3Njc3ODgyNjN8MA&ixlib=rb-4.1.0&q=80&w=1080" 
+                    alt="Cyberpunk City" 
+                    className="w-full h-full object-cover opacity-40 mix-blend-overlay scale-110 animate-pulse"
+                    style={{ animationDuration: '8s' }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background/50"></div>
             </div>
 
-            {/* Map Nodes */}
-            <div className="relative w-full h-full max-w-5xl mx-auto transform translate-y-10">
-                <MapNode x={50} y={45} icon={<Home size={32}/>} label="HQ" path="/dashboard" color="border-white" delay={0} levelRequired={MAP_UNLOCKS.DASHBOARD} currentLevel={trainerLevel} />
-                
-                <MapNode x={20} y={30} icon={<Box size={32}/>} label="Barracks" path="/inventory" color="border-neon-blue" delay={100} levelRequired={MAP_UNLOCKS.INVENTORY} currentLevel={trainerLevel} />
-                
-                <MapNode x={80} y={30} icon={<Swords size={32}/>} label="Arena" path="/battle" color="border-red-500" delay={200} levelRequired={MAP_UNLOCKS.BATTLE} currentLevel={trainerLevel} />
-                
-                <MapNode x={25} y={70} icon={<Dna size={32}/>} label="Fusion Lab" path="/breeding" color="border-neon-purple" delay={300} levelRequired={MAP_UNLOCKS.BREEDING} currentLevel={trainerLevel} />
-                
-                <MapNode x={75} y={70} icon={<ShoppingBag size={32}/>} label="Market" path="/market" color="border-neon-yellow" delay={400} levelRequired={MAP_UNLOCKS.MARKET} currentLevel={trainerLevel} />
+            {/* Background Grid */}
+            <div className="absolute inset-0 bg-[linear-gradient(hsla(var(--primary)/0.1)_1px,transparent_1px),linear-gradient(90deg,hsla(var(--primary)/0.1)_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none z-10 opacity-30"></div>
+            
+            <div className="absolute top-10 left-10 z-20">
+                <h1 className="text-5xl md:text-7xl font-display font-black tracking-tighter italic uppercase neon-text animate-in slide-in-from-left duration-700">
+                    NEON <span className="text-secondary neon-text-secondary">CITY</span>
+                </h1>
+                <div className="flex items-center gap-3 mt-2 animate-in slide-in-from-left duration-700 delay-150">
+                    <span className="w-12 h-[1px] bg-primary"></span>
+                    <p className="text-primary font-mono text-sm tracking-[0.3em] uppercase">SECTOR 07 // DISTRICT ACTIVE</p>
+                </div>
+            </div>
 
-                <MapNode x={50} y={15} icon={<LandPlot size={32}/>} label="Neural Bank" path="/bank" color="border-neon-green" delay={500} levelRequired={MAP_UNLOCKS.BANK} currentLevel={trainerLevel} />
+            <div className="absolute top-10 right-10 z-20 text-right animate-in slide-in-from-right duration-700">
+                <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-md px-4 py-2 rounded-full border border-border">
+                    <Activity className="text-accent animate-pulse" size={16} />
+                    <span className="text-xs font-display font-bold text-muted-foreground uppercase tracking-widest">System Status: Online</span>
+                </div>
+            </div>
 
-                {/* Decorative Lines */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30">
-                    <line x1="50%" y1="45%" x2="20%" y2="30%" stroke="#00ffff" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse" />
-                    <line x1="50%" y1="45%" x2="80%" y2="30%" stroke="#ff073a" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse" />
-                    <line x1="50%" y1="45%" x2="25%" y2="70%" stroke="#b026ff" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse" />
-                    <line x1="50%" y1="45%" x2="75%" y2="70%" stroke="#fff01f" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse" />
-                    <line x1="50%" y1="45%" x2="50%" y2="15%" stroke="#39ff14" strokeWidth="2" strokeDasharray="5,5" className="animate-pulse" />
+            {/* Map Nodes Container */}
+            <div className="relative w-full h-full max-w-6xl mx-auto z-20 flex items-center justify-center">
+                <MapNode x={50} y={40} icon={<Home size={32}/>} label="HQ" path="/dashboard" color="border-white" delay={0} levelRequired={MAP_UNLOCKS.DASHBOARD} currentLevel={trainerLevel} />
+                
+                <MapNode x={15} y={25} icon={<Box size={32}/>} label="Armory" path="/inventory" color="border-primary" delay={100} levelRequired={MAP_UNLOCKS.INVENTORY} currentLevel={trainerLevel} />
+                
+                <MapNode x={85} y={25} icon={<Swords size={32}/>} label="Arena" path="/battle" color="border-destructive" delay={200} levelRequired={MAP_UNLOCKS.BATTLE} currentLevel={trainerLevel} />
+                
+                <MapNode x={20} y={65} icon={<Dna size={32}/>} label="Lab" path="/breeding" color="border-secondary" delay={300} levelRequired={MAP_UNLOCKS.BREEDING} currentLevel={trainerLevel} />
+                
+                <MapNode x={80} y={65} icon={<ShoppingBag size={32}/>} label="Market" path="/market" color="border-accent" delay={400} levelRequired={MAP_UNLOCKS.MARKET} currentLevel={trainerLevel} />
+
+                <MapNode x={50} y={10} icon={<LandPlot size={32}/>} label="Bank" path="/bank" color="border-accent" delay={500} levelRequired={MAP_UNLOCKS.BANK} currentLevel={trainerLevel} />
+
+                {/* Connection Lines */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
+                    <path d="M 50% 40% L 15% 25%" stroke="hsla(var(--primary)/0.5)" strokeWidth="1" strokeDasharray="4 4" className="animate-pulse" />
+                    <path d="M 50% 40% L 85% 25%" stroke="hsla(var(--primary)/0.5)" strokeWidth="1" strokeDasharray="4 4" className="animate-pulse" />
+                    <path d="M 50% 40% L 20% 65%" stroke="hsla(var(--primary)/0.5)" strokeWidth="1" strokeDasharray="4 4" className="animate-pulse" />
+                    <path d="M 50% 40% L 80% 65%" stroke="hsla(var(--primary)/0.5)" strokeWidth="1" strokeDasharray="4 4" className="animate-pulse" />
+                    <path d="M 50% 40% L 50% 10%" stroke="hsla(var(--primary)/0.5)" strokeWidth="1" strokeDasharray="4 4" className="animate-pulse" />
                 </svg>
             </div>
+
+            {/* Scanline Effect */}
+            <div className="absolute inset-0 pointer-events-none z-30 opacity-[0.03] bg-[linear-gradient(transparent_50%,#fff_50%)] bg-[size:100%_4px]"></div>
         </div>
     );
 });
