@@ -5,9 +5,7 @@ import { safeParseJSON, generateUUID } from '../utils';
 import { getBreedingPrompt, getEvolutionPrompt, getBattlePrompt } from './prompts';
 import { generateStableDiffusionImage } from './stableDiffusionService';
 import { getRandomName, getRandomDescription, generateMockBattleLogs } from './mockData';
-
-// Import the Hashlips Config
-import hashlipsConfig from '../hashlips_config.json';
+import { generateHashlipsTraits, mixTraits } from '../domain/beasts';
 
 // --- API KEY MANAGEMENT & MOCK MODE ---
 const getGeminiApiKey = (): string => {
@@ -27,70 +25,10 @@ const modelName = 'gemini-2.5-flash';
 // SECURITY: Use stronger ID generation
 const generateId = () => generateUUID();
 
-// --- HASHLIPS GENERATION LOGIC ---
-
-interface HashlipsLayer {
-    name: string;
-    weight: number;
-    rarity: string;
-}
-
-// Helper: Pick a random option from a layer based on weights defined in the JSON
-const pickTraitFromConfig = (layerName: string): { name: string, rarity: string, weight: number } | null => {
-  // Access the layers object dynamically
-  const layerOptions = (hashlipsConfig.layers as any)[layerName] as HashlipsLayer[];
-  
-  if (!layerOptions) return null;
-
-  const totalWeight = layerOptions.reduce((acc, opt) => acc + opt.weight, 0);
-  let random = Math.random() * totalWeight;
-  
-  for (const opt of layerOptions) {
-    if (random < opt.weight) return opt;
-    random -= opt.weight;
-  }
-  return layerOptions[0]; // Fallback
-};
-
-// Generates the 12 traits programmatically using the Hashlips JSON config
-const generateHashlipsTraits = (): { traits: Trait[], overallRarity: Rarity } => {
-  const traits: Trait[] = [];
-  let rarityScore = 0;
-
-  const layersOrder = hashlipsConfig.layerConfigurations[0].layersOrder;
-
-  layersOrder.forEach(layer => {
-    const selected = pickTraitFromConfig(layer.name);
-    if (selected) {
-        traits.push({
-            name: selected.name,
-            value: selected.name,
-            type: layer.name as any,
-            rarity: 100 - selected.weight // Visual rarity score
-        });
-
-        // Calculate score for overall rarity
-        if (selected.rarity === 'Zen Master') rarityScore += 50;
-        else if (selected.rarity === 'Legendary') rarityScore += 20;
-        else if (selected.rarity === 'Epic') rarityScore += 10;
-        else if (selected.rarity === 'Rare') rarityScore += 5;
-        else if (selected.rarity === 'Uncommon') rarityScore += 2;
-        else rarityScore += 1;
-    }
-  });
-
-  // Determine overall rarity based on the sum of trait scores
-  let overallRarity = Rarity.COMMON;
-  if (rarityScore > 100) overallRarity = Rarity.ZEN_MASTER;
-  else if (rarityScore > 60) overallRarity = Rarity.LEGENDARY;
-  else if (rarityScore > 40) overallRarity = Rarity.EPIC;
-  else if (rarityScore > 25) overallRarity = Rarity.RARE;
-  else if (rarityScore > 15) overallRarity = Rarity.UNCOMMON;
-
-  return { traits, overallRarity };
-};
-
-// --- END HASHLIPS LOGIC ---
+// Trait + breeding logic now lives in src-domain `domain/beasts/` so the same
+// pure functions can drive both the legacy client path and the upcoming
+// Cloudflare Worker BFF. Anything imported from there is safe to call on the
+// server with no DOM/fetch dependencies.
 
 export const generateZenBeast = async (generation: number): Promise<ZenBeast> => {
   // --- MOCK MODE ---
@@ -190,94 +128,6 @@ export const generateZenBeast = async (generation: number): Promise<ZenBeast> =>
   }
 };
 
-const mixTraits = (parentA: ZenBeast, parentB: ZenBeast): { traits: Trait[], overallRarity: Rarity } => {
-  const childTraits: Trait[] = [];
-  let rarityScore = 0;
-  const layersOrder = hashlipsConfig.layerConfigurations[0].layersOrder;
-
-  // Map traits by type for easier access
-  const traitsA = new Map(parentA.traits.map(t => [t.type, t]));
-  const traitsB = new Map(parentB.traits.map(t => [t.type, t]));
-
-  layersOrder.forEach(layer => {
-    const layerName = layer.name;
-    const traitA = traitsA.get(layerName as any);
-    const traitB = traitsB.get(layerName as any);
-
-    let selectedTrait: Trait | null = null;
-    const mutationChance = 0.1; // 10% chance to mutate
-
-    if (Math.random() < mutationChance) {
-      // Mutation: Pick a random new trait
-      const picked = pickTraitFromConfig(layerName);
-      if (picked) {
-        selectedTrait = {
-          name: picked.name,
-          value: picked.name,
-          type: layerName as any,
-          rarity: 100 - picked.weight
-        };
-      }
-    } else {
-      // Inheritance
-      if (traitA && traitB) {
-        // Both parents have it: 50/50
-        selectedTrait = Math.random() < 0.5 ? traitA : traitB;
-      } else if (traitA) {
-        selectedTrait = traitA;
-      } else if (traitB) {
-        selectedTrait = traitB;
-      } else {
-        // Neither has it, try to pick one (mutation fallback) or skip
-        const picked = pickTraitFromConfig(layerName);
-        if (picked) {
-            selectedTrait = {
-              name: picked.name,
-              value: picked.name,
-              type: layerName as any,
-              rarity: 100 - picked.weight
-            };
-        }
-      }
-    }
-
-    if (selectedTrait) {
-      childTraits.push(selectedTrait);
-      // Rarity Calculation Logic from generateHashlipsTraits
-      // We need to reverse-engineer the weight or just use the visual rarity score we stored
-      // But generateHashlipsTraits uses string checking on the 'rarity' field of the config object,
-      // which we don't strictly have here unless we look it up or store it.
-      // However, trait.rarity is a number (1-100).
-      // Let's approximate score based on the numeric rarity we have.
-      // Or, we can re-find the config object to be precise.
-
-      const layerOptions = (hashlipsConfig.layers as any)[layerName] as HashlipsLayer[];
-      const configObj = layerOptions?.find(opt => opt.name === selectedTrait!.name);
-
-      if (configObj) {
-         if (configObj.rarity === 'Zen Master') rarityScore += 50;
-         else if (configObj.rarity === 'Legendary') rarityScore += 20;
-         else if (configObj.rarity === 'Epic') rarityScore += 10;
-         else if (configObj.rarity === 'Rare') rarityScore += 5;
-         else if (configObj.rarity === 'Uncommon') rarityScore += 2;
-         else rarityScore += 1;
-      } else {
-          rarityScore += 1;
-      }
-    }
-  });
-
-  // Determine overall rarity based on the sum of trait scores
-  let overallRarity = Rarity.COMMON;
-  if (rarityScore > 100) overallRarity = Rarity.ZEN_MASTER;
-  else if (rarityScore > 60) overallRarity = Rarity.LEGENDARY;
-  else if (rarityScore > 40) overallRarity = Rarity.EPIC;
-  else if (rarityScore > 25) overallRarity = Rarity.RARE;
-  else if (rarityScore > 15) overallRarity = Rarity.UNCOMMON;
-
-  return { traits: childTraits, overallRarity };
-};
-
 export const breedZenBeasts = async (parentA: ZenBeast, parentB: ZenBeast): Promise<ZenBeast> => {
     // --- MOCK MODE ---
   if (MOCK_MODE) {
@@ -321,7 +171,7 @@ export const breedZenBeasts = async (parentA: ZenBeast, parentB: ZenBeast): Prom
     }
 
     // 2. Mix Traits
-    const { traits: childTraits, overallRarity: childRarity } = mixTraits(parentA, parentB);
+    const { traits: childTraits, overallRarity: childRarity } = mixTraits(parentA.traits, parentB.traits);
 
     // 3. Generate Image
     const imageUrl = await generateStableDiffusionImage(childClass, childTraits);

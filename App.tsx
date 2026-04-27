@@ -7,6 +7,7 @@ import { useGameState } from './hooks/useGameState';
 import Layout from './components/Layout';
 import PageLoader from './components/PageLoader';
 import DebugConsole from './components/DebugConsole';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Lazy load route components
 const Dashboard = lazy(() => import('./components/Dashboard'));
@@ -36,6 +37,7 @@ const App = () => {
         onSwitchChain={gameState.switchChain}
         onClaimQuest={gameState.claimQuestReward}
       >
+          <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<WorldMap trainerLevel={gameState.trainerLevel} />} />
@@ -87,7 +89,8 @@ const App = () => {
               } />
             </Routes>
           </Suspense>
-          
+          </ErrorBoundary>
+
         {import.meta.env.DEV && (
           <DebugConsole
             onAddCoins={gameState.debugMethods.addCoins}

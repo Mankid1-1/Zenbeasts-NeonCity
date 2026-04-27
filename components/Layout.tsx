@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutProps } from '../types';
+import { Notification, Wallet, Quest, Chain } from '../types';
 import { Menu, X, Coins, Map, Home, Box, Dna, Sword, ShoppingBag, LandPlot, User, Wallet as WalletIcon, Terminal, Gift } from 'lucide-react';
 import { CyberToast } from './common/CyberComponents';
 import QuestLog from './QuestLog';
+import { calculateLevelProgress } from '../utils';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,8 +19,6 @@ interface LayoutProps {
   onSwitchChain: (chain: Chain) => void;
   onClaimQuest: (id: string) => void;
 }
-
-import { calculateLevelProgress } from '../utils';
 
 const NavItem: React.FC<{ to: string; icon: React.ReactNode; label: string; onClick?: () => void }> = ({ to, icon, label, onClick }) => (
     <NavLink

@@ -28,20 +28,21 @@ export interface Wallet {
   isConnected: boolean;
 }
 
-// Updated to the 12 specific hashlips layers
-export type TraitType = 
-  | 'Background' 
-  | 'Aura' 
-  | 'Body' 
-  | 'Cybernetics' 
-  | 'Clothes' 
-  | 'Eyes' 
-  | 'Mouth' 
-  | 'Headgear' 
-  | 'Weapon' 
-  | 'Accessory' 
-  | 'Element' 
-  | 'Spirit';
+// Aligned with hashlips_config.json layer names (was previously out-of-sync,
+// which forced `as any` casts in geminiService).
+export type TraitType =
+  | 'Background'
+  | 'Aura'
+  | 'Body'
+  | 'Skin_Pattern'
+  | 'Clothes'
+  | 'Cybernetics'
+  | 'Eyes'
+  | 'Mouth'
+  | 'Headgear'
+  | 'Weapon'
+  | 'Accessory'
+  | 'Spirit_Projection';
 
 export interface Trait {
   name: string; // The specific attribute name (e.g. "Laser Katana")
