@@ -1,5 +1,6 @@
 
 import { BeastClass, Trait } from '../types';
+import { compositeBeastImage } from './hashlipsCompositor';
 
 // --- API KEY MANAGEMENT ---
 const getStabilityApiKey = (): string => {
@@ -29,13 +30,10 @@ export const generateStableDiffusionImage = async (
     Style: Magicavoxel, Cryptovoxels, SandboxGame.
   `;
 
-  // If no API key is present in this demo environment, return a deterministic placeholder
+  // No API key: composite locally from the Hashlips layer assets in /public/layers/.
   if (!apiKey || apiKey === 'undefined' || apiKey === 'YOUR_STABILITY_API_KEY') {
-    console.warn("No Stability AI API Key found. Using deterministic simulation.");
-
-    // Create a deterministic seed from the beast's visual traits
-    const seed = beastClass + traits.map(t => t.value).join('');
-    return `https://picsum.photos/seed/${seed}/400/400`;
+    console.warn("No Stability AI API Key found. Compositing locally from Hashlips layers.");
+    return compositeBeastImage(beastClass, traits);
   }
 
   try {
@@ -89,7 +87,7 @@ export const generateStableDiffusionImage = async (
   } catch (error) {
     // SECURITY: Log only the error message to avoid leaking sensitive data (like headers in raw error objects)
     console.error("Stable Diffusion Generation Error:", error instanceof Error ? error.message : "Unknown error");
-    // Fallback to placeholder on error
-    return `https://picsum.photos/seed/${Math.random()}/400/400`;
+    // Degrade to local Hashlips composite so the beast still renders.
+    return compositeBeastImage(beastClass, traits);
   }
 };
